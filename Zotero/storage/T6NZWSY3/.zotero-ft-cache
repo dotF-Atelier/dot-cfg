@@ -1,0 +1,3083 @@
+3D Math Primer for Graphics and Game Development
+Second Edition
+Fletcher Dunn Ian Parberry
+
+A K Peters/CRC Press Taylor & Francis Group 6000 Broken Sound Parkway NW, Suite 300 Boca Raton, FL 33487-2742
+© 2011 by Taylor and Francis Group, LLC A K Peters/CRC Press is an imprint of Taylor & Francis Group, an Informa business
+No claim to original U.S. Government works
+International Standard Book Number-13: 978-1-4398-6981-9 (eBook - PDF)
+This book contains information obtained from authentic and highly regarded sources. Reasonable efforts have been made to publish reliable data and information, but the author and publisher cannot assume responsibility for the validity of all materials or the consequences of their use. The authors and publishers have attempted to trace the copyright holders of all material reproduced in this publication and apologize to copyright holders if permission to publish in this form has not been obtained. If any copyright material has not been acknowledged please write and let us know so we may rectify in any future reprint.
+Except as permitted under U.S. Copyright Law, no part of this book may be reprinted, reproduced, transmitted, or utilized in any form by any electronic, mechanical, or other means, now known or hereafter invented, including photocopying, microfilming, and recording, or in any information storage or retrieval system, without written permission from the publishers.
+For permission to photocopy or use material electronically from this work, please access www.copyright.com (http://www.copyright.com/) or contact the Copyright Clearance Center, Inc. (CCC), 222 Rosewood Drive, Danvers, MA 01923, 978-750-8400. CCC is a not-for-profit organization that provides licenses and registration for a variety of users. For organizations that have been granted a photocopy license by the CCC, a separate system of payment has been arranged.
+Trademark Notice: Product or corporate names may be trademarks or registered trademarks, and are used only for identification and explanation without intent to infringe.
+Visit the Taylor & Francis Web site at http://www.taylorandfrancis.com
+and the A K Peters Web site at http://www.akpeters.com
+
+To A’me
+—F.D.
+To Maggie
+in the hope that she continues her interest in math
+—I. P.
+
+Contents
+
+Acknowledgments
+
+xiii
+
+Introduction
+
+xv
+
+1 Cartesian Coordinate Systems
+
+1
+
+1.1 1D Mathematics . . . . . . . . . . . . . . . . . . . . . .
+
+2
+
+1.2 2D Cartesian Space . . . . . . . . . . . . . . . . . . . . .
+
+5
+
+1.3 3D Cartesian Space . . . . . . . . . . . . . . . . . . . . . 12
+
+1.4 Odds and Ends . . . . . . . . . . . . . . . . . . . . . . . 19
+
+1.5 Exercises . . . . . . . . . . . . . . . . . . . . . . . . . . . 27
+
+2 Vectors
+
+31
+
+2.1 Mathematical Deﬁnition of Vector, and Other Boring Stuﬀ 32
+
+2.2 Geometric Deﬁnition of Vector . . . . . . . . . . . . . . 34
+
+2.3 Specifying Vectors with Cartesian Coordinates . . . . . 36
+
+2.4 Vectors versus Points . . . . . . . . . . . . . . . . . . . . 39
+
+2.5 Negating a Vector . . . . . . . . . . . . . . . . . . . . . . 43
+
+2.6 Vector Multiplication by a Scalar . . . . . . . . . . . . . 45
+
+2.7 Vector Addition and Subtraction . . . . . . . . . . . . . 47
+
+2.8 Vector Magnitude (Length) . . . . . . . . . . . . . . . . 51
+
+2.9 Unit Vectors . . . . . . . . . . . . . . . . . . . . . . . . . 53
+
+2.10 The Distance Formula . . . . . . . . . . . . . . . . . . . 55
+
+2.11 Vector Dot Product . . . . . . . . . . . . . . . . . . . . . 56
+
+2.12 Vector Cross Product . . . . . . . . . . . . . . . . . . . . 66
+
+2.13 Linear Algebra Identities . . . . . . . . . . . . . . . . . . 70
+
+2.14 Exercises . . . . . . . . . . . . . . . . . . . . . . . . . . . 71
+
+3 Multiple Coordinate Spaces
+
+79
+
+3.1 Why Bother with Multiple Coordinate Spaces? . . . . . 80
+
+3.2 Some Useful Coordinate Spaces . . . . . . . . . . . . . . 81
+
+3.3 Basis Vectors and Coordinate Space Transformations . . 86
+
+3.4 Nested Coordinate Spaces . . . . . . . . . . . . . . . . . 106
+
+vii
+
+viii
+
+Contents
+
+3.5 In Defense of Upright Space . . . . . . . . . . . . . . . . 108 3.6 Exercises . . . . . . . . . . . . . . . . . . . . . . . . . . . 109
+
+4 Introduction to Matrices
+
+113
+
+4.1 Mathematical Deﬁnition of Matrix . . . . . . . . . . . . 113
+
+4.2 Geometric Interpretation of Matrix . . . . . . . . . . . . 124
+
+4.3 The Bigger Picture of Linear Algebra . . . . . . . . . . . 130
+
+4.4 Exercises . . . . . . . . . . . . . . . . . . . . . . . . . . . 132
+
+5 Matrices and Linear Transformations
+
+137
+
+5.1 Rotation . . . . . . . . . . . . . . . . . . . . . . . . . . . 138
+
+5.2 Scale . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 144
+
+5.3 Orthographic Projection . . . . . . . . . . . . . . . . . . 148
+
+5.4 Reﬂection . . . . . . . . . . . . . . . . . . . . . . . . . . 151
+
+5.5 Shearing . . . . . . . . . . . . . . . . . . . . . . . . . . . 152
+
+5.6 Combining Transformations . . . . . . . . . . . . . . . . 153
+
+5.7 Classes of Transformations . . . . . . . . . . . . . . . . . 154
+
+5.8 Exercises . . . . . . . . . . . . . . . . . . . . . . . . . . . 159
+
+6 More on Matrices
+
+161
+
+6.1 Determinant of a Matrix . . . . . . . . . . . . . . . . . . 161
+
+6.2 Inverse of a Matrix . . . . . . . . . . . . . . . . . . . . . 168
+
+6.3 Orthogonal Matrices . . . . . . . . . . . . . . . . . . . . 171
+
+6.4 4 × 4 Homogeneous Matrices . . . . . . . . . . . . . . . 176
+
+6.5 4 × 4 Matrices and Perspective Projection . . . . . . . . 183
+
+6.6 Exercises . . . . . . . . . . . . . . . . . . . . . . . . . . . 189
+
+7 Polar Coordinate Systems
+
+191
+
+7.1 2D Polar Space . . . . . . . . . . . . . . . . . . . . . . . 191
+
+7.2 Why Would Anybody Use Polar Coordinates? . . . . . . 201
+
+7.3 3D Polar Space . . . . . . . . . . . . . . . . . . . . . . . 203
+
+7.4 Using Polar Coordinates to Specify Vectors . . . . . . . 213
+
+7.5 Exercises . . . . . . . . . . . . . . . . . . . . . . . . . . . 214
+
+8 Rotation in Three Dimensions
+
+217
+
+8.1 What Exactly is “Orientation”? . . . . . . . . . . . . . . 218
+
+8.2 Matrix Form . . . . . . . . . . . . . . . . . . . . . . . . 220
+
+8.3 Euler Angles . . . . . . . . . . . . . . . . . . . . . . . . . 229
+
+8.4 Axis-Angle and Exponential Map Representations . . . . 244
+
+8.5 Quaternions . . . . . . . . . . . . . . . . . . . . . . . . . 246
+
+8.6 Comparison of Methods . . . . . . . . . . . . . . . . . . 273
+
+8.7 Converting between Representations . . . . . . . . . . . 275
+
+8.8 Exercises . . . . . . . . . . . . . . . . . . . . . . . . . . . 291
+
+Contents
+
+ix
+
+9 Geometric Primitives
+
+295
+
+9.1 Representation Techniques . . . . . . . . . . . . . . . . . 295
+
+9.2 Lines and Rays . . . . . . . . . . . . . . . . . . . . . . . 297
+
+9.3 Spheres and Circles . . . . . . . . . . . . . . . . . . . . . 303
+
+9.4 Bounding Boxes . . . . . . . . . . . . . . . . . . . . . . . 304
+
+9.5 Planes . . . . . . . . . . . . . . . . . . . . . . . . . . . . 311
+
+9.6 Triangles . . . . . . . . . . . . . . . . . . . . . . . . . . . 317
+
+9.7 Polygons . . . . . . . . . . . . . . . . . . . . . . . . . . . 332
+
+9.8 Exercises . . . . . . . . . . . . . . . . . . . . . . . . . . . 339
+
+10 Mathematical Topics from 3D Graphics
+
+343
+
+10.1 How Graphics Works . . . . . . . . . . . . . . . . . . . . 345
+
+10.2 Viewing in 3D . . . . . . . . . . . . . . . . . . . . . . . . 362
+
+10.3 Coordinate Spaces . . . . . . . . . . . . . . . . . . . . . 369
+
+10.4 Polygon Meshes . . . . . . . . . . . . . . . . . . . . . . . 381
+
+10.5 Texture Mapping . . . . . . . . . . . . . . . . . . . . . . 393
+
+10.6 The Standard Local Lighting Model . . . . . . . . . . . 396
+
+10.7 Light Sources . . . . . . . . . . . . . . . . . . . . . . . . 414
+
+10.8 Skeletal Animation . . . . . . . . . . . . . . . . . . . . . 424
+
+10.9 Bump Mapping . . . . . . . . . . . . . . . . . . . . . . . 431
+
+10.10 The Real-Time Graphics Pipeline . . . . . . . . . . . . . 438
+
+10.11 Some HLSL Examples . . . . . . . . . . . . . . . . . . . 457
+
+10.12 Further Reading . . . . . . . . . . . . . . . . . . . . . . 475
+
+10.13 Exercises . . . . . . . . . . . . . . . . . . . . . . . . . . . 476
+
+11 Mechanics 1: Linear Kinematics and Calculus
+
+479
+
+11.1 Overview and Other Expectation-Reducing Remarks . . 479
+
+11.2 Basic Quantities and Units . . . . . . . . . . . . . . . . 483
+
+11.3 Average Velocity . . . . . . . . . . . . . . . . . . . . . . 486
+
+11.4 Instantaneous Velocity and the Derivative . . . . . . . . 490
+
+11.5 Acceleration . . . . . . . . . . . . . . . . . . . . . . . . . 513
+
+11.6 Motion under Constant Acceleration . . . . . . . . . . . 516
+
+11.7 The Integral . . . . . . . . . . . . . . . . . . . . . . . . . 530
+
+11.8 Uniform Circular Motion . . . . . . . . . . . . . . . . . . 542
+
+11.9 Exercises . . . . . . . . . . . . . . . . . . . . . . . . . . . 549
+
+12 Mechanics 2: Linear and Rotational Dynamics
+
+553
+
+12.1 Newton’s Three Laws . . . . . . . . . . . . . . . . . . . . 554
+
+12.2 Some Simple Force Laws . . . . . . . . . . . . . . . . . . 562
+
+12.3 Momentum . . . . . . . . . . . . . . . . . . . . . . . . . 581
+
+12.4 Impulsive Forces and Collisions . . . . . . . . . . . . . . 590
+
+12.5 Rotational Dynamics . . . . . . . . . . . . . . . . . . . . 603
+
+12.6 Real-Time Rigid Body Simulators . . . . . . . . . . . . . 621
+
+x
+
+Contents
+
+12.7 Suggested Reading . . . . . . . . . . . . . . . . . . . . . 639 12.8 Exercises . . . . . . . . . . . . . . . . . . . . . . . . . . . 640
+
+13 Curves in 3D
+
+645
+
+13.1 Parametric Polynomial Curves . . . . . . . . . . . . . . 646
+
+13.2 Polynomial Interpolation . . . . . . . . . . . . . . . . . . 653
+
+13.3 Hermite Curves . . . . . . . . . . . . . . . . . . . . . . . 665
+
+13.4 B´ezier Curves . . . . . . . . . . . . . . . . . . . . . . . . 670
+
+13.5 Subdivision . . . . . . . . . . . . . . . . . . . . . . . . . 685
+
+13.6 Splines . . . . . . . . . . . . . . . . . . . . . . . . . . . . 690
+
+13.7 Hermite and B´ezier Splines . . . . . . . . . . . . . . . . 694
+
+13.8 Continuity . . . . . . . . . . . . . . . . . . . . . . . . . . 697
+
+13.9 Automatic Tangent Control . . . . . . . . . . . . . . . . 702
+
+13.10 Exercises . . . . . . . . . . . . . . . . . . . . . . . . . . . 711
+
+14 Afterword
+
+715
+
+14.1 What Next? . . . . . . . . . . . . . . . . . . . . . . . . . 715
+
+14.2 Exercises . . . . . . . . . . . . . . . . . . . . . . . . . . . 715
+
+A Geometric Tests
+
+717
+
+A.1 Closest Point on 2D Implicit Line . . . . . . . . . . . . . 717
+
+A.2 Closest Point on a Parametric Ray . . . . . . . . . . . . 718
+
+A.3 Closest Point on a Plane . . . . . . . . . . . . . . . . . . 719
+
+A.4 Closest Point on a Circle or Sphere . . . . . . . . . . . . 719
+
+A.5 Closest Point in an AABB . . . . . . . . . . . . . . . . . 720
+
+A.6 Intersection Tests . . . . . . . . . . . . . . . . . . . . . . 720
+
+A.7 Intersection of Two Implicit Lines in 2D . . . . . . . . . 721
+
+A.8 Intersection of Two Rays in 3D . . . . . . . . . . . . . . 722
+
+A.9 Intersection of a Ray and Plane . . . . . . . . . . . . . . 724
+
+A.10 Intersection of an AABB and Plane . . . . . . . . . . . . 725
+
+A.11 Intersection of Three Planes . . . . . . . . . . . . . . . . 726
+
+A.12 Intersection of Ray and a Circle or Sphere . . . . . . . . 727
+
+A.13 Intersection of Two Circles or Spheres . . . . . . . . . . 729
+
+A.14 Intersection of a Sphere and AABB . . . . . . . . . . . . 731
+
+A.15 Intersection of a Sphere and a Plane . . . . . . . . . . . 732
+
+A.16 Intersection of a Ray and a Triangle . . . . . . . . . . . 734
+
+A.17 Intersection of Two AABBs . . . . . . . . . . . . . . . . 737
+
+A.18 Intersection of a Ray and an AABB . . . . . . . . . . . 740
+
+B Answers to the Exercises
+
+745
+
+B.1 Chapter 1 . . . . . . . . . . . . . . . . . . . . . . . . . . 745
+
+B.2 Chapter 2 . . . . . . . . . . . . . . . . . . . . . . . . . . 746
+
+B.3 Chapter 3 . . . . . . . . . . . . . . . . . . . . . . . . . . 758
+
+Contents
+
+xi
+
+B.4 Chapter 4 . . . . . . . . . . . . . . . . . . . . . . . . . . 759 B.5 Chapter 5 . . . . . . . . . . . . . . . . . . . . . . . . . . 763 B.6 Chapter 6 . . . . . . . . . . . . . . . . . . . . . . . . . . 765 B.7 Chapter 7 . . . . . . . . . . . . . . . . . . . . . . . . . . 767 B.8 Chapter 8 . . . . . . . . . . . . . . . . . . . . . . . . . . 772 B.9 Chapter 9 . . . . . . . . . . . . . . . . . . . . . . . . . . 774 B.10 Chapter 10 . . . . . . . . . . . . . . . . . . . . . . . . . 779 B.11 Chapter 11 . . . . . . . . . . . . . . . . . . . . . . . . . 781 B.12 Chapter 12 . . . . . . . . . . . . . . . . . . . . . . . . . 784 B.13 Chapter 13 . . . . . . . . . . . . . . . . . . . . . . . . . 792 B.14 Chapter 14 . . . . . . . . . . . . . . . . . . . . . . . . . 799
+
+Bibliography
+
+801
+
+Index
+
+807
+
+So much time, and so little to do! Strike that, reverse it.
+— Willy Wonka
+
+Acknowledgments
+Fletcher would like to thank his wife, A’me, who endured the absolute eternity that it took to produce this book, and his general tendency to generate lots of interesting ideas for large-scale projects that are initiated and then dropped a quarter of the way through. (No more gigantic projects for at least two or three weeks, I promise!)
+Ian would like to thank his wife and children for not whining too loudly, and Fletcher for putting up with his procrastination. He would also like to thank Douglas Adams for the herring sandwich scoop, the bowl of petunias, and countless other references to the Hitchhiker’s Guide to the Galaxy trilogy that you will ﬁnd in this book.
+Mike Pratcher gets a very huge thanks for his detailed and knowledgable critique, and for writing a very large portion of the exercises. Matt Carter made the robot and kitchen and agreed to numerous requests to pose the robot one way or another. Thanks to Glenn Gamble for the dead sheep. Eric Huang created the cover illustration and all other 2D artwork that required any artistic talent whatsoever. (The authors made the rest.) Pavel Krajcevski provided helpful criticism.
+Gratitude is merely the secret hope of further favors. — Francois de La Rochefoucauld (1613–1680) Always look and smell your best. — Riley Dunn (1945–)
+xiii
+
+Introduction
+First things ﬁrst, but not necessarily in that order. — Doctor Who from Meglos (1980)
+Who Should Read This Book
+This book is about 3D math, the geometry and algebra of 3D space. It is designed to teach you how to describe objects and their positions, orientations, and trajectories in 3D using mathematics. This is not a book about computer graphics, simulation, or even computational geometry, although if you plan on studying those subjects, you will deﬁnitely need the information here.
+This is not just a book for video game programmers. We do assume that a majority of our readers are learning for the purpose of programming video games, but we expect a wider audience and we have designed the book with a diverse audience in mind. If you’re a programmer or interested in learning how to make video games, welcome aboard! If you meet neither of these criteria, there’s still plenty for you here. We have made every eﬀort to make the book useful to designers and technical artists. Although there are several code snippets in the book, they are (hopefully) easy to read even for nonprogrammers. Most important, even though it is always necessary to understand the surrounding concepts to make sense of the code, the reverse is never true. We use code samples to illustrate how ideas can be implemented on a computer, not to explain the ideas themselves.
+The title of this book says it is for “game development,” but a great deal of the material that we cover is applicable outside of video games. Practically anyone who wants to simulate, render, or understand a threedimensional world will ﬁnd this book useful. While we do try to provide motivating examples from the world of video game development, since that is our area of expertise and also our primary target audience, you won’t be left out if the last game you completed was Space Quest.1 If your interests
+1Well, you may be left out of a few jokes, like that one. Sorry.
+xv
+
+xvi
+
+Introduction
+
+lie in more “grown up” things than video games, rest assured that this book is not ﬁlled with speciﬁc examples from video games about head-shots or severed limbs or how to get the blood spurt to look just right.
+
+Why You Should Read This Book
+This book has many unique features, including its topic, approach, authors, and writing style.
+Unique topic. This book ﬁlls a gap that has been left by other books on graphics, linear algebra, simulation, and programming. It’s an introductory book, meaning we have focused our eﬀorts on providing thorough coverage on fundamental 3D concepts—topics that are normally glossed over in a few quick pages or relegated to an appendix in other books (because, after all, you already know all this stuﬀ). We have found that these very topics are often the sticking points for beginners! In a way, this book is the mirror image of gluing together books on graphics, physics, and curves. Whereas that mythical conglomeration would begin with a brief overview of the mathematical fundamentals, followed by in-depth coverage of the application area, we start with a thorough coverage of the math fundamentals, and then give compact, high-level overviews of the application areas.
+This book does try to provide a graceful on-ramp for beginners, but that doesn’t mean we’ll be stuck in the slow lane forever. There is plenty of material here that is traditionally considered “advanced” and taught in upper-level or graduate classes. In reality, these topics are specialized more than they are diﬃcult, and they have recently become important prerequisites that need to be taught earlier, which is part of what has driven the demand for a book like this.
+Unique approach. All authors think that they strike the perfect balance between being pedantic and being chatty in order to best reach their audience, and we are no exception. We recognize, however, that the people who disagree with this glowing self-assessment will mostly ﬁnd this book too informal (see the index entry for “stickler alert”). We have focused on perspicuous explanations and intuition, and sometimes we have done this at the expense of rigor. Our aim is to simplify, but not to oversimplify. We lead readers to the goal through a path that avoids the trolls and dragons, so why begin the journey by pointing them all out before we’ve even said what our destination is or why we’re going there? However, since we know readers will be crossing the ﬁeld on their own eventually, after we reach our goal we will turn around to point out where the dangers lie. But we may sometimes need to leave certain troll-slaying to another source, especially if
+
+Introduction
+
+xvii
+
+we expect that your usual path won’t take you near the danger. Those who intend to be on that land frequently should consult with a local for more intimate knowledge. This is not to say that we think rigor is unimportant; we just think it’s easier to get rigor after intuition about the big picture has been established, rather than front-loading every discussion with deﬁnitions and axioms needed to handle the edge cases. Frankly, nowadays a reader can pursue concise and formal presentations free on wikipedia.org or Wolfram MathWorld (mathworld.wolfram.com), so we don’t think any book oﬀers much worth paying for by dwelling excessively on deﬁnitions, axioms, proofs, and edge cases, especially for introductory material targeted primarily to engineers.
+Unique authors. Our combined experience brings together academic authority with in-the-trenches practical advice. Fletcher Dunn has 15 years of professional game programming experience, with around a dozen titles under his belt on a variety of gaming platforms. He worked at Terminal Reality in Dallas, where as principal programmer he was one of the architects of the Infernal engine and lead programmer on BloodRayne. He was a technical director for The Walt Disney Company at Wideload Games in Chicago and the lead programmer for Disney Guilty Party, IGN’s E3 2010 Family Game of the Year. He now works for Valve Software in Bellevue, Washington. But his biggest claim to fame by far is as the namesake of Corporal Dunn from Call of Duty: Modern Warfare 2.
+Dr. Ian Parberry has more than a quarter century of experience in research and teaching in academia. This is his sixth book, his third on game programming. He is currently a tenured full professor in the Department of Computer Science & Engineering at the University of North Texas. He is nationally known as one of the pioneers of game programming in higher education, and has been teaching game programming classes at the University of North Texas continuously since 1993.
+Unique writing style. We hope you will enjoy reading this math book (say what?) for two reasons. Most important, we want you to learn from this book, and learning something you are interested in is fun. Secondarily, we want you to enjoy reading this book in the same way that you enjoy reading a work of literature. We have no delusions that we’re in the same class as Mark Twain, or that this book is destined to become a classic like, say, The Hitchhikers Guide to the Galaxy. But one can always have aspirations. Honestly, we are just silly people. At the same time, no writing style should stand in the way of the ﬁrst priority: clear communication of mathematical knowledge about video games.2
+2Which is why we’ve put most of the jokes and useless trivia in footnotes like this. Somehow, we felt like we could get away with more that way.
+
+xviii
+
+Introduction
+
+What You Should Know before Reading This Book
+We have tried to make the book accessible to as wide an audience as possible; no book, however, can go back all the way to ﬁrst principles. We expect from the reader the following basic mathematical skills:
+• Manipulating algebraic expressions, fractions, and basic algebraic laws such as the associative and distributive laws and the quadratic equation.
+• Understanding what variables are, what a function is, how to graph a function, and so on.
+• Some very basic 2D Euclidian geometry, such as what a point is, what a line is, what it means for lines to be parallel and perpendicular, and so forth. Some basic formulas for area and circumference are used in a few places. It’s OK if you have temporarily forgotten those—you will hopefully recognize them when you see them.
+• Some prior exposure to trigonometry is best. We give a brief review of trigonometry in the front of this book, but it is not presented with the same level of paced explanation found most elsewhere in this book.
+• Readers with some prior exposure to calculus will have an advantage, but we have restricted our use of calculus in this book to very basic principles, which we will (attempt to) teach in Chapter 11 for those without this training. Only the most high-level concepts and fundamental laws are needed.
+Some programming knowledge is helpful, but not required. In several places, we give brief code snippets to show how the ideas being discussed get translated into code. (Also certain procedures are just easier to explain in code.) These snippets are extremely basic, well commented, and require only the most rudimentary understanding of C language syntax (which has been copied to several other languages). Most technical artists or level designers should be able to interpret these snippets with ease.
+
+Overview
+• Chapter 1 gets warmed up with some groundwork that it is needed in the rest of the book and which you probably already know. It reviews the Cartesian coordinate system in 2D and 3D and discusses how to use the Cartesian coordinate system to locate points in space. Also included is a very quick refresher on trigonometry and summation notation.
+
+Introduction
+
+xix
+
+• Chapter 2 introduces vectors from a mathematical and geometric perspective and investigates the important relationship between points and vectors. It also discusses a number of vector operations, how to do them, what it means geometrically to do them, and situations for which you might ﬁnd them useful.
+• Chapter 3 discusses examples of coordinate spaces and how they are nested in a hierarchy. It also introduces the central concepts of basis vectors and coordinate-space transformations.
+• Chapter 4 introduces matrices from a mathematical and geometric perspective and shows how matrices are a compact notation for the math behind linear transformations.
+• Chapter 5 surveys diﬀerent types of linear transformations and their corresponding matrices in detail. It also discusses various ways to classify transformations.
+• Chapter 6 covers a few more interesting and useful properties of matrices, such as aﬃne transforms and perspective projection, and explains the purpose and workings of four-dimensional vectors and matrices within a three-dimensional world.
+• Chapter 7 discusses how to use polar coordinates in 2D and 3D, why it is useful to do so, and how to convert between polar and Cartesian representations.
+• Chapter 8 discusses diﬀerent techniques for representing orientation and angular displacement in 3D: Euler angles, rotation matrices, exponential maps, and quaternions. For each method, it explains how the method works and presents the advantages and disadvantages of the method and when its use is recommended. It also shows how to convert between diﬀerent representations.
+• Chapter 9 surveys a number of commonly used geometric primitives and discusses how to represent and manipulate them mathematically.
+• Chapter 10 is a whirlwind lesson on graphics, touching on a few selected theoretical as well as modern practical issues. First, it presents a high-level overview of “how graphics works,” leading up to the rendering equation. The chapter then walks through a few theoretical topics of a mathematical nature. Next it discusses two contemporary topics that are often sources of mathematical diﬃculty and should be of particular interest to the reader: skeletal animation and bump mapping. Finally, the chapter presents an overview of the real-time graphics pipeline, demonstrating how the theories from the ﬁrst half
+
+xx
+
+Introduction
+
+of the chapter are implemented in the context of current rendering hardware.
+• Chapter 11 crams two rather large topics into one chapter. It interleaves the highest-level topics from ﬁrst-semester calculus with a discussion of rigid body kinematics—how to describe and analyze the motion of a rigid body without necessarily understanding its cause or being concerned with orientation or rotation.
+• Chapter 12 continues the discussion of rigid body mechanics. It starts with a condensed explanation of classical mechanics, including Newton’s laws of motion and basic concepts such as inertia, mass, force, and momentum. It reviews a few basic force laws, such as gravity, springs, and friction. The chapter also considers the rotational analogs of all of the linear ideas discussed up to this point. Due attention is paid to the important topic of collisions. The chapter ends with a discussion of issues that arise when using a computer to simulate rigid bodies.
+• Chapter 13 explains parametric curves in 3D. The ﬁrst half of the chapter explains how a relatively short curve is represented in some common, important forms: monomial, B´ezier, and Hermite. The second half is concerned with ﬁtting together these shorter pieces into a longer curve, called a spline. In understanding each system, the chapter considers what controls the system presents to a designer of curves, how to take a description of a curve made by a designer and recreate the curve, and how these controls can be used to construct a curve with speciﬁc properties.
+• Chapter 14 inspires the reader to pursue greatness in video games.
+• Appendix A is an assortment of useful tests that can be performed on geometric primitives. We intend it to be a helpful reference, but it can also make for interesting browsing.
+• Appendix B has all the answers.3
+
+Find a Bug in This Book?
+We calculated the odds that we could write an 800+ page math book free of mistakes. The result was a negative number, which we know can’t be right, but is probably pretty close. If you ﬁnd a bug in this book, please
+3To the exercises, that is.
+
+Introduction
+
+xxi
+
+visit gamemath.com. Most likely, the error is already listed in the errata, in which case you have our profound apologies. Otherwise, send us an email, and you will have (in addition to our profound thanks) everlasting fame via credit in the errata for being the ﬁrst to ﬁnd the mistake.
+
+Careful. We don’t want to learn from this. — Bill Watterson (1958–) from Calvin and Hobbes
+
+Chapter 1
+Cartesian Coordinate Systems
+Before turning to those moral and mental aspects of the matter which present the greatest diﬃculties, let the inquirer begin by mastering more elementary problems. — Sherlock Holmes from A Study in Scarlett (1887)
+3D math is all about measuring locations, distances, and angles precisely and mathematically in 3D space. The most frequently used framework to perform such calculations using a computer is called the Cartesian coordinate system. Cartesian mathematics was invented by (and is named after) a brilliant French philosopher, physicist, physiologist, and mathematician named Ren´e Descartes, who lived from 1596 to 1650. Ren´e Descartes is famous not just for inventing Cartesian mathematics, which at the time was a stunning uniﬁcation of algebra and geometry. He is also well-known for making a pretty good stab of answering the question “How do I know something is true?”—a question that has kept generations of philosophers happily employed and does not necessarily involve dead sheep (which will perhaps disturbingly be a central feature of the next section), unless you really want it to. Descartes rejected the answers proposed by the Ancient Greeks, which are ethos (roughly, “because I told you so”), pathos (“because it would be nice”), and logos (“because it makes sense”), and set about ﬁguring it out for himself with a pencil and paper.
+This chapter is divided into four main sections. • Section 1.1 reviews some basic principles of number systems and the
+ﬁrst law of computer graphics. • Section 1.2 introduces 2D Cartesian mathematics, the mathematics
+of ﬂat surfaces. It shows how to describe a 2D cartesian coordinate space and how to locate points using that space. • Section 1.3 extends these ideas into three dimensions. It explains leftand right-handed coordinate spaces and establishes some conventions used in this book.
+1
+
+2
+Figure 1.1 One dead sheep
+
+1. Cartesian Coordinate Systems
+• Section 1.4 concludes the chapter by quickly reviewing assorted prerequisites.
+1.1 1D Mathematics
+You’re reading this book because you want to know about 3D mathematics, so you’re probably wondering why we’re bothering to talk about 1D math. Well, there are a couple of issues about number systems and counting that we would like to clear up before we get to 3D.
+The natural numbers, often called the counting numbers, were invented millennia ago, probably to keep track of dead sheep. The concept of “one sheep” came easily (see Figure 1.1), then “two sheep,” “three sheep,” but people very quickly became convinced that this was too much work, and gave up counting at some point that they invariably called “many sheep.” Diﬀerent cultures gave up at diﬀerent points, depending on their threshold of boredom. Eventually, civilization expanded to the point where we could aﬀord to have people sitting around thinking about numbers instead of doing more survival-oriented tasks such as killing sheep and eating them. These savvy thinkers immortalized the concept of zero (no sheep), and although they didn’t get around to naming all of the natural numbers, they ﬁgured out various systems whereby they could name them if they really wanted to using digits such as 1, 2, etc. (or if you were Roman, M, X, I, etc.). Thus, mathematics was born.
+The habit of lining sheep up in a row so that they can be easily counted leads to the concept of a number line, that is, a line with the numbers marked oﬀ at regular intervals, as in Figure 1.2. This line can in principle go on for as long as we wish, but to avoid boredom we have stopped at ﬁve sheep and used an arrowhead to let you know that the line can continue. Clearer thinkers can visualize it going oﬀ to inﬁnity, but historical purveyors of dead sheep probably gave this concept little thought outside of their dreams and fevered imaginings.
+
+Figure 1.2. A number line for the natural numbers
+
+1.1. 1D Mathematics
+
+3
+
+Figure 1.3. A number line for integers. (Note the ghost sheep for negative numbers.)
+At some point in history, it was probably realized that sometimes, particularly fast talkers could sell sheep that they didn’t actually own, thus simultaneously inventing the important concepts of debt and negative numbers. Having sold this putative sheep, the fast talker would in fact own “negative one” sheep, leading to the discovery of the integers, which consist of the natural numbers and their negative counterparts. The corresponding number line for integers is shown in Figure 1.3.
+The concept of poverty probably predated that of debt, leading to a growing number of people who could aﬀord to purchase only half a dead sheep, or perhaps only a quarter. This led to a burgeoning use of fractional numbers consisting of one integer divided by another, such as 2/3 or 111/27. Mathematicians called these rational numbers, and they ﬁt in the number line in the obvious places between the integers. At some point, people became lazy and invented decimal notation, writing “3.1415” instead of the longer and more tedious 31415/10000, for example.
+After a while it was noticed that some numbers that appear to turn up in everyday life were not expressible as rational numbers. The classic example is the ratio of the circumference of a circle to its diameter, usually denoted π (the Greek letter pi, pronounced “pie”). These are the so-called real numbers, which include the rational numbers and numbers such as π that would, if expressed in decimal notation, require an inﬁnite number of decimal places. The mathematics of real numbers is regarded by many to be the most important area of mathematics—indeed, it is the basis of most forms of engineering, so it can be credited with creating much of modern civilization. The cool thing about real numbers is that although rational numbers are countable (that is, can be placed into one-to-one correspondence with the natural numbers), the real numbers are uncountable. The study of natural numbers and integers is called discrete mathematics, and the study of real numbers is called continuous mathematics.
+The truth is, however, that real numbers are nothing more than a polite ﬁction. They are a relatively harmless delusion, as any reputable physicist will tell you. The universe seems to be not only discrete, but also ﬁnite.
+
+4
+
+1. Cartesian Coordinate Systems
+
+If there are a ﬁnite amount of discrete things in the universe, as currently appears to be the case, then it follows that we can only count to a certain ﬁxed number, and thereafter we run out of things to count on—not only do we run out of dead sheep, but toasters, mechanics, and telephone sanitizers, too. It follows that we can describe the universe using only discrete mathematics, and only requiring the use of a ﬁnite subset of the natural numbers at that (large, yes, but ﬁnite). Somewhere, someplace there may be an alien civilization with a level of technology exceeding ours who have never heard of continuous mathematics, the fundamental theorem of calculus, or even the concept of inﬁnity; even if we persist, they will ﬁrmly but politely insist on having no truck with π, being perfectly happy to build toasters, bridges, skyscrapers, mass transit, and starships using 3.14159 (or perhaps 3.1415926535897932384626433832795 if they are fastidious) instead.
+So why do we use continuous mathematics? Because it is a useful tool that lets us do engineering. But the real world is, despite the cognitive dissonance involved in using the term “real,” discrete. How does that aﬀect you, the designer of a 3D computer-generated virtual reality? The computer is, by its very nature, discrete and ﬁnite, and you are more likely to run into the consequences of the discreteness and ﬁniteness during its creation than you are likely to in the real world. C++ gives you a variety of diﬀerent forms of number that you can use for counting or measuring in your virtual world. These are the short, the int, the float and the double, which can be described as follows (assuming current PC technology). The short is a 16bit integer that can store 65,536 diﬀerent values, which means that “many sheep” for a 16-bit computer is 65,537. This sounds like a lot of sheep, but it isn’t adequate for measuring distances inside any reasonable kind of virtual reality that take people more than a few minutes to explore. The int is a 32-bit integer that can store up to 4,294,967,296 diﬀerent values, which is probably enough for your purposes. The float is a 32-bit value that can store a subset of the rationals (slightly fewer than 4,294,967,296 of them, the details not being important here). The double is similar, using 64 bits instead of 32.
+The bottom line in choosing to count and measure in your virtual world using ints, floats, or doubles is not, as some misguided people would have it, a matter of choosing between discrete shorts and ints versus continuous floats and doubles; it is more a matter of precision. They are all discrete in the end. Older books on computer graphics will advise you to use integers because ﬂoating-point hardware is slower than integer hardware, but this is no longer the case. In fact, the introduction of dedicated ﬂoating point vector processors has made ﬂoating-point arithmetic faster than integer in many common cases. So which should you choose? At this point, it is probably best to introduce you to the ﬁrst law of computer graphics and leave you to think about it.
+
+1.2. 2D Cartesian Space
+
+5
+
+The First Law of Computer Graphics If it looks right, it is right.
+We will be doing a lot of trigonometry in this book. Trigonometry involves real numbers such as π, and real-valued functions such as sine and cosine (which we’ll get to later). Real numbers are a convenient ﬁction, so we will continue to use them. How do you know this is true? Because, Descartes notwithstanding, we told you so, because it would be nice, and because it makes sense.
+1.2 2D Cartesian Space
+You probably have used 2D Cartesian coordinate systems even if you have never heard the term “Cartesian” before. “Cartesian” is mostly just a fancy word for “rectangular.” If you have ever looked at the ﬂoor plans of a house, used a street map, seen a football1 game, or played chess, you have some exposure to 2D Cartesian coordinate spaces.
+This section introduces 2D Cartesian mathematics, the mathematics of ﬂat surfaces. It is divided into three main subsections.
+• Section 1.2.1 provides a gentle introduction to the concept of 2D Cartesian space by imagining a ﬁctional city called Cartesia.
+• Section 1.2.2 generalizes this concept to arbitrary or abstract 2D Cartesian spaces. The main concepts introduced are
+◦ the origin ◦ the x- and y-axes ◦ orienting the axes in 2D
+• Section 1.2.3 describes how to specify the location of a point in the 2D plane using Cartesian (x, y) coordinates.
+1This sentence works no matter which sport you think we are referring to with the word “football.” Well, OK, it works a little better with American football because of the clearly marked yard lines.
+
+6
+
+1. Cartesian Coordinate Systems
+
+Figure 1.4. Map of the hypothetical city of Cartesia
+1.2.1 An Example: The Hypothetical City of Cartesia
+Let’s imagine a ﬁctional city named Cartesia. When the Cartesia city planners were laying out the streets, they were very particular, as illustrated in the map of Cartesia in Figure 1.4.
+As you can see from the map, Center Street runs east-west through the middle of town. All other east-west streets (parallel to Center Street) are named based on whether they are north or south of Center Street, and how far they are from Center Street. Examples of streets that run east-west are North 3rd Street and South 15th Street.
+The other streets in Cartesia run north-south. Division Street runs north-south through the middle of town. All other north-south streets (parallel to Division Street) are named based on whether they are east or
+
+1.2. 2D Cartesian Space
+
+7
+
+west of Division Street, and how far they are from Division Street. So we have streets such as East 5th Street and West 22nd Street.
+The naming convention used by the city planners of Cartesia may not be creative, but it certainly is practical. Even without looking at the map, it is easy to ﬁnd the donut shop at North 4th and West 2nd. It’s also easy to determine how far you will have to drive when traveling from one place to another. For example, to go from that donut shop at North 4th and West 2nd, to the police station at South 3rd and Division, you would travel seven blocks south and two blocks east.
+1.2.2 Arbitrary 2D Coordinate Spaces
+Before Cartesia was built, there was nothing but a large ﬂat area of land. The city planners arbitrarily decided where the center of town would be, which direction to make the roads run, how far apart to space the roads, and so forth. Much like the Cartesia city planners laid down the city streets, we can establish a 2D Cartesian coordinate system anywhere we want—on a piece of paper, a chessboard, a chalkboard, a slab of concrete, or a football ﬁeld.
+Figure 1.5 shows a diagram of a 2D Cartesian coordinate system. As illustrated in Figure 1.5, a 2D Cartesian coordinate space is deﬁned by two pieces of information:
+• Every 2D Cartesian coordinate space has a special location, called the origin, which is the “center” of the coordinate system. The origin is analogous to the center of the city in Cartesia.
+
+Figure 1.5 A 2D Cartesian coordinate space
+
+8
+
+1. Cartesian Coordinate Systems
+
+• Every 2D Cartesian coordinate space has two straight lines that pass through the origin. Each line is known as an axis and extends inﬁnitely in two opposite directions. The two axes are perpendicular to each other. (Actually, they don’t have to be, but most of the coordinate systems we will look at will have perpendicular axes.) The two axes are analogous to Center and Division streets in Cartesia. The grid lines in the diagram are analogous to the other streets in Cartesia.
+At this point it is important to highlight a few signiﬁcant diﬀerences between Cartesia and an abstract mathematical 2D space:
+• The city of Cartesia has oﬃcial city limits. Land outside of the city limits is not considered part of Cartesia. A 2D coordinate space, however, extends inﬁnitely. Even though we usually concern ourselves with only a small area within the plane deﬁned by the coordinate space, in theory this plane is boundless. Also, the roads in Cartesia go only a certain distance (perhaps to the city limits) and then they stop. In contrast, our axes and grid lines extend potentially inﬁnitely in two directions.
+• In Cartesia, the roads have thickness. In contrast, lines in an abstract coordinate space have location and (possibly inﬁnite) length, but no real thickness.
+• In Cartesia, you can drive only on the roads. In an abstract coordinate space, every point in the plane of the coordinate space is part of the coordinate space, not just the “roads.” The grid lines are drawn only for reference.
+In Figure 1.5, the horizontal axis is called the x-axis, with positive x pointing to the right, and the vertical axis is the y-axis, with positive y pointing up. This is the customary orientation for the axes in a diagram. Note that “horizontal” and “vertical” are terms that are inappropriate for many 2D spaces that arise in practice. For example, imagine the coordinate space on top of a desk. Both axes are “horizontal,” and neither axis is really “vertical.”
+The city planners of Cartesia could have made Center Street run northsouth instead of east-west. Or they could have oriented it at a completely arbitrary angle. For example, Long Island, New York, is reminiscent of Cartesia, where for convenience the “streets” (1st Street, 2nd Street etc.) run across the island, and the “avenues” (1st Avenue, 2nd Avenue, etc.) run along its long axis. The geographic orientation of the long axis of the island is an arbitrary result of nature. In the same way, we are free to orient our axes in any way that is convenient to us. We must also decide for each
+
+1.2. 2D Cartesian Space
+
+9
+
+axis which direction we consider to be positive. For example, when working with images on a computer screen, it is customary to use the coordinate system shown in Figure 1.6. Notice that the origin is in the upper left-hand corner, +x points to the right, and +y points down rather than up.
+Unfortunately, when Cartesia was being laid out, the only mapmakers were in the neighboring town of Dyslexia. The minor-level functionary who sent the contract out to bid neglected take into account that the dyslectic mapmaker was equally likely to draw his maps with north pointing up, down, left, or right. Although he always drew the east-west line at right angles to the north-south line, he often got east and west backwards. When his boss realized that the job had gone to the lowest bidder, who happened to live in Dyslexia, many hours were spent in committee meetings trying to ﬁgure out Figure 1.6 what to do. The paperwork had been Screen coordinate space done, the purchase order had been issued, and bureaucracies being what they are, it would be too expensive and time-consuming to cancel the order. Still, nobody had any idea what the mapmaker would deliver. A committee was hastily formed.
+The committee fairly quickly decided that there were only eight possible orientations that the mapmaker could deliver, shown in Figure 1.7. In
+
+Figure 1.7. Possible map axis orientations in 2D
+
+10
+
+1. Cartesian Coordinate Systems
+
+the best of all possible worlds, he would deliver a map oriented as shown in the top-left rectangle, with north pointing to the top of the page and east to the right, which is what people usually expect. A subcommittee formed for the task decided to name this the normal orientation.
+After the meeting had lasted a few hours and tempers were beginning to fray, it was decided that the other three variants shown in the top row of Figure 1.7 were probably acceptable too, because they could be transformed to the normal orientation by placing a pin in the center of the page and rotating the map around the pin. (You can do this, too, by placing this book ﬂat on a table and turning it.) Many hours were wasted by tired functionaries putting pins into various places in the maps shown in the second row of Figure 1.7, but no matter how fast they twirled them, they couldn’t seem to transform them to the normal orientation. It wasn’t until everybody important had given up and gone home that a tired intern, assigned to clean up the used coﬀee cups, noticed that the maps in the second row can be transformed into the normal orientation by holding them up against a light and viewing them from the back. (You can do this, too, by holding Figure 1.7 up to the light and viewing it from the back—you’ll have to turn it, too, of course.) The writing was backwards too, but it was decided that if Leonardo da Vinci (1452–1519) could handle backwards writing in 15th century, then the citizens of Cartesia, though by no means his intellectual equivalent (probably due to daytime TV), could probably handle it in the 21st century.
+In summary, no matter what orientation we choose for the x- and yaxes, we can always rotate the coordinate space around so that +x points to our right and +y points up. For our example of screen-space coordinates, imagine turning the coordinate system upside down and looking at the screen from behind the monitor. In any case, these rotations do not distort the original shape of the coordinate system (even though we may be looking at it upside down or reversed). So in one particular sense, all 2D coordinate systems are “equal.” In Section 1.3.3, we discover the surprising fact that this is not the case in 3D.
+1.2.3 Specifying Locations in 2D Using Cartesian Coordinates
+A coordinate space is a framework for specifying location precisely. A gentleman of Cartesia could, if he wished to tell his lady love where to meet him for dinner, for example, consult the map in Figure 1.4 and say, “Meet you at the corner of East 2nd Street and North 4th Street.” Notice that he speciﬁes two coordinates, one in the horizontal dimension (East 2nd Street, listed along the top of the map in Figure 1.4) and one in the vertical dimension (North 4th Street, listed along the left of the map). If he wished
+
+1.2. 2D Cartesian Space
+
+11
+
+to be concise he could abbreviate the “East 2nd Street” to “2” and the
+
+“North 4th Street” to “4” and say to his lady love, somewhat cryptically,
+
+“Meet you at (2, 4).”
+
+The ordered pair (2, 4) is an example of what are called Cartesian coor-
+
+dinates. In 2D, two numbers are used to specify a location. (The fact that
+
+we use two numbers to describe the location of a point is the reason it’s
+
+called two-dimensional space. In 3D, we will use three numbers.) The ﬁrst
+
+coordinate (the 2 in our example (2, 4)) is called the x-coordinate, and the
+
+second coordinate (the 4 in our example (2, 4)) is called the y-coordinate.
+
+Analogous to the street names in
+
+Cartesia, each of the two coordinates
+
+speciﬁes which side of the origin the
+
+point is on and how far away the point is
+
+from the origin in that direction. More
+
+precisely, each coordinate is the signed
+
+distance (that is, positive in one direc-
+
+tion and negative in the other) to one
+
+of the axes, measured along a line par-
+
+allel to the other axis. Essentially, we
+
+use positive coordinates for east and
+
+north streets and negative coordinates
+
+for south and west streets. As shown
+
+in Figure 1.8, the x-coordinate desig-
+
+nates the signed distance from the point to the y-axis, measured along a line
+
+Figure 1.8 How to locate a point using 2D Cartesian
+
+parallel to the x-axis. Likewise, the coordinates
+
+y-coordinate designates the signed dis-
+
+tance from the point to the x-axis, measured along a line parallel to the
+
+y-axis.
+
+Figure 1.9 shows several points and their Cartesian coordinates. Notice
+
+that the points to the left of the y-axis have negative x values, and those to
+
+the right of the y-axis have positive x values. Likewise, points with positive
+
+y are located above the x-axis, and points with negative y are below the
+
+x-axis. Also notice that any point can be speciﬁed, not just the points at
+
+grid line intersections. You should study this ﬁgure until you are sure that
+
+you understand the pattern.
+
+Let’s take a closer look at the grid lines usually shown in a diagram.
+
+Notice that a vertical grid line is composed of points that all have the same
+
+x-coordinate. In other words, a vertical grid line (actually any vertical
+
+line) marks a line of constant x. Likewise, a horizontal grid line marks a
+
+line of constant y; all the points on that line have the same y coordinate.
+
+We’ll come back to this idea in a bit when we discuss polar coordinate
+
+spaces.
+
+12
+
+1. Cartesian Coordinate Systems
+
+Figure 1.9. Example points labeled with 2D Cartesian coordinates
+1.3 3D Cartesian Space
+The previous sections have explained how the Cartesian coordinate system works in 2D. Now it’s time to leave the ﬂat 2D world and think about 3D space.
+It might seem at ﬁrst that 3D space is only “50% more complicated” than 2D. After all, it’s just one more dimension, and we already had two. Unfortunately, this is not the case. For a variety of reasons, 3D space is more than incrementally more diﬃcult than 2D space for humans to visualize and describe. (One possible reason for this diﬃculty could be that our physical world is 3D, whereas illustrations in books and on computer screens are 2D.) It is frequently the case that a problem that is “easy” to solve in 2D is much more diﬃcult or even undeﬁned in 3D. Still, many concepts in 2D do extend directly into 3D, and we frequently use 2D to establish an understanding of a problem and develop a solution, and then extend that solution into 3D.
+This section extends 2D Cartesian math into 3D. It is divided into four major subsections.
+• Section 1.3.1 begins the extension of 2D into 3D by adding a third axis. The main concepts introduced are
+
+1.3. 3D Cartesian Space
+
+13
+
+◦ the z-axis ◦ the xy, xz, and yz planes
+• Section 1.3.2 describes how to specify the location of a point in the 3D plane using Cartesian (x, y, z) coordinates.
+• Section 1.3.3 introduces the concepts of left-handed and right-handed 3D coordinate spaces. The main concepts introduced are
+◦ the hand rule, an informal deﬁnition for left-handed and righthanded coordinate spaces
+◦ diﬀerences in rotation in left-handed and right-handed coordinate spaces
+◦ how to convert between the two ◦ neither is better than the other, only diﬀerent
+• Section 1.3.4 describes some conventions used in this book.
+1.3.1 Extra Dimension, Extra Axis
+In 3D, we require three axes to establish a coordinate system. The ﬁrst two axes are called the x-axis and y-axis, just as in 2D. (However, it is not accurate to say that these are the same as the 2D axes; more on this later.) We call the third axis (predictably) the z-axis. Usually, we set things up so that all axes are mutually perpendicular, that is, each one is perpendicular to the others. Figure 1.10 shows an example of a 3D coordinate space.
+
+Figure 1.10 A 3D Cartesian coordinate space
+As discussed in Section 1.2.2, it is customary in 2D for +x to point to the right and +y to point up. (Or sometimes +y may point down, but
+
+14
+
+1. Cartesian Coordinate Systems
+
+in either case, the x-axis is horizontal and the y-axis is vertical.) These conventions in 2D are fairly standardized. In 3D, however, the conventions for arrangement of the axes in diagrams and the assignment of the axes onto physical dimensions (left, right, up, down, forward, back) are not very standardized. Diﬀerent authors and ﬁelds of study have different conventions. Section 1.3.4 discusses the conventions used in this book.
+As mentioned earlier, it is not entirely appropriate to say that the x-axis and y-axis in 3D are the “same” as the x-axis and y-axis in 2D. In 3D, any pair of axes deﬁnes a plane that contains the two axes and is perpendicular to the third axis. For example, the plane containing the x- and y-axes is the xy plane, which is perpendicular to the z-axis. Likewise, the xz plane is perpendicular to the y-axis, and the yz plane is perpendicular to the x-axis. We can consider any of these planes a 2D Cartesian coordinate space in its own right. For example, if we assign +x, +y, and +z to point right, up, and forward, respectively, then the 2D coordinate space of the “ground” is the xz plane, as shown in Figure 1.10.
+1.3.2 Specifying Locations in 3D
+In 3D, points are speciﬁed using three numbers, x, y, and z, which give the signed distance to the yz, xz, and xy planes, respectively. This distance is measured along a line parallel to the axis. For example, the x-value is the signed distance to the yz plane, measured along a line parallel to the x-axis. Don’t let this precise deﬁnition of how points in 3D are located confuse you. It is a straightforward extension of the process for 2D, as shown in Figure 1.11.
+
+Figure 1.11 Locating points in 3D
+
+1.3. 3D Cartesian Space
+
+15
+
+1.3.3 Left-handed versus Right-handed Coordinate Spaces
+As we discussed in Section 1.2.2, all 2D coordinate systems are “equal” in the sense that for any two 2D coordinate spaces A and B, we can rotate coordinate space A such that +x and +y point in the same direction as they do in coordinate space B. (We are assuming perpendicular axes.) Let’s examine this idea in more detail.
+Figure 1.5 shows the “standard” 2D coordinate space. Notice that the diﬀerence between this coordinate space and “screen” coordinate space shown Figure 1.6 is that the y-axis points in opposite directions. However, imagine rotating Figure 1.6 clockwise 180 degrees so that +y points up and +x points to the left. Now rotate it by “turning the page” and viewing the diagram from behind. Notice that now the axes are oriented in the “standard” directions like in Figure 1.5. No matter how many times we ﬂip an axis, we can always ﬁnd a way to rotate things back into the standard orientation.
+Let’s see how this idea extends into 3D. Examine Figure 1.10 once more. We stated earlier that +z points into the page. Does it have to be this way? What if we made +z point out of the page? This is certainly allowed, so let’s ﬂip the z-axis.
+Now, can we rotate the coordinate system around such that things line up with the original coordinate system? As it turns out, we cannot. We can rotate things to line up two axes at a time, but the third axes always points in the wrong direction! (If you have trouble visualizing this, don’t worry. In just a moment we will illustrate this principle in more concrete terms.)
+All 3D coordinate spaces are not equal, in the sense that some pairs of coordinate systems cannot be rotated to line up with each other. There are exactly two distinct types of 3D coordinate spaces: left-handed coordinate spaces and right-handed coordinate spaces. If two coordinate spaces have the same handedness, then they can be rotated such that the axes are aligned. If they are of opposite handedness, then this is not possible.
+What exactly do “left-handed” and “right-handed” mean? The most intuitive way to identify the handedness of a particular coordinate system is to use, well, your hands! With your left hand, make an ‘L’ with your thumb and index ﬁnger.2 Your thumb should be pointing to your right, and your index ﬁnger should be pointing up. Now extend your third ﬁnger3 so it points directly forward. You have just formed a left-handed coordinate system. Your thumb, index ﬁnger, and third ﬁnger point in the +x, +y, and +z directions, respectively. This is shown in Figure 1.12.
+2You may have to put the book down. 3This may require some dexterity. The authors advise that you not do this in public without ﬁrst practicing privately, to avoid oﬀending innocent bystanders.
+
+16
+
+1. Cartesian Coordinate Systems
+
+Figure 1.12 Left-handed coordinate space
+Now perform the same experiment with your right hand. Notice that your index ﬁnger still points up, and your third ﬁnger points forward. However, with your right hand, your thumb will point to the left. This is a right-handed coordinate system. Again, your thumb, index ﬁnger, and third ﬁnger point in the +x, +y, and +z directions, respectively. A righthanded coordinate system is shown in Figure 1.13.
+Figure 1.13 Right-handed coordinate space
+Try as you might, you cannot rotate your hands into a position such that all three ﬁngers simultaneously point the same direction on both hands. (Bending your ﬁngers is not allowed.)
+Left-handed and right-handed coordinate systems also diﬀer in the deﬁnition of “positive rotation.” Let’s say we a have line in space and we need to rotate about this line by a speciﬁed angle. We call this line an axis of rotation, but don’t think that the word axis implies that we’re talking only about one of the cardinal axes (the x-, y-, or z-axis). An axis of rotation can be arbitrarily oriented. Now, if you tell me to “rotate 30o about the
+
+1.3. 3D Cartesian Space
+
+17
+
+Left-hand rule
+
+Right-hand rule
+
+Figure 1.14. The left-hand rule and right-hand rule deﬁne which direction is considered “positive” rotation.
+
+axis,” how do I know which way to rotate? We need to agree between us that one direction of rotation is the positive direction, and the other direction is the negative direction. The standard way to tell which is which in a left-handed coordinate system is called the left-hand rule. First, we must deﬁne which way our axis “points.” Of course, the axis of rotation is theoretically inﬁnite in length, but we still consider it having a positive and negative end, just like the normal cardinal axes that deﬁne our coordinate space. The left-hand rule works like this: put your left hand in the “thumbs up” position, with your thumb pointing towards the positive end of the axis of rotation. Positive rotation about the axis of rotation is in the direction that your ﬁngers are curled. There’s a corresponding rule for right-handed coordinate spaces; both of these rules are illustrated in Figure 1.14.
+As you can see, in a left-handed coordinate system, positive rotation rotates clockwise when viewed from the positive end of the axis, and in a right-handed coordinate system, positive rotation is counterclockwise. Table 1.1 shows what happens when we apply this general rule to the speciﬁc case of the cardinal axes.
+Any left-handed coordinate system can be transformed into a righthanded coordinate system, or vice versa. The simplest way to do this is by swapping the positive and negative ends of one axis. Notice that if we
+
+18
+
+1. Cartesian Coordinate Systems
+
+When looking towards the origin from. . .
++x +y +z
+
+Positive rotation Left-handed: Clockwise Right-handed: Counterclockwise +y → +z → −y → −z → +y +z → +x → −z → −x → +z +x → +y → −x → −y → +x
+
+Negative rotation Left-handed: Counterclockwise Right-handed: Clockwise +y → −z → −y → +z → +y +z → −x → −z → +x → +z +x → −y → −x → +y → +x
+
+Table 1.1. Rotation about the cardinal axes in left- and right-handed coordinate systems
+
+ﬂip two axes, it is the same as rotating the coordinate space 180o about the third axis, which does not change the handedness of the coordinate space. Another way to toggle the handedness of a coordinate system is to exchange two axes.
+Both left-handed and right-handed coordinate systems are perfectly valid, and despite what you might read in other books, neither is “better” than the other. People in various ﬁelds of study certainly have preferences for one or the other, depending on their backgrounds. For example, some newer computer graphics literature uses left-handed coordinate systems, whereas traditional graphics texts and more math-oriented linear algebra people tend to prefer right-handed coordinate systems. Of course, these are gross generalizations, so always check to see what coordinate system is being used. The bottom line, however, is that in many cases it’s just a matter of a negative sign in the z-coordinate. So, appealing to the ﬁrst law of computer graphics in Section 1.1, if you apply a tool, technique, or resource from another book, web page, or article and it doesn’t look right, try ﬂipping the sign on the z-axis.
+1.3.4 Some Important Conventions Used in This Book
+When designing a 3D virtual world, several design decisions have to be made beforehand, such as left-handed or right-handed coordinate system, which direction is +y, and so forth. The map makers from Dyslexia had to choose from among eight diﬀerent ways to assign the axes in 2D (see Figure 1.7). In 3D, we have a total of 48 diﬀerent combinations to choose from; 24 of these combinations are left-handed, and 24 are right-handed. (Exercise 3 asks you to list all of them.)
+Diﬀerent situations can call for diﬀerent conventions, in the sense that certain tasks can be easier if you adopt the right conventions. Usually, however, it is not a major deal as long as you establish the conventions early in your design process and stick to them. (In fact, the choice is most likely thrust upon you by the engine or framework you are using, because very few people start from scratch these days.) All of the basic principles discussed in this book are applicable regardless of the conventions used. For the most part, all of the equations and techniques given are applicable
+
+1.4. Odds and Ends
+
+19
+
+regardless of convention, as well.4 However, in some cases there are some slight, but critical, diﬀerences in application dealing with left-handed versus right-handed coordinate spaces. When those diﬀerences arise, we will point them out.
+We use a left-handed coordinate system in this book. The +x, +y, and +z directions point right, up, and forward, respectively, as shown in Figure 1.15. In situations where “right” and “forward” are not appropriate terms (for example, when we discuss the world coordinate space), we assign +x to “east” and +z to “north.”
+
+Figure 1.15 The left-handed coordinate system conventions used in this book
+1.4 Odds and Ends
+In this book, we spend a lot of time focusing on some crucial material that is often relegated to a terse presentation tucked away in an appendix in the books that consider this material a prerequisite. We, too, must assume a nonzero level of mathematical knowledge from the reader, or else every book would get no further than a review of ﬁrst principles, and so we also have our terse presentation of some prerequisites. In this section we present a few bits of mathematical knowledge with which most readers are probably familiar, but might need a quick refresher.
+4This is due to a fascinating and surprising symmetry in nature. You might say that nature doesn’t know if we are using left- or right-handed coordinates. There’s a really interesting discussion in The Feynman Lectures on Physics about how it is impossible without very advanced physics to describe the concepts of “left” or “right” to someone without referencing some object you both have seen.
+
+20
+
+1. Cartesian Coordinate Systems
+
+Summation notation Product notation
+
+1.4.1 Summation and Product Notation
+Summation notation is a shorthand way to write the sum of a list of things. It’s sort of like a mathematical for loop. Let’s look at an example:
+6
+ai = a1 + a2 + a3 + a4 + a5 + a6.
+i=1
+The variable i is known as the index variable. The expressions above and below the summation symbol tell us how many times to execute our “loop” and what values to use for i during each iteration. In this case, i will count from 1 to 6. To “execute” our loop, we iterate the index through all the values speciﬁed by the control conditions. For each iteration, we evaluate the expression on the right-hand side of the summation notation (substituting the appropriate value for the index variable), and add this to our sum.
+Summation notation is also known as sigma notation because that coollooking symbol that looks like an E is the capital version of the Greek letter sigma.
+A similar notation is used when we are taking the product of a series of values, only we use the symbol Π, which is the capital version of the letter π:
+n
+ai = a1 × a2 × · · · × an−1 × an.
+i=1
+1.4.2 Interval Notation
+Several times in this book, we refer to a subset of the real number line using interval notation. The notation [a, b] means, “the portion of the number line from a to b.” Or, more formally, we could read [a, b] as “all numbers x such that a ≤ x ≤ b.” Notice that this is a closed interval, meaning that the endpoints a and b are included in the interval. An open interval is one in which the endpoints are excluded. It is denoted using parentheses instead of square brackets: (a, b). This interval contains all x such that a < x < b. Sometimes a closed interval is called inclusive and an open interval called exclusive.
+Occasionally, we encounter half-open intervals, which include one endpoint but exclude the other. These are denoted with a lopsided5 notation such as [a, b) or (a, b], with the square bracket being placed next to the endpoint that is included. By convention, if an endpoint is inﬁnite, we consider that end to be open. For example, the set of all nonnegative numbers is [0, ∞).
+5And confusing to the delimiter matching feature of your text editor.
+
+1.4. Odds and Ends
+
+21
+
+Notice that the notation (x, y) could refer to an open interval or a 2D point. Likewise, [x, y] could be a closed interval or a 2D vector (discussed in the next chapter). The context will always make clear which is the case.
+1.4.3 Angles, Degrees, and Radians
+An angle measures an amount of rotation in the plane. Variables representing angles are often assigned the Greek letter θ.6 The most important units of measure used to specify angles are degrees (o) and radians (rad).
+Humans usually measure angles using degrees. One degree measures 1/360th of a revolution, so 360o represents a complete revolution.7 Mathematicians, however, prefer to measure angles in radians, which is a unit of measure based on the properties of a circle. When we specify the angle between two rays in radians, we are actually measuring the length of the intercepted arc of a unit circle (a circle centered at the origin with radius 1), as shown in Figure 1.16.
+
+Figure 1.16 A radian measures arc length on a unit circle
+6One prerequisite that we do not assume in this book is familiarity with the Greek alphabet. The symbol θ is the lowercase theta, pronounced “THAY-tuh.”
+7The number 360 is a relatively arbitrary choice, which may have had its origin in primitive calendars, such as the Persian calendar, which divided the year into 360 days. This error was never corrected to 365 because the number 360 is so darn convenient. The number 360 has a whopping 22 divisors (not counting itself and 1): 2, 3, 4, 5, 6, 8, 9, 10, 12, 15, 18, 20, 24, 30, 36, 40, 45, 60, 72, 90, 120, and 180. This means 360 can be divided evenly in a large number of cases without needing fractions, which was apparently a good thing to early civilizations. As early as 1750 BCE the Babylonians had devised a sexagesimal (base 60) number system. The number 360 is also large enough so that precision to the nearest whole degree is suﬃcient in many circumstances.
+
+22
+
+1. Cartesian Coordinate Systems
+
+Converting between radians and degrees
+
+The circumference of a unit circle is 2π, with π approximately equal to 3.14159265359. Therefore, 2π radians represents a complete revolution.
+Since 360o = 2π rad, 180o = π rad. To convert an angle from radians to degrees, we multiply by 180/π ≈ 57.29578, and to convert an angle from degrees to radians, we multiply by π/180 ≈ 0.01745329. Thus,
+
+1 rad = (180/π)o
+
+≈ 57.29578o,
+
+1o = (π/180) rad ≈ 0.01745329 rad.
+
+In the next section, Table 1.2 will list several angles in both degree and radian format.
+
+1.4.4 Trig Functions
+There are many ways to deﬁne the elementary trig functions. In this section, we deﬁne them using the unit circle. In two dimensions, if we begin with a unit ray pointing towards +x, and then rotate this ray counterclockwise by an angle θ, we have drawn the angle in the standard position. (If the angle is negative, rotate the ray in the other direction.) This is illustrated in Figure 1.17.
+The (x, y) coordinates of the endpoint of a ray thus rotated have special properties and are so signiﬁcant mathematically that they have been assigned special functions, known as the cosine and sine of the angle:
+
+Deﬁning sine and cosine using the unit circle
+
+cos θ = x,
+
+sin θ = y.
+
+Figure 1.17 An angle in standard position
+
+1.4. Odds and Ends
+
+23
+
+You can easily remember which is which because they are in alphabetical order: x comes before y, and cos comes before sin.
+The secant, cosecant, tangent, and cotangent are also useful trig functions. They can be deﬁned in terms of the the sine and cosine:
+
+sec θ
+
+=
+
+1 cos
+
+θ
+
+,
+
+csc θ
+
+=
+
+1 sin
+
+θ
+
+,
+
+tan θ
+
+=
+
+sin cos
+
+θ θ
+
+,
+
+cot θ
+
+=
+
+1 tan θ
+
+=
+
+cos sin
+
+θ θ
+
+.
+
+If we form a right triangle using the rotated ray as the hypotenuse (the side opposite the right angle), we see that x and y give the lengths of the legs (those sides that form the right angle). The length of the adjacent leg is x, and the length of the opposite leg is y, with the terms “adjacent” and “opposite” interpreted relative to the angle θ. Again, alphabetical order is a useful memory aid: “adjacent” and “opposite” are in the same order as the corresponding “cosine” and “sine.” Let the abbreviations hyp, adj , and opp refer to the lengths of the hypotenuse, adjacent leg, and opposite leg, respectively, as shown in Figure 1.18.
+
+Figure 1.18 The hypotenuse and the adjacent and opposite legs
+
+The primary trig functions are deﬁned by the following ratios:
+
+cos θ
+
+=
+
+adj hyp
+
+,
+
+sin θ
+
+=
+
+opp hyp
+
+,
+
+tan θ
+
+=
+
+opp adj
+
+,
+
+sec θ
+
+=
+
+hyp adj
+
+,
+
+csc θ
+
+=
+
+hyp opp
+
+,
+
+cot θ
+
+=
+
+adj opp
+
+.
+
+Because of the properties of similar triangles, the above equations apply even when the hypotenuse is not of unit length. However, they do not
+
+24
+
+1. Cartesian Coordinate Systems
+
+Figure 1.19 A more general interpretation using (x, y) coordinates rather than side lengths
+
+apply when θ is obtuse, since we cannot form a right triangle with an obtuse interior angle. But by showing the angle in standard position and allowing the rotated ray to be of any length r (Figure 1.19), we can express the ratios using x, y, and r:
+
+cos θ = x/r,
+
+sin θ = y/r,
+
+tan θ = y/x,
+
+sec θ = r/x,
+
+csc θ = r/y,
+
+cot θ = x/y.
+
+Table 1.2 shows several diﬀerent angles, expressed in degrees and radians, and the values of their principal trig functions.
+
+Basic identities related to symmetry
+
+1.4.5 Trig Identities
+In this section we present a number of basic relationships between the trig functions. Because we assume in this book that the reader has some prior exposure to trigonometry, we do not develop or prove these theorems. The proofs can be found online or in any trigonometry textbook.
+A number of identities can be derived based on the symmetry of the unit circle:
+
+sin(−θ) = − sin θ,
+
+cos(−θ) = cos θ,
+
+tan(−θ) = − tan θ,
+
+sin
+
+π 2
+
+−
+
+θ
+
+= cos θ,
+
+cos
+
+π 2
+
+−
+
+θ
+
+= sin θ,
+
+tan
+
+π 2
+
+−
+
+θ
+
+= cot θ.
+
+1.4. Odds and Ends
+
+25
+
+θo
+
+θ rad cos θ sin θ tan θ sec θ csc θ cot θ
+
+0
+
+01
+
+0
+
+0
+
+1 undef undef
+
+√
+
+30
+
+π 6
+
+≈
+
+0.5236
+
+3 √2
+
+45
+
+π 4
+
+≈
+
+0.7854
+
+2 2
+
+60
+
+π 3
+
+≈
+
+1.0472
+
+1 2
+
+1 √2
+2 √2
+3 2
+
+√ 3 3
+√1 3
+
+√ 23
+√3 2
+2
+
+√2 2
+√ 23
+3
+
+√ 3
+1
+√ 3 3
+
+90 120 135 150
+
+π 2
+
+≈
+
+1.5708
+
+2π 3
+
+≈
+
+2.0944
+
+3π 4
+
+≈
+
+2.3562
+
+5π 6
+
+≈
+
+2.6180
+
+0
+
+−√21
+
+−
+
+2 √2
+
+−
+
+3 2
+
+1 undef undef
+
+√ 3
+√2 2 2
+
+√ −3 −1
+√
+
+−2 √ −2
+√
+
+1 2
+
+−
+
+3 3
+
+−233
+
+1
+√ 23
+√3 2
+2
+
+0
+
+√
+
+−
+
+3 3
+
+−√1 −3
+
+180 π ≈ 3.1416 −1 0
+
+0
+
+−1 undef undef
+
+210 225 240
+
+7π 6
+
+≈
+
+3.6652
+
+5π 4
+
+≈
+
+3.9270
+
+4π 3
+
+≈
+
+4.1888
+
+√
+
+−
+
+3 √2
+
+−
+
+2 2
+
+−
+
+1 2
+
+−√12
+
+−
+
+2 √2
+
+−
+
+3 2
+
+√ 3 3
+1 √
+3
+
+√
+
+−
+
+2
+√3
+
+3
+
+−2
+
+−2
+
+−2 √ −2
+√
+−233
+
+√ −3
+
+−1
+
+√
+
+−
+
+3 3
+
+270
+
+3π 2
+
+≈
+
+4.7124
+
+300
+
+5π 3
+
+≈
+
+5.2360
+
+315
+
+7π 4
+
+≈
+
+5.4978
+
+330
+
+11π 6
+
+≈
+
+5.7596
+
+0
+1 √2
+2 √2
+3 2
+
+−1
+
+√
+
+−
+
+3 √2
+
+−
+
+2 2
+
+−
+
+1 2
+
+un√def −3
+
+−1
+
+√
+
+−
+
+3 3
+
+undef
+2 √
+2
+√ 23
+3
+
+−1
+
+√
+
+−
+
+2
+√3
+
+3
+
+−2
+
+−2
+
+0
+
+√
+
+−
+
+3 3
+
+−1 √ −3
+
+360 2π ≈ 6.2832 1
+
+0
+
+0
+
+1 undef undef
+
+Table 1.2. Common angles in degrees and radians, and the values of the principal trig functions
+
+Perhaps the most famous and basic identity concerning the right triangle, one that most readers learned in their primary education, is the Pythagorean theorem. It says that the sum of the squares of the two legs of a right triangle is equal to the square of the hypotenuse. Or, more famously, as shown in Figure 1.20,
+a2 + b2 = c2.
+
+Pythagorean theorem
+
+By applying the Pythagorean theorem to the unit circle, one can deduce the identities
+
+sin2 θ + cos2 θ = 1, 1 + tan2 θ = sec2 θ, 1 + cot2 θ = csc2 θ.
+
+Pythagorean identities
+
+26
+
+1. Cartesian Coordinate Systems
+
+Figure 1.20 The Pythagorean theorem
+
+The following identities involve taking a trig function on the sum or diﬀerence of two angles:
+
+Sum and diﬀerence identities
+
+sin(a + b) = sin a cos b + cos a sin b,
+
+sin(a − b) = sin a cos b − cos a sin b,
+
+cos(a + b) = cos a cos b − sin a sin b,
+
+cos(a − b) = cos a cos b + sin a sin b,
+
+tan(a + b)
+
+=
+
+tan a + tan b 1 − tan a tan b
+
+,
+
+tan(a − b)
+
+=
+
+tan a − tan b 1 + tan a tan b
+
+.
+
+(1.1)
+
+If we apply the sum identities to the special case where a and b are the same, we get the following double angle identities:
+
+Double angle identities
+
+sin 2θ = 2 sin θ cos θ,
+
+cos 2θ = cos2 θ − sin2 θ = 2 cos2 θ − 1 = 1 − 2 sin2 θ,
+
+tan 2θ
+
+=
+
+1
+
+2 tan θ − tan2
+
+θ.
+
+We often need to solve for an unknown side length or angle in a triangle, in terms of the known side lengths or angles. For these types of problems the law of sines and law of cosines are helpful. The formula to use will depend on which values are known and which value is unknown. Figure 1.21 illustrates the notation and shows that these identities hold for any triangle, not just right triangles:
+
+Law of sines
+
+sin A a
+
+=
+
+sin B b
+
+=
+
+sin C c
+
+,
+
+1.5. Exercises
+
+27
+
+Figure 1.21 Notation used for the law of sines and law of cosines
+
+a2 = b2 + c2 − 2bc cos A, b2 = a2 + c2 − 2ac cos B, c2 = a2 + b2 − 2ab cos C.
+
+Law of cosines
+
+1.5 Exercises
+(Answers on page 745.) 1. Give the coordinates of the following points. Assume the standard 2D conventions. The darker grid lines represent one unit.
+
+28
+
+1. Cartesian Coordinate Systems
+
+2. Give the coordinates of the following points:
++y c
+
+a
+
+i
+
+g
+
+f
+
+e
+
++x
+
+d
+
+z
+
+h
+
+b
+
+3. List the 48 diﬀerent possible ways that the 3D axes may be assigned to the directions “north,” “east,” and “up.” Identify which of these combinations are left-handed, and which are right-handed.
+4. In the popular modeling program 3DS Max, the default orientation of the axes is for +x to point right/east, +y to point forward/north, and +z to point up.
+(a) Is this a left- or right-handed coordinate space?
+(b) How would we convert 3D coordinates from the coordinate system used by 3DS Max into points we could use with our coordinate conventions discussed in Section 1.3.4?
+(c) What about converting from our conventions to the 3DS Max conventions?
+5. A common convention in aerospace is that +x points forward/north, +y points right/east, and z points down.
+(a) Is this a left- or right-handed coordinate space?
+(b) How would we convert 3D coordinates from these aerospace conventions into our conventions?
+(c) What about converting from our conventions to the aerospace conventions?
+6. In a left-handed coordinate system:
+
+1.5. Exercises
+
+29
+
+(a) when looking from the positive end of an axis of rotation, is positive rotation clockwise (CW) or counterclockwise (CCW)?
+(b) when looking from the negative end of an axis of rotation, is positive rotation CW or CCW?
+
+In a right-handed coordinate system:
+
+(c) when looking from the positive end of an axis of rotation, is positive rotation CW or CCW?
+(d) when looking from the negative end of an axis of rotation, is positive rotation CW or CCW?
+
+7. Compute the following:
+
+5
+(a) i
+i=1
+
+5
+(b) 2i
+i=1
+
+5
+(c) 2i
+i=1
+
+4
+(d) 7(i + 1)
+i=0
+
+100
+(e)8 i
+i=1
+
+8. Convert from degrees to radians:
+(a) 30o (b) −45o (c) 60o (f) 225o (g) −270o (h) 167.5o
+
+(d) 90o (i) 527o
+
+(e) −180o (j) −1080o
+
+9. Convert from radians to degrees:
+(a) −π/6 (b) 2π/3 (c) 3π/2 (f) π/180 (g) π/18 (h) −5π
+
+(d) −4π/3 (i) 10π
+
+(e) 2π (j) π/5
+
+10. In The Wizard of Oz, the scarecrow receives his degree from the wizard and blurts out this mangled version of the Pythagorean theorem:
+
+The sum of the square roots of any two sides of an isosceles triangle is equal to the square root of the remaining side.
+Apparently the scarecrow’s degree wasn’t worth very much, since this “proof that he had a brain” is actually wrong in at least two ways.9 What should the scarecrow have said?
+
+8There is a well-known story about the mathematician Karl Friedrich Gauss solving this problem in only a few seconds while a student in primary school. As the story goes, his teacher wanted to occupy the students by having them add the numbers 1 to 100 and turn in their answers at the end of class. However, mere seconds after being given this assignment, Gauss handed the correct answer to his teacher as the teacher and the rest of the class gazed in astonishment at the young Gauss.
+9Homer Simpson repeated the same jibberish after putting on a pair of glasses found in a toilet. A man in a nearby stall corrected him on one of his errors. So if you saw that episode of The Simpsons, then you have a headstart on this question, but not the whole answer.
+
+30
+
+1. Cartesian Coordinate Systems
+
+11. Conﬁrm the following:
+(a) (sin(α)/ csc(α)) + (cos(α)/ sec(α)) = 1 (b) (sec2(θ) − 1)/ sec2(θ) = sin2(θ) (c) 1 + cot2(t) = csc2(t) (d) cos(φ)(tan(φ) + cot(φ)) = csc(φ)
+
+People, places, science, odds and ends, and things you should have learned in school had you been paying attention.
+— Categories from Michael Feldman’s weekend radio show Whaddya know?
+
+Chapter 2
+Vectors
+Yellow fever vaccine should be administered 10 to 12 days before exposure to the vector.
+— The United States Dispensatory (1978)
+Vectors are the formal mathematical entities we use to do 2D and 3D math. The word vector has two distinct but related meanings. Mathematics books, especially those on linear algebra, tend to focus on a rather abstract deﬁnition, caring about the numbers in a vector but not necessarily about the context or actual meaning of those numbers. Physics books, on the other hand, tend towards an interpretation that treats a vector as a geometric entity to the extent that they avoid any mention of the coordinates used to measure the vector, when possible. It’s no wonder that you can sometimes ﬁnd people from these two disciplines correcting one another on the ﬁner points of “how vectors really work.” Of course the reality is that they are both right,1 and to be proﬁcient with 3D math, we need to understand both interpretations of vectors and how the two interpretations are related.
+This chapter introduces the concept of vectors. It is divided into the following sections.
+• Section 2.1 covers some of the basic mathematical properties of vectors.
+• Section 2.2 gives a high-level introduction to the geometric properties of vectors.
+• Section 2.3 connects the mathematical deﬁnition with the geometric one and discusses how vectors work within the framework of Cartesian coordinates.
+1But the perspective taken by physics textbooks is probably the one that’s more appropriate for video game programming, at least in the beginning.
+31
+
+32
+
+2. Vectors
+
+• Section 2.4 discusses the often confusing relationship between points and vectors and considers the rather philosophical question of why it is so diﬃcult to make absolute measurements.
+• Sections 2.5–2.12 discuss the fundamental calculations we can perform with vectors, considering both the algebra and geometric interpretations of each operation.
+• Section 2.13 presents a list of helpful vector algebra laws.
+
+A 3D column vector
+
+2.1 Mathematical Deﬁnition of Vector,
+and Other Boring Stuff
+To mathematicians, a vector is a list of numbers. Programmers will recognize the synonymous term array. Notice that the STL template array class in C++ is named vector, and the basic Java array container class is java.util.Vector. So mathematically, a vector is nothing more than an array of numbers.
+Yawn. . . If this abstract deﬁnition of a vector doesn’t inspire you, don’t worry. Like many mathematical subjects, we must ﬁrst introduce some terminology and notation before we can get to the “fun stuﬀ.”
+Mathematicians distinguish between vector and scalar (pronounced “SKAY-lur”) quantities. You’re already an expert on scalars—scalar is the technical term for an ordinary number. We use this term speciﬁcally when we wish to emphasize that a particular quantity is not a vector quantity. For example, as we will discuss shortly, “velocity” and “displacement” are vector quantities, whereas “speed” and “distance” are scalar quantities.
+The dimension of a vector tells how many numbers the vector contains. Vectors may be of any positive dimension, including one. In fact, a scalar can be considered a 1D vector. In this book, we primarily are interested in 2D, 3D, and (later) 4D vectors.
+When writing a vector, mathematicians list the numbers surrounded by square brackets, for example, [1, 2, 3]. When we write a vector inline in a paragraph, we usually put commas between the numbers. When we write it out in an equation, the commas are often omitted. In either case, a vector written horizontally is called a row vector. Vectors are also frequently written vertically:
+1 2.
+3
+A vector written vertically is known as a column vector. This book uses both notations. For now, the distinction between row and column
+
+Mathematical Deﬁnition of Vector, and Other Boring Stuff
+
+33
+
+vectors won’t matter. However, in Section 4.1.7 we discuss why in certain circumstances the distinction is critical.
+When we wish to refer to the individual components in a vector, we use subscript notation. In math literature, integer indices are used to access the elements. For example v1 refers to the ﬁrst element in v. However, we are speciﬁcally interested in 2D, 3D, and 4D vectors rather than vectors of arbitrary dimension n, so we rarely use this notation. Instead, we use x and y to refer to the elements in a 2D vector; x, y, and z to refer to the elements in a 3D vector; and x, y, z, and w to refer to the elements in a 4D vector. This notation is shown in Equation (2.1).
+
+a=
+
+1 2
+
+3 b = 4
+5
+
+6
+
+c
+
+=
+
+7 8
+
+9
+
+a1 = ax = 1 a2 = ay = 2
+b1 = bx = 3 b2 = by = 4 b3 = bz = 5
+c1 = cx = 6 c2 = cy = 7 c3 = cz = 8 c4 = cw = 9
+
+(2.1)
+
+Notice that the components of a 4D vector are not in alphabetical order. The fourth value is w. (Hey, they ran out of letters in the alphabet!)
+Now let’s talk about some important typeface conventions that are used in this book. As you know, variables are placeholder symbols used to stand for unknown quantities. In 3D math, we work with scalar, vector, and (later) matrix quantities. In the same way that it’s important in a C++ or Java program to specify what type of data is stored by a variable, it is important when working with vectors to be clear what type of data is represented by a particular variable. In this book, we use diﬀerent fonts for variables of diﬀerent types:
+
+• Scalar variables are represented by lowercase Roman or Greek letters in italics: a, b, x, y, z, θ, α, ω, γ.
+
+• Vector variables of any dimension are represented by lowercase letters in boldface: a, b, u, v, q, r.
+
+• Matrix variables are represented using uppercase letters in boldface: A, B, M, R.
+
+Vector subscript notation
+
+34
+
+2. Vectors
+
+Note that other authors may use diﬀerent conventions. One common convention used frequently when writing vectors by hand, is to draw an arrow over the vector, for example, a.
+Before we go any further, a bit of context is in order concerning the perspective that we are adopting about vectors. The branch of mathematics that deals primarily with vectors and matrices is called linear algebra, a subject that assumes the abstract deﬁnition given previously: a vector is an array of numbers. This highly generalized approach allows for the exploration of a large set of mathematical problems. In linear algebra, vectors and matrices of dimension n are used to solve a system of n linear equations for n unknowns, without knowing or caring what physical signiﬁcance, if any, is attached to any of the numbers. This is certainly a fascinating and highly practical study, but it is not of primary interest to our investigation of 3D math. For 3D math, we are mostly concerned with the geometric interpretations of vectors and vector operations.
+Our focus is geometric, so we omit many details and concepts of linear algebra that do not further our understanding of 2D or 3D geometry. Even though we occasionally discuss properties or operations for vectors of an arbitrary dimension n, we will usually focus on 2D, 3D, and (later) 4D vectors and matrices. Even when the numbers in a vector do not have any physical signiﬁcance, the ability to visualize the linear algebra operations is of some utility, so learning how to interpret the operations geometrically is useful even in nonphysical applications. Some more context about how the topics in this book ﬁt into the bigger picture of linear algebra can be found in Section 4.3.
+2.2 Geometric Deﬁnition of Vector
+Now that we have discussed what a vector is mathematically, let’s look at a more geometric interpretation of vectors. Geometrically speaking, a vector is a directed line segment that has magnitude and direction.
+• The magnitude of a vector is the length of the vector. A vector may have any nonnegative length.
+• The direction of a vector describes which way the vector is pointing in space. Note that “direction” is not exactly the same as “orientation,” a distinction we will reexamine in Section 8.1.
+
+2.2. Geometric Deﬁnition of Vector
+
+35
+
+Let’s look at a vector. Figure 2.1 shows an illustration of a vector in 2D. It looks like an arrow, right? This is the standard way to represent a vector graphically, since the two deﬁning characteristics of a vector are captured: its magnitude and direction.
+We sometimes refer to the head and tail of a vector. As shown in Figure 2.2, the head is the end of the vector with the arrowhead on it (where the vector “ends”), and the tail is the other end (where the vector “starts”).
+
+Figure 2.1 A 2D vector
+
+Figure 2.2 A vector has a head and a tail
+Where is this vector? Actually, that is not an appropriate question. Vectors do not have position, only magnitude and direction. This may sound impossible, but many quantities we deal with on a daily basis have magnitude and direction, but no position. Consider how the two statements below could make sense, regardless of the location where they are applied.
+• Displacement. “Take three steps forward.” This sentence seems to be all about positions, but the actual quantity used in the sentence is a relative displacement and does not have an absolute position. This relative displacement consists of a magnitude (3 steps) and a direction (forward), so it could be represented by a vector.
+• Velocity. “I am traveling northeast at 50 mph.” This sentence describes a quantity that has magnitude (50 mph) and direction (northeast), but no position. The concept of “northeast at 50 mph” can be represented by a vector.
+Notice that displacement and velocity are technically diﬀerent from the terms distance and speed. Displacement and velocity are vector quantities and therefore entail a direction, whereas distance and speed are scalar quantities that do not specify a direction. More speciﬁcally, the scalar quantity distance is the magnitude of the vector quantity displacement, and the scalar quantity speed is the magnitude of the vector quantity velocity.
+Because vectors are used to express displacements and relative diﬀerences between things, they can describe relative positions. (“My house is 3 blocks east of here.”) However, you should not think of a vector as having an absolute position itself, instead, remember that it is describing the displacement from one position to another, in this case from “here” to “my
+
+36
+
+2. Vectors
+
+house.” (More on relative versus absolute position in Section 2.4.1.) To help enforce this, when you imagine a vector, picture an arrow. Remember that the length and direction of this arrow are signiﬁcant, but not the position.
+Since vectors do not have a position, we can represent them on a diagram anywhere we choose, provided that the length and direction of the vector are represented correctly. We often use this fact to our advantage by sliding the vector around into a meaningful location on a diagram.
+Now that we have the big picture about vectors from a mathematical and geometric perspective, let’s learn how to work with vectors in the Cartesian coordinate system.
+
+2.3 Specifying Vectors with Cartesian Coordinates
+When we use Cartesian coordinates to describe vectors, each coordinate measures a signed displacement in the corresponding dimension. For example, in 2D, we list the displacement parallel to the x-axis, and the displacement parallel to the y-axis, as illustrated in Figure 2.3.
+
+Figure 2.3 Vectors are speciﬁed by giving the signed displacement in each dimension.
+Figure 2.4 shows several 2D vectors and their values. Notice that the position of each vector on the diagram is irrelevant. (The axes are conspicuously absent to emphasize this fact, although we do assume the standard convention of +x pointing to the right and +y pointing up.) For example, two of the vectors in Figure 2.4 have the value [1.5, 1], but they are not in the same place on the diagram.
+3D vectors are a simple extension of 2D vectors. A 3D vector contains three numbers, which measure the signed displacements in the x, y, and z directions, just as you’d expect.
+We are focusing on Cartesian coordinates for now, but they are not the only way to describe vectors mathematically. Polar coordinates are also common, especially in physics textbooks. Polar coordinates are the subject of Chapter 7.
+
+2.3. Specifying Vectors with Cartesian Coordinates
+
+37
+
+Figure 2.4. Examples of 2D vectors and their values
+2.3.1 Vector as a Sequence of Displacements
+One helpful way to think about the displacement described by a vector is to break out the vector into its axially aligned components. When these axially aligned displacements are combined, they cumulatively deﬁne the displacement deﬁned by the vector as a whole.
+For example, the 3D vector [1, −3, 4] represents a single displacement, but we can visualize this displacement as moving 1 unit to the right, 3 units down, and then 4 units forward. (Assume our convention that +x, +y, and +z point right, up, and forward, respectively. Also note that we do
+Figure 2.5 Interpreting a vector as a sequence of displacements
+
+38
+
+2. Vectors
+
+not “turn” between steps, so “forward” is always parallel to +z.) This displacement is illustrated in Figure 2.5.
+The order in which we perform the steps is not important; we could move 4 units forward, 3 units down, and then 1 unit to the right, and we would have displaced by the same total amount. The diﬀerent orderings correspond to diﬀerent routes along the axially aligned bounding box containing the vector. Section 2.7.2 mathematically veriﬁes this geometric intuition.
+
+The zero vector
+
+2.3.2 The Zero Vector
+
+For any given vector dimension, there is a special vector, known as the zero vector, that has zeroes in every position. For example, the 3D zero vector is [0, 0, 0]. We denote a zero vector of any dimension using a boldface zero: 0. In other words,
+
+0
+
+0
+
+0=  
+
+...
+
+.  
+
+0
+
+The zero vector is special because it is the only vector with a magnitude of zero. All other vectors have a positive magnitude. The zero vector is also unique because it is the only vector that does not have a direction.
+Since the zero vector doesn’t have a direction or length, we don’t draw it as an arrow like we do for other vectors. Instead, we depict the zero vector as a dot. But don’t let this make you think of the zero vector as a “point” because a vector does not deﬁne a location. Instead, think of the zero vector as a way to express the concept of “no displacement,” much as the scalar zero stands for the concept of “no quantity.”
+Like the scalar zero you know, the zero vector of a given dimension is the additive identity for the set of vectors of that dimension. Try to take yourself back to your algebra class, and retrieve from the depths of your memory the concept of the additive identity: for any set of elements, the additive identity of the set is the element x such that for all y in the set, y+x = y.2 In other words, when we add the zero vector to any other vector, we get that vector: 0 + a = a. Section 2.7 deals with vector addition.
+
+2The typeface used here is not intended to limit the discussion to the set of scalars. We are talking about elements in any set. Also, we request leniency from the abstract algebra sticklers for our use of the word “set,” when we should use “group.” But the latter term is not as widely understood, and we could only aﬀord this footnote to dwell on the distinction.
+
+2.4. Vectors versus Points
+
+39
+
+Figure 2.6. Locating points versus specifying vectors
+2.4 Vectors versus Points
+Recall that a “point” has a location but no real size or thickness. In this chapter, we have learned how a “vector” has magnitude and direction, but no position. So “points” and “vectors” have diﬀerent purposes, conceptually: a “point” speciﬁes a position, and a “vector” speciﬁes a displacement.
+But now examine Figure 2.6, which compares an illustration from Chapter 1 (Figure 1.8), showing how 2D points are located, with a ﬁgure from earlier in this chapter (Figure 2.3), showing how 2D vectors are speciﬁed. It seems that there is a strong relationship between points and vectors. This section examines this important relationship.
+2.4.1 Relative Position
+Section 2.2 discussed the fact that because vectors can describe displacements, they can describe relative positions. The idea of a relative position is fairly straightforward: the position of something is speciﬁed by describing where it is in relation to some other, known location.
+This begs the questions: Where are these “known” locations? What is an “absolute” position? It is surprising to realize that there is no such thing! Every attempt to describe a position requires that we describe it relative to something else. Any description of a position is meaningful only in the context of some (typically “larger”) reference frame. Theoretically, we could establish a reference frame encompassing everything in existence and select a point to be the “origin” of this space, thus deﬁning the “absolute” coordinate space. However, even if such an absolute coordinate space were possible, it would not be practical. Luckily for us, absolute positions in
+
+40
+
+2. Vectors
+
+the universe aren’t important. Do you know your precise position in the universe right now? We don’t know ours, either.3
+
+2.4.2 The Relationship between Points and Vectors
+
+Vectors are used to describe displacements, and therefore they can describe
+
+relative positions. Points are used to specify positions. But we have just
+
+established in Section 2.4.1 that any method of specifying a position must
+
+be relative. Therefore, we must conclude that points are relative as well—
+
+they are relative to the origin of the coordinate system used to specify their
+
+coordinates. This leads us to the relationship between points and vectors.
+
+Figure 2.7 illustrates how the point (x, y) is related to the vector [x, y],
+
+given arbitrary values for x and y.
+
+As you can see, if we start
+
+at the origin and move by the
+
+amount speciﬁed by the vector
+
+[x, y], we will end up at the lo-
+
+cation described by the point
+
+(x, y). Another way of say-
+
+ing this is that the vector [x, y]
+
+gives the displacement from the
+
+origin to the point (x, y).
+
+This may seem obvious, but
+
+it is important to understand
+
+that points and vectors are con-
+
+ceptually distinct, but mathe-
+
+matically equivalent. This con-
+
+fusion between “points” and
+
+Figure 2.7 The relationship between points and vectors
+
+“vectors” can be a stumbling block for beginners, but it needn’t be a problem for you.
+
+When you think of a location, think of a point and visualize a dot. When
+
+you think of a displacement, think of a vector and visualize an arrow.
+
+In many cases, displacements are from the origin, and so the distinction
+
+between points and vectors will be a ﬁne one. However, we often deal with
+
+quantities that are not relative to the origin, or any other point for that
+
+matter. In these cases, it is important to visualize these quantities as an
+
+arrow rather than a point.
+
+The math we develop in the following sections operates on “vectors”
+
+rather than “points.” Keep in mind that any point can be represented as
+
+a vector from the origin.
+
+3But we do know our position relative to the nearest Taco Bell.
+
+2.4. Vectors versus Points
+
+41
+
+Actually, now would be a good time to warn you that a lot of people take a much ﬁrmer stance on this issue and would not approve of our cavalier attitude in treating vectors and points as mathematical equals.4 Such hardliners will tell you, for example, that while you can add two vectors (yielding a third vector), and you can add a vector and a point (yielding a point), you cannot add two points together. We admit that there is some value in understanding these distinctions in certain circumstances. However, we have found that, especially when writing code that operates on points and vectors, adherence to these ethics results in programs that are almost always longer and never faster.5 Whether it makes the code cleaner or easier to understand is a highly subjective matter. Although this book does not use diﬀerent notations for points and vectors, in general it will be clear whether a quantity is a point or a vector. We have tried to avoid presenting results with vectors and points mixed inappropriately, but for all the intermediate steps, we might not have been quite as scrupulous.
+2.4.3 It’s All Relative
+Before we move on to the vector operations, let’s take a brief philosophical intermission. Spatial position is not the only aspect of our world for which we have diﬃculty establishing an “absolute” reference, and so we use relative measurements. There are also temperature, loudness, and velocity.
+Temperature. One of the ﬁrst attempts to make a standard temperature scale occurred about AD 170, when Galen proposed a standard “neutral” temperature made up of equal quantities of boiling water and ice. On either side of this temperature were four degrees of “hotter” and four degrees of “colder.” Sounds fairly primitive, right? In 1724, Gabriel Fahrenheit suggested a bit more precise system. He suggested that mercury be used as the liquid in a thermometer, and calibrated his scale using two reference points: the freezing point of water, and the temperature of a healthy human being. He called his scale the Fahrenheit scale, and measurements were in oF. In 1745, Carolus Linnaeus of Uppsala, Sweden, suggested that things would be simpler if we made the scale range from 0 (at the freezing point of water) to 100 (water’s boiling point), and called this scale the centigrade scale. (This scale was later abandoned in favor of the Celsius scale, which is technically diﬀerent from centigrade in subtle ways that are not important here.) Notice that all of these scales are relative—they are based on the freezing point of water, which is an arbitrary (but highly practical) reference point. A temperature reading of xoC basically means “x degrees hotter than the temperature at which water freezes.” It wasn’t until 1848, with
+4If you are one of those people, then this is a warning of a slightly diﬀerent sort! 5Indeed, sometimes slower, depending on your compiler.
+
+42
+
+2. Vectors
+
+the invention of the Kelvin scale by Lord Kelvin, that mankind ﬁnally had an absolute temperature scale. 0 K is the coldest possible temperature, corresponding to −273oC.
+Loudness. Loudness is usually measured in decibels (abbreviated dB). To be more precise, decibels are used to measure the ratio of two power levels. If we have two power levels P1 and P2, then the diﬀerence in decibels between the two power levels is
+10 log10(P2/P1) dB.
+So, if P2 is about twice the level of P1, then the diﬀerence is about 3 dB. Notice that this is a relative system, providing a precise way to measure the relative strength of two power levels, but not a way to assign a number to one power level. In other words, we haven’t established any sort of absolute reference point. (It’s also a logarithmic scale, but that isn’t important here.) You may have used a mixer board, volume control knob, or digital audio program that measures volume in dB. Normally, there’s an arbitrary point marked 0 dB, and then most of the readings have negative values. In other words, 0 dB is the loudest volume, and all other volume settings are softer.
+None of these values are absolute—but how could they be? How could your digital audio program know the absolute loudness you will experience, which depends not only on the audio data, but also the volume setting on your computer, the volume knob on your ampliﬁer, the power supplied by the ampliﬁer to your speakers, the distance you are from the speakers, and so on.
+Sometimes people describe how loud something is in terms of an absolute dB number. Following in the footsteps of Gabriel Fahrenheit, this scale uses a reference point based on the human body. “Absolute” dB numbers are actually relative to the threshold of hearing for a normal human.6 Because of this, it’s actually possible to have an “absolute” dB reading that is negative. This simply means that the intensity is below the threshold where most people are able to hear it.
+At this point, we should probably mention that there is a way to devise an absolute scale for loudness, by measuring a physical quantity such as pressure, energy, or power, all of which have an absolute minimum value
+6About 20 micropascals. However, this number varies with frequency. It also increases with age. One author remembers that when he was young, his father would never turn the radio in the car completely oﬀ, but rather would turn the volume down below the (father’s) threshold of hearing. The son’s threshold of hearing was just low enough for this to be irritating. Today the son owns his own car and car radio, and has realized, with some degree of embarrassment, that he also often turns the radio volume down without turning it oﬀ. However, he oﬀers in his defense that he turns it all the way down, below everyone’s threshold of hearing. (The other author wishes to suggest that clearly even the term “normal human” is relative.)
+
+2.5. Negating a Vector
+
+43
+
+of zero. The point is that these absolute systems aren’t used in many cases—the relative system is the one that’s the most useful.
+Velocity. How fast are you moving right now? Perhaps you’re sitting in a comfy chair, so you’d say that your speed was zero. Maybe you’re in a car and so you might say something like 65 mph. (Hopefully someone else is driving!) Actually, you are hurtling through space at almost 30 km per second ! That’s about the speed that Earth travels in order to make the 939-million-km trek around the sun each year. Of course, even this velocity is relative to the sun. Our solar system is moving around within the Milky Way galaxy. So then how fast are we actually moving, in absolute terms? Galileo told us back in the 17th century that this question doesn’t have an answer—all velocity is relative.
+Our diﬃculty in establishing absolute velocity is similar to the diﬃculty in establishing position. After all, velocity is displacement (diﬀerence between positions) over time. To establish an absolute velocity, we’d need to have some reference location that would “stay still” so that we could measure our displacement from that location. Unfortunately, everything in our universe seems to be orbiting something else.
+
+2.5 Negating a Vector
+The previous sections have presented a high-level overview of vectors. The remainder of this chapter looks at speciﬁc mathematical operations we perform on vectors. For each operation, we ﬁrst deﬁne the mathematical rules for performing the operation and then describe the geometric interpretations of the operation and give some practical uses for the operation.
+The ﬁrst operation we’d like to consider is that of vector negation. When discussing the zero vector, we asked you to recall from group theory the idea of the additive identity. Please go back to wherever it was in your brain that you found the additive identity, perhaps between the metaphorical couch cushions, or at the bottom of a box full of decade-old tax forms. Nearby, you will probably ﬁnd a similarly discarded obvious-to-the-point-of-useless concept: the additive inverse. Let’s dust it oﬀ. For any group, the additive inverse of x, denoted by −x, is the element that yields the additive identity (zero) when added to x. Put simply, x + (−x) = 0. Another way of saying this is that elements in the group can be negated.
+The negation operation can be applied to vectors. Every vector v has an additive inverse −v of the same dimension as v such that v + (−v) = 0. (We will learn how to add vectors in Section 2.7.)
+
+44
+
+2. Vectors
+
+2.5.1 Ofﬁcial Linear Algebra Rules
+To negate a vector of any dimension, we simply negate each component of the vector. Stated formally,
+
+Negating a vector
+
+ a1   −a1 
+
+ a2   −a2 
+
+ −
+
+
+...
+
+ = 
+
+...
+
+ . 
+
+an−1
+
+ 
+
+−an−1
+
+an
+
+−an
+
+Applying this to the speciﬁc cases of 2D, 3D, and 4D vectors, we have
+
+Negating 2D, 3D, and 4D vectors
+
+− x y = −x − x y z = −x − x y z w = −x
+
+−y , −y −z , −y −z −w .
+
+Figure 2.8. Examples of vectors and their negatives. Notice that a vector and its negative are parallel and have the same magnitude, but point in opposite directions.
+
+2.6. Vector Multiplication by a Scalar
+
+45
+
+A few examples are
+
+− 1.34
+
+− 4 −5 = −4 5 ,
+
+√
+
+√
+
+− −1 0 3 = 1 0 − 3 ,
+
+−3/4 −5 π = −1.34 3/4 5
+
+−π .
+
+2.5.2 Geometric Interpretation
+Negating a vector results in a vector of the same magnitude but opposite direction, as shown in Figure 2.8.
+Remember, the position of a vector on a diagram is irrelevant—only the magnitude and direction are important.
+
+2.6 Vector Multiplication by a Scalar
+Although we cannot add a vector and a scalar, we can multiply a vector by a scalar. The result is a vector that is parallel to the original vector, with a diﬀerent length and possibly opposite direction.
+
+2.6.1 Ofﬁcial Linear Algebra Rules
+
+Vector-times-scalar multiplication is straightforward; we simply multiply each component of the vector by the scalar. Stated formally,
+
+ a1   a1   ka1 
+
+ a2   a2   ka2 
+
+ k
+
+
+...
+
+ = 
+
+...
+
+ k =  
+
+...
+
+ . 
+
+an−1
+
+ 
+
+an−1
+
+ 
+
+kan−1
+
+an
+
+an
+
+kan
+
+Applying this rule to 3D vectors, as an example, we get
+
+x x kx
+
+ky = yk = ky.
+
+z
+
+z
+
+kz
+
+Although the scalar and vector may be written in either order, most people choose to put the scalar on the left, preferring kv to vk.
+A vector may also be divided by a nonzero scalar. This is equivalent to multiplying by the reciprocal of the scalar:
+
+v k
+
+=
+
+1 k
+
+vx/k v = vy/k
+vz /k
+
+for 3D vector v and nonzero scalar k.
+
+Multiplying a vector by a scalar
+Multiplying a 3D vector by a scalar
+Dividing a 3D vector by a scalar
+
+46
+
+2. Vectors
+
+Figure 2.9 A 2D vector multiplied by various scalars
+Some examples are
+21 2 3 = 2 4 6, −3 −5.4 0 = 16.2 0 , 4.7 −6 8 /2 = 2.35 −3 4 .
+Here are a few things to notice about multiplication of a vector by a scalar:
+• When we multiply a vector and a scalar, we do not use any multiplication symbol. The multiplication is signiﬁed by placing the two quantities side-by-side (usually with the vector on the right).
+• Scalar-times-vector multiplication and division both occur before any addition and subtraction. For example 3a + b is the same as (3a) + b, not 3(a + b).
+• A scalar may not be divided by a vector, and a vector may not be divided by another vector.
+• Vector negation can be viewed as the special case of multiplying a vector by the scalar −1.
+2.6.2 Geometric Interpretation
+Geometrically, multiplying a vector by a scalar k has the eﬀect of scaling the length by a factor of |k|. For example, to double the length of a vector we
+
+2.7. Vector Addition and Subtraction
+
+47
+
+would multiply the vector by 2. If k < 0, then the direction of the vector is ﬂipped. Figure 2.9 illustrates a vector multiplied by several diﬀerent scalars.
+
+2.7 Vector Addition and Subtraction
+We can add and subtract two vectors, provided they are of the same dimension. The result is a vector quantity of the same dimension as the vector operands. We use the same notation for vector addition and subtraction as is used for addition and subtraction of scalars.
+
+2.7.1 Ofﬁcial Linear Algebra Rules
+The linear algebra rules for vector addition are simple: to add two vectors, we add the corresponding components:
+
+ a1   b1   a1 + b1 
+
+ a2   b2   a2 + b2 
+
+  
+
+...
+
+ + 
+
+...
+
+ = 
+
+...
+
+ . 
+
+an−1
+
+ 
+
+bn−1
+
+ 
+
+an−1
+
++
+
+bn−1
+
+ 
+
+an
+
+bn
+
+an + bn
+
+Adding two vectors
+
+Subtraction can be interpreted as adding the negative, so a − b = a + (−b):
+
+ a1   b1   a1    b1   a1 − b1 
+
+ a2   b2   a2    b2   a2 − b2 
+
+  
+
+...
+
+ − 
+
+...
+
+ = 
+
+...
+
+   + −   
+
+...
+
+   =   
+
+...
+
+ . 
+
+an−1
+
+bn−1
+
+an−1
+
+ 
+
+bn−1
+
+an−1 − bn−1
+
+an
+
+bn
+
+an
+
+bn
+
+an − bn
+
+Subtracting two vectors
+
+For example, given
+
+1 a = 2,
+3
+
+4 b = 5,
+6
+
+7 c = −3,
+0
+
+48
+
+2. Vectors
+
+then
+
+1 4 1 + 4 5
+
+a + b = 2 + 5 = 2 + 5 = 7,
+
+3
+
+6
+
+3+6
+
+9
+
+1 4 1 − 4 −3
+
+a − b = 2 − 5 = 2 − 5 = −3,
+
+3
+
+6
+
+3−6
+
+−3
+
+4  7  1  4 + 7 − 1  10
+
+b + c − a = 5 + −3 − 2 = 5 + (−3) − 2 =  0 .
+
+6
+
+0
+
+3
+
+6+0−3
+
+3
+
+A vector cannot be added or subtracted with a scalar, or with a vector of a diﬀerent dimension. Also, just like addition and subtraction of scalars, vector addition is commutative,
+
+a + b = b + a,
+
+whereas vector subtraction is anticommutative,
+
+a − b = −(b − a).
+
+2.7.2 Geometric Interpretation
+We can add vectors a and b geometrically by positioning the vectors so that the head of a touches the tail of b and then drawing a vector from
+
+Figure 2.10 2D vector addition and subtraction using the triangle rule.
+
+2.7. Vector Addition and Subtraction
+
+49
+
+the tail of a to the head of b. In other words, if we start at a point and apply the displacements speciﬁed by a and then b, it’s the same as if we had applied the single displacement a + b. This is known as the triangle rule of vector addition. It also works for vector subtraction, as shown in Figure 2.10.
+Figure 2.10 provides geometric evidence that vector addition is commutative but vector subtraction is not. Notice that the vector labeled a + b is identical to the vector labeled b + a, but the vectors d − c and c − d point in opposite directions because d − c = −(c − d).
+
+Figure 2.11 Extending the triangle rule to more than two vectors
+
+The triangle rule can be extended to more than two vectors. Figure 2.11 shows how the triangle rule veriﬁes something we stated in Section 2.3.1: a vector can be interpreted as a sequence of axially aligned displacements.
+Figure 2.12 is a reproduction of Figure 2.5, which shows how the vector [1, −3, 4] may be interpreted as a displacement of 1 unit to the right, 3 units down, and then 4 units forward, and can be veriﬁed mathematically by using vector addition:
+
+ 1  1  0  0
+
+−3 = 0 + −3 + 0.
+
+4
+
+0
+
+0
+
+4
+
+This seems obvious, but this is a very powerful concept. We will use a similar technique in Section 4.2 to transform vectors from one coordinate space to another.
+
+50
+
+2. Vectors
+
+Figure 2.12 Interpreting a vector as a sequence of displacements
+2.7.3 Displacement Vector from One Point to Another
+It is very common that we will need to compute the displacement from one point to another. In this case, we can use the triangle rule and vector subtraction. Figure 2.13 shows how the displacement vector from a to b can be computed by subtracting a from b.
+Figure 2.13 Using 2D vector subtraction to compute the vector from point a to point b
+As Figure 2.13 shows, to compute the vector from a to b, we interpret the points a and b as vectors from the origin, and then use the triangle rule. In fact, this is how vectors are deﬁned in some texts: the subtraction of two points.
+Notice that the vector subtraction b − a yields a vector from a to b. It doesn’t make any sense to simply ﬁnd the vector “between two points,” since the language in this sentence does not specify a direction. We must always form a vector that goes from one point to another point.
+
+2.8. Vector Magnitude (Length)
+
+51
+
+2.8 Vector Magnitude (Length)
+As we have discussed, vectors have magnitude and direction. However, you might have noticed that neither the magnitude nor the direction is expressed explicitly in the vector (at least not when we use Cartesian coordinates). For example, the magnitude of the 2D vector [3, 4] is neither 3 nor 4; it’s 5. Since the magnitude of the vector is not expressed explicitly, we must compute it. The magnitude of a vector is also known as the length or norm of the vector.
+
+2.8.1 Ofﬁcial Linear Algebra Rules
+In linear algebra, the magnitude of a vector is denoted by using double vertical bars surrounding the vector. This is similar to the single vertical bar notation used for the absolute value operation for scalars. This notation and the equation for computing the magnitude of a vector of arbitrary dimension n are shown in Equation (2.2):
+
+v=
+
+n
+vi2 =
+i=1
+
+v12 + v22 + · · · + vn−12 + vn2.
+
+(2.2)
+
+Magnitude of a vector of arbitrary dimension
+
+Thus, the magnitude of a vector is the square root of the sum of the squares of the components of the vector. This sounds complicated, but the magnitude equations for 2D and 3D vectors are actually very simple:
+
+v = vx2 + vy2 v = vx2 + vy2 + vz2
+
+(for a 2D vector v), (for a 3D vector v).
+
+(2.3)
+
+Vector magnitude for 2D and 3D vectors
+
+The magnitude of a vector is a nonnegative scalar quantity. An example of how to compute the magnitude of a 3D vector is
+
+5 −4 7
+
+=
+
+52
+
++
+
+(−4)2
+
++
+
+72
+
+=
+
+√ 25
+
++
+
+16
+
++
+
+49
+
+=
+
+√ 90
+
+≈ 9.4868.
+
+Some books use a single bar notation to indicate vector magnitude: |v|
+
+52
+
+2. Vectors
+
+One quick note to satisfy all you sticklers who already know about vector norms and at this moment are pointing your web browser to gamemath.com, looking for the email address for errata. The term norm actually has a very general deﬁnition, and basically any equation that meets a certain set of criteria can call itself a norm. So to describe Equation (2.2) as the equation for the vector norm is slightly misleading. To be more accurate, we should say that Equation (2.2) is the equation for the 2-norm, which is one speciﬁc way to calculate a norm. The 2-norm belongs to a class of norms known as the p-norms, and the p-norm is not the only way to deﬁne a norm. Still, omitting this level of generality isn’t too harmful of a delusion; because the 2-norm measures Euclidian distance, it is by far the most commonly used norm in geometric applications. It is also widely used in situations even where a geometric interpretation is not directly applicable. Readers interested in such exotica should check out Exercise 15.
+
+2.8.2 Geometric Interpretation
+
+Let’s try to get a better understand-
+
+ing of why Equation (2.3) works. For
+
+any vector v in 2D, we can form a right
+
+triangle with v as the hypotenuse, as
+
+shown in Figure 2.14.
+
+Notice that to be precise we had
+
+to put absolute value signs around the
+
+components vx and vy. The compo-
+
+nents of the vector may be negative,
+
+since they are signed displacements, but
+
+length is always positive.
+
+Figure 2.14 Geometric interpretation of the magnitude equation
+
+The Pythagorean theorem states that for any right triangle, the square of the length of the hypotenuse is equal
+
+to the sum of the squares of the lengths
+
+of the other two sides. Applying this theorem to Figure 2.14, we have
+
+v 2 = |vx|2 + |vy|2.
+
+Since |x|2 = x2, we can omit the absolute value symbols:
+
+v 2 = vx2 + vy2.
+
+Then, by taking the square root of both sides and simplifying, we get
+
+v 2 = vx2 + vy2,
+
+v = vx2 + vy2,
+
+2.9. Unit Vectors
+
+53
+
+which is the same as Equation (2.3). The proof of the magnitude equation in 3D is only slightly more complicated.
+For any positive magnitude m, there are an inﬁnite number of vectors of magnitude m. Since these vectors all have the same length but diﬀerent directions, they form a circle when the tails are placed at the origin, as shown in Figure 2.15.
+
+Figure 2.15 For any positive magnitude, there are an inﬁnite number of vectors with that magnitude
+2.9 Unit Vectors
+For many vector quantities, we are concerned only with direction and not magnitude: “Which way am I facing?” “Which way is the surface oriented?” In these cases, it is often convenient to use unit vectors. A unit vector is a vector that has a magnitude of one. Unit vectors are also known as normalized vectors.
+Unit vectors are also sometimes simply called normals; however, a warning is in order concerning terminology. The word “normal” carries with it the connotation of “perpendicular.” When most people speak of a “normal” vector, they are usually referring to a vector that is perpendicular to something. For example, a surface normal at a given point on an object is a vector that is perpendicular to the surface at that location. However, since the concept of perpendicular is related only to the direction of a vector and not its magnitude, in most cases you will ﬁnd that unit vectors are used for normals instead of a vector of arbitrary length. When this book refers to a vector as a “normal,” it means “a unit vector perpendicular
+
+54
+
+2. Vectors
+
+to something else.” This is common usage, but be warned that the word “normal” primarily means “perpendicular” and not “unit length.” Since it is so common for normals to be unit vectors, we will take care to call out any situation where a “normal” vector does not have unit length.
+In summary, a “normalized” vector always has unit length, but a “normal” vector is a vector that is perpendicular to something and by convention usually has unit length.
+
+Normalizing a vector
+
+2.9.1 Ofﬁcial Linear Algebra Rules
+
+For any nonzero vector v, we can compute a unit vector that points in the same direction as v. This process is known as normalizing the vector. In this book we use a common notation of putting a hat symbol over unit vectors; for example, vˆ (pronounced “v hat”). To normalize a vector, we divide the vector by its magnitude:
+
+vˆ =
+
+v v
+
+for any nonzero vector v.
+
+For example, to normalize the 2D vector [12, −5],
+
+12 −5 12 −5
+
+12 −5
+
+=√
+
+=
+
+122 + 52
+
+1√2 −5 169
+
+=
+
+12 −5 13
+
+=
+
+12 13
+
+−5 13
+
+≈ 0.923 −0.385 .
+
+The zero vector cannot be normalized. Mathematically, this is not allowed because it would result in division by zero. Geometrically, it makes sense because the zero vector does not deﬁne a direction—if we normalized the zero vector, in what direction should the resulting vector point?
+
+Figure 2.16 Normalizing vectors in 2D
+
+2.10. The Distance Formula
+
+55
+
+2.9.2 Geometric Interpretation
+In 2D, if we draw a unit vector with the tail at the origin, the head of the vector will touch a unit circle centered at the origin. (A unit circle has a radius of 1.) In 3D, unit vectors touch the surface of a unit sphere. Figure 2.16 shows several 2D vectors of arbitrary length in gray, beneath their normalized counterparts in black.
+Notice that normalizing a vector makes some vectors shorter (if their length was greater than 1) and some vectors longer (if their length was less than 1).
+
+2.10 The Distance Formula
+
+We are now prepared to derive one of the oldest and most fundamental formulas in computational geometry: the distance formula. This formula is used to compute the distance between two points.
+First, let’s deﬁne distance as the length of the line segment between the two points. Since a vector is a directed line segment, geometrically it makes sense that the distance between the two points would be equal to the length of a vector from one point to the other. Let’s derive the distance formula in 3D. First, we will compute the vector d from a to b. We learned how to do this in 2D in Section 2.7.3. In 3D, we use
+bx − ax d = b − a = by − ay .
+bz − az
+The distance between a and b is equal to the length of the vector d, which we computed in Section 2.8:
+
+distance (a, b) = d = dx2 + dy2 + dz2. Substituting for d, we get
+
+distance (a, b) = b − a = (bx − ax)2 + (by − ay)2 + (bz − az)2.
+Thus, we have derived the distance formula in 3D. The 2D equation is even simpler:
+
+distance (a, b) = b − a = Let’s look at an example in 2D:
+distance 5 0 , −1 8 = =
+
+(bx − ax)2 + (by − ay)2. (−1 − 5)2 + (8 − 0)2
+√ (−6)2 + 82 = 100 = 10.
+
+The 3D distance formula The 2D distance formula
+
+56
+
+2. Vectors
+
+Notice that it doesn’t matter which point we call a and which point we call b. If we deﬁne d to be the vector from b to a instead of from a to b, we will derive a slightly diﬀerent, but mathematically equivalent, equation.
+
+2.11 Vector Dot Product
+Section 2.6 showed how to multiply a vector by a scalar. We can also multiply two vectors together. There are two types of vector products. The ﬁrst vector product is the dot product (also known as the inner product), the subject of this section. We talk about the other vector product, the cross product, in Section 2.12.
+The dot product is ubiquitous in video game programming, useful in everything from graphics, to simulation, to AI. Following the pattern we used for the operations, we ﬁrst discuss the algebraic rules for computing dot products in Section 2.11.1, followed by some geometric interpretations in Section 2.11.2.
+The dot product formula is one of the few formulas in this book worth memorizing. First of all, it’s really easy to memorize. Also, if you understand what the dot product does, the formula makes sense. Furthermore, the dot product has important relationships to many other operations, such as matrix multiplication, convolution of signals, statistical correlations, and Fourier transforms. Understanding the formula will make these relationships more apparent.
+Even more important than memorizing a formula is to get an intuitive grasp for what the dot product does. If there is only enough space in your brain for either the formula or the geometric deﬁnition, then we recommend internalizing the geometry, and getting the formula tattooed on your hand. You need to understand the geometric deﬁnition in order to use the dot product. When programming in computer languages such as C++, HLSL, or even Matlab and Maple, you won’t need to know the formula anyway, since you will usually tell the computer to do a dot product calculation not by typing in the formula, but by invoking a high-level function or overloaded operator. Furthermore, the geometric deﬁnition of the dot product does not assume any particular coordinate frame or even the use of Cartesian coordinates.
+2.11.1 Ofﬁcial Linear Algebra Rules
+The name “dot product” comes from the dot symbol used in the notation: a · b. Just like scalar-times-vector multiplication, the vector dot product is performed before addition and subtraction, unless parentheses are used to override this default order of operations. Note that although we usually
+
+2.11. Vector Dot Product
+
+57
+
+omit the multiplication symbol when multiplying two scalars or a scalar and a vector, we must not omit the dot symbol when performing a vector dot product. If you ever see two vectors placed side-by-side with no symbol in between, interpret this according to the rules of matrix multiplication, which we discuss in Chapter 4.7
+The dot product of two vectors is the sum of the products of corresponding components, resulting in a scalar :
+
+ a1   b1 
+
+ a2   b2 
+
+  
+
+...
+
+ · 
+
+...
+
+
+
+ 
+
+=
+
+a1b1
+
++
+
+a2b2
+
++
+
+·
+
+·
+
+·
+
++
+
+an−1bn−1
+
++
+
+anbn.
+
+an−1
+
+bn−1
+
+ 
+
+an
+
+bn
+
+This can be expressed succinctly by using the summation notation
+
+n
+a · b = aibi.
+i=1
+Applying these rules to the 2D and 3D cases yields
+
+a · b = axbx + ayby a · b = axbx + ayby + azbz
+
+(a and b are 2D vectors), (a and b are 3D vectors).
+
+Vector dot product
+Dot product using summation notation 2D and 3D dot products
+
+Examples of the dot product in 2D and 3D are
+4 6 · −3 7 = (4)(−3) + (6)(7) = 30,
+3 0 −2 ·  4  = (3)(0) + (−2)(4) + (7)(−1) = −15.
+7 −1
+It is obvious from inspection of the equations that vector dot product is commutative: a · b = b · a. More vector algebra laws concerning the dot product are given in Section 2.13.
+2.11.2 Geometric Interpretation
+Now let’s discuss the more important aspect of the dot product: what it means geometrically. It would be diﬃcult to make too big of a deal
+7One notation you will probably bump up against is treating the dot product as an ordinary matrix multiplication, denoted by aTb if a and b are interpreted as column vectors, or abT for row vectors. If none of this makes sense, don’t worry, we will repeat it after we learn about matrix multiplication and row and column vectors in Chapter 4.
+
+58
+
+2. Vectors
+
+out of the dot product, as it is fundamental to almost every aspect of 3D math. Because of its supreme importance, we’re going to dwell on it a bit. We’ll discuss two slightly diﬀerent ways of thinking about this operation geometrically; since they are really equivalent, you may or may not think one interpretation or the other is “more fundamental,” or perhaps you may think we are being redundant and wasting your time. You might especially think this if you already have some exposure to the dot product, but please indulge us.
+The ﬁrst geometric deﬁnition to present is perhaps the less common of the two, but in agreement with the advice of Dray and Manogue [15], we believe it’s actually the more useful. The interpretation we ﬁrst consider is that of the dot product performing a projection.
+Assume for the moment that aˆ is a unit vector, and b is a vector of any length. Now take b and project it onto a line parallel to aˆ, as in Figure 2.17.
+
+Figure 2.17 The dot product as a projection
+(Remember that vectors are displacements and do not have a ﬁxed position, so we are free to move them around on a diagram anywhere we wish.) We can deﬁne the dot product aˆ · b as the signed length of the projection of b onto this line. The term “projection” has a few diﬀerent technical meanings (see Section 5.3) and we won’t bother attempting a formal deﬁnition here.8 You can think of the projection of b onto aˆ as the “shadow” that b casts on aˆ when the rays of light are perpendicular to aˆ.
+We have drawn the projections as arrows, but remember that the result of a dot product is a scalar, not a vector. Still, when you ﬁrst learned about negative numbers, your teacher probably depicted numbers as arrows on a number line, to emphasize their sign, just as we have. After all, a scalar is a perfectly valid one-dimensional vector.
+What does it mean for the dot product to measure a signed length? It means the value will be negative when the projection of b points in the opposite direction from aˆ, and the projection has zero length (it is a single point) when aˆ and b are perpendicular. These cases are illustrated in Figure 2.18.
+8Thus shirking our traditional duties as mathematics authors to make intuitive concepts sound much more complicated than they are.
+
+2.11. Vector Dot Product
+
+59
+
+Figure 2.18. Sign of the dot product
+In other words, the sign of the dot product can give us a rough classiﬁcation of the relative directions of the two vectors. Imagine a line (in 2D) or plane (in 3D) perpendicular to the vector aˆ. The sign of the dot product aˆ · b tells us which half-space b lies in. This is illustrated in Figure 2.19.
+
+Figure 2.19 The sign of the dot product gives a rough classiﬁcation of the relative orientation of two vectors.
+
+Next, consider what happens when we scale b by some factor k. As shown in Figure 2.20, the length of the projection (and thus the value of the dot product) increases by the same factor. The two triangles have equal interior angles and thus are similar. Since the hypotenuse on the right is longer than the hypotenuse on the left by a factor of k, by the properties of similar triangles, the base on the right is also longer by a factor of k.
+Let’s state this fact algebraically and prove it by using the formula:
+aˆ · (kb) = ax(kbx) + ay(kby) + az(kbz)
+= k(axbx + ayby + azbz) = k(aˆ · b).
+
+Dot product is associative with multiplication by a scalar
+
+60
+
+2. Vectors
+
+Figure 2.20 Scaling one operand of the dot product
+
+Dot product is associative with multiplication by a scalar for either vector
+
+The expanded scalar math in the middle uses three dimensions as our example, but the vector notation at either end of the equation applies for vectors of any dimension.
+We’ve seen what happens when we scale b: the length of its projection onto aˆ increases along with the value of the dot product. What if we scale a? The algebraic argument we just made can be used to show that the value of the dot product scales with the length of a, just like it does when we scale b. In other words,
+(ka) · b = k(a · b) = a · (kb).
+So scaling a scales the numeric value of the dot product. However, this scale has no aﬀect geometrically on the length of the projection of b onto a. Now that we know what happens if we scale either a or b, we can write our geometric deﬁnition without any assumptions about the length of the vectors.
+
+Dot Product as Projection
+The dot product a · b is equal to the signed length of the projection of b onto any line parallel to a, multiplied by the length of a.
+
+As we continue to examine the properties of the dot product, some will be easiest to illustrate geometrically when either a, or both a and b, are unit vectors. Because we have shown that scaling either a or b directly scales the value of the dot product, it will be easy to generalize our results after we have obtained them. Furthermore, in the algebraic arguments that accompany each geometric argument, unit vector assumptions won’t be necessary. Remember that we put hats on top of vectors that are assumed to have unit length.
+You may well wonder why the dot product measures the projection of the second operand onto the ﬁrst, and not the other way around. When the two vectors aˆ and bˆ are unit vectors, we can easily make a geometric
+
+2.11. Vector Dot Product
+
+61
+
+argument that the projection of aˆ onto bˆ has the same length as the projection of bˆ onto aˆ. Consider Figure 2.21. The two triangles have equal interior angles and thus are similar. Since aˆ and bˆ are corresponding sides and have the same length, the two triangles are reﬂections of each other.
+
+Figure 2.21 Dot product is commutative
+
+We’ve already shown how scaling either vector will scale the dot product proportionally, so this result applies for a and b with arbitrary length. Furthermore, this geometric fact is also trivially veriﬁed by using the formula, which does not depend on the assumption that the vectors have equal length. Using two dimensions as our example this time,
+
+a · b = axbx + ayby = bxax + byay = b · a.
+The next important property of the dot product is that it distributes over addition and subtraction, just like scalar multiplication. This time let’s do the algebra before the geometry. When we say that the dot product “distributes,” that means that if one of the operands to the dot product is a sum, then we can take the dot product of the pieces individually, and then take their sum. Switching back to three dimensions for our example,
+
+Dot product is commutative
+
+ax bx + cx
+
+a · (b + c) = ay · by + cy 
+
+az
+
+bz + cz
+
+= ax(bx + cx) + ay(by + cy) + az(bz + cz)
+
+= axbx + axcx + ayby + aycy + azbz + azcz
+
+= (axbx + ayby + azbz) + (axcx + aycy + azcz)
+
+= a · b + a · c.
+
+By replacing c with −c, it’s clear that the dot product distributes over vector subtraction just as it does for vector addition. Figure 2.22 shows how the dot product distributes over addition.
+Now let’s look at a special situation in which one of the vectors is the unit vector pointing in the +x direction, which we’ll denote as xˆ. As shown in Figure 2.23, the signed length of the projection is simply the x-coordinate
+
+Dot product distributes over addition and subtraction
+
+62
+
+2. Vectors
+
+Figure 2.22 The dot product distributes over addition.
+
+Relationship between vector magnitude and
+the dot product
+
+of the original vector. In other words, taking the dot product of a vector with a cardinal axis “sifts” out the coordinate for that axis.
+If we combine this “sifting” property of the dot product with the fact that it distributes over addition, which we have been able to show in purely geometric terms, we can see why the formula has to be what it is.
+Because the dot product measures the length of a projection, it has an interesting relationship to the vector magnitude calculation. Remember that the vector magnitude is a scalar measuring the amount of displacement (the length) of the vector. The dot product also measures the amount of displacement, but only the displacement in a particular direction is counted; perpendicular displacement is discarded by the projecting process. But what if we measure the displacement in the Figure 2.23 same direction that the vector is Taking the dot product with a cardinal axis sifts pointing? In this case, all of the out the corresponding coordinate. vector’s displacement is in the direction being measured, so if we project a vector onto itself, the length of that projection is simply the magnitude of the vector. But remember that a · b is equal to the length of the projection of b onto a, scaled by a . If we dot a vector with itself, such as v · v, we get the length of the projection, which is v , times the length of the vector we are projecting onto, which is also v . In other words,
+
+v · v = v 2,
+
+√ v = v · v.
+
+2.11. Vector Dot Product
+
+63
+
+Before we switch to the second interpretation of the dot product, let’s check out one more very common use of the dot product as a projection. Assume once more that aˆ is a unit vector and b has arbitrary length. Using the dot product, it’s possible to separate b into two values, b and b⊥ (read “b parallel” and “b perp”), which are parallel and perpendicular to aˆ, respectively, such that b = b + b⊥. Figure 2.24 illustrates the geometry involved.
+
+Figure 2.24 Projecting one vector onto another
+We’ve already established that the length of b will be equal to aˆ · b. But the dot product yields a scalar, and b is a vector, so we’ll take the direction speciﬁed by the unit vector aˆ and scale it up:
+b = (aˆ · b)aˆ.
+Once we know b , we can easily solve for b⊥:
+b⊥ + b = b, b⊥ = b − b , b⊥ = b − (aˆ · b)aˆ.
+It’s not too diﬃcult to generalize these results to the case where a is not a unit vector.
+In the rest of this book, we make use of these equations several times to separate a vector into components that are parallel and perpendicular to another vector.
+Now let’s examine the dot product through the lens of trigonometry. This is the more common geometric interpretation of the dot product, which places a bit more emphasis on the angle between the vectors. We’ve been thinking in terms of projections, so we haven’t had much need for this angle. Less experienced and conscientious authors [16] might give you just one of the two important viewpoints, which is probably suﬃcient to interpret an equation that contains the dot product. However, a more valuable skill is
+
+64
+
+2. Vectors
+
+to recognize situations for which the dot product is the correct tool for the job; sometimes it helps to have other interpretations pointed out, even if they are “obviously” equivalent to each other.
+Consider the right triangle on the right-hand side of Figure 2.25. As the ﬁgure shows, the length of the hypotenuse is 1 (since bˆ is a unit vector) and the length of the base is equal to the dot product aˆ · bˆ. From elementary trig (which was reviewed in Section 1.4.4), remember that the cosine of an angle is the ratio of the Figure 2.25 length of the adjacent leg divided by Interpreting the dot product by using the the length of the hypotenuse. Plug- trigonometry of the right triangle ging in the values from Figure 2.25, we have
+
+cos θ
+
+=
+
+adjacent hypotenuse
+
+=
+
+aˆ · bˆ 1
+
+=
+
+aˆ
+
+·
+
+bˆ.
+
+In other words, the dot product of two unit vectors is equal to the cosine of the angle between them. This statement is true even if the right triangle in Figure 2.25 cannot be formed, when aˆ · bˆ ≤ 0 and θ > 90o. Remember that the dot product of any vector with the vector xˆ = [1, 0, 0] will simply extract the x-coordinate of the vector. In fact, the x-coordinate of a unit vector that has been rotated by an angle of θ from standard position is one way to deﬁne the value of cos θ. Review Section 1.4.4 if this isn’t fresh in your memory.
+By combining these ideas with the previous observation that scaling either vector scales the dot product by the same factor, we arrive at the general relationship between the dot product and the cosine.
+
+Dot Product Relation to Intercepted Angle
+The dot product of two vectors a and b is equal to the cosine of the angle θ between the vectors, multiplied by the lengths of the vectors (see Figure 2.26). Stated formally,
+
+a · b = a b cos θ.
+
+(2.4)
+
+2.11. Vector Dot Product
+
+65
+
+Figure 2.26 The dot product is related to the angle between two vectors.
+
+What does it mean to measure the angle between two vectors in 3D? Any two vectors will always lie in a common plane (place them tail to tail to see this), and so we measure the angle in the plane that contains both vectors. If the vectors are parallel, the plane is not unique, but the angle is either 0o or ±180o, and it doesn’t matter which plane we choose.
+The dot product provides a way for us to compute the angle between two vectors. Solving Equation (2.4) for θ,
+
+θ = arccos a · b . ab
+
+(2.5)
+
+We can avoid the division in Equation (2.5) if we know that a and b are unit vectors. In this very common case, the denominator of Equation (2.5) is trivially 1, and we are left with
+
+θ = arccos aˆ · bˆ
+
+(assume aˆ and bˆ are unit vectors).
+
+Using the dot product to compute the angle between two vectors
+Computing the angle between two unit vectors
+
+If we do not need the exact value of θ, and need only a classiﬁcation of the relative orientation of a and b, then we need only the sign of the dot product. This is the same idea illustrated in Figure 2.18, only now we can relate it to the angle θ, as shown in Table 2.1.
+
+a·b
+>0 0 <0
+
+θ 0o ≤ θ < 90o θ = 90o 90o < θ ≤ 180o
+
+Angle is
+acute right obtuse
+
+a and b are
+pointing mostly in the same direction perpendicular pointing mostly in the opposite direction
+
+Table 2.1. The sign of the dot product can be used as a rough classiﬁcation of the angle between two vectors.
+
+Since the magnitude of the vectors does not aﬀect the sign of the dot product, Table 2.1 applies regardless of the lengths of a and b. However, notice that if either a or b is the zero vector, then a · b = 0. Thus, when we use the dot product to classify the relationship between two vectors, the dot product acts as if the zero vector is perpendicular to any other vector. As it turns out, the cross product behaves diﬀerently.
+
+66
+
+2. Vectors
+
+Let’s summarize the dot product’s geometric properties.
+• The dot product a · b measures the length of the projection of b onto a, multiplied by the length of a.
+• The dot product can be used to measure displacement in a particular direction.
+• The projection operation is closely related to the cosine function. The dot product a · b also is equal to a b cos θ, where θ is the angle between the vectors.
+We review the commutative and distributive properties of the dot product at the end of this chapter along with other algebraic properties of vector operations.
+
+2.12 Vector Cross Product
+The other vector product, known as the cross product, can be applied only in 3D. Unlike the dot product, which yields a scalar and is commutative, the vector cross product yields a 3D vector and is not commutative.
+
+Cross product
+
+2.12.1 Ofﬁcial Linear Algebra Rules
+
+Similar to the dot product, the term “cross” product comes from the symbol
+
+used in the notation a × b. We always write the cross symbol, rather than
+
+omitting it as we do with scalar multiplication. The equation for the cross
+
+product is
+
+x1 x2  y1z2 − z1y2  y1 × y2 = z1x2 − x1z2.
+
+z1
+
+z2
+
+x1y2 − y1x2
+
+For example,
+
+1  2  (3)(8) − (4)(−5) 24 − (−20)  44 
+
+3 × −5 =  (4)(2) − (1)(8)  =  8 − 8  =  0 .
+
+4
+
+8
+
+(1)(−5) − (3)(2)
+
+−5 − 6
+
+−11
+
+The cross product enjoys the same level of operator precedence as the dot product: multiplication occurs before addition and subtraction. When dot product and cross product are used together, the cross product takes precedence: a · b × c = a · (b × c). Luckily, there’s an easy way to remember this: it’s the only way it could work. The dot product returns a scalar, and so (a · b) × c is undeﬁned, since you cannot take the cross product of a
+
+2.12. Vector Cross Product
+
+67
+
+scalar and a vector. The operation a · (b × c) is known as the triple product. We present some special properties of this computation in Section 6.1.
+As mentioned earlier, the vector cross product is not commutative. In fact, it is anticommutative: a × b = −(b × a). The cross product is not associative, either. In general, (a × b) × c = a × (b × c). More vector algebra laws concerning the cross product are given in Section 2.13.
+2.12.2 Geometric Interpretation
+The cross product yields a vector that is perpendicular to the original two vectors, as illustrated in Figure 2.27.
+
+Figure 2.27 Vector cross product
+The length of a × b is equal to the product of the magnitudes of a and b and the sine of the angle between a and b:
+a × b = a b sin θ.
+As it turns out, this is also equal to the area of the parallelogram formed with two sides a and b. Let’s see if we can verify why this is true by using Figure 2.28.
+
+The magnitude of the cross product is related to the sine of the angle between the vectors
+
+Figure 2.28 A parallelogram with sides a and b
+
+68
+
+2. Vectors
+
+Figure 2.29 Area of a parallelogram
+note that sin θ = h/a. Then
+
+First, from planar geometry, we know that the area of the parallelogram is bh, the product of the base and the height. (In Figure 2.28, the base is b = b .) We can verify this rule by “clipping” oﬀ a triangle from one end and moving it to the other end, forming a rectangle, as shown in Figure 2.29.
+The area of a rectangle is given by its length and width. In this case, this area is the product bh. Since the area of the rectangle is equal to the area of the parallelogram, the area of the parallelogram must also be bh.
+Returning to Figure 2.28, let a and b be the lengths of a and b, respectively, and
+
+A = bh = b(a sin θ) = a b sin θ = a×b .
+
+If a and b are parallel, or if a or b is the zero vector, then a × b = 0. So the cross product interprets the zero vector as being parallel to every other vector. Notice that this is diﬀerent from the dot product, which interprets the zero vector as being perpendicular to every other vector. (Of course, it is ill-deﬁned to describe the zero vector as being perpendicular or parallel to any vector, since the zero vector has no direction.)
+We have stated that a×b is perpendicular to a and b. But there are two directions that are perpendicular to a and b—which of these two directions does a × b point? We can determine the direction of a × b by placing the tail of b at the head of a, and examining whether we make a clockwise or counterclockwise turn from a to b. In a left-handed coordinate system, a × b points towards you if the vectors a and b make a clockwise turn from your viewpoint, and away from you if a and b make a counterclockwise turn. In a right-handed coordinate system, the exact opposite occurs: if a and b make a counterclockwise turn, a × b points towards you, and if a and b make a clockwise turn, a × b points away from you.
+Figure 2.30 shows clockwise and counterclockwise turns. Notice that to make the clockwise or counterclockwise determination, we must align the
+
+2.12. Vector Cross Product
+
+69
+
+Clockwise turn
+
+Counterclockwise turn
+
+In a left-handed coordinate system, a × b (not shown) points towards you. In a right-handed coordinate system, a × b points away from you.
+
+In a left-handed coordinate system, a × b (not shown) points away from you. In a right-handed coordinate system, a × b points towards you.
+
+Figure 2.30. Determining clockwise versus counterclockwise turns
+
+head of a with the tail of b. Compare this to Figure 2.26, where the tails are touching. The tail-to-tail alignment shown in Figure 2.26 is the correct way to position the vectors to measure the angle between them, but to judge whether the turn is clockwise or counterclockwise, the vectors should be aligned head-to-tail, as shown in Figure 2.30.
+Let’s apply this general rule to the speciﬁc case of the cardinal axes. Let xˆ, yˆ, and zˆ be unit vectors that point in the +x, +y, and +z directions, respectively. The results of taking the cross product of each pair of axes are
+
+xˆ × yˆ = zˆ, yˆ × zˆ = xˆ, zˆ × xˆ = yˆ,
+
+yˆ × xˆ = −zˆ, zˆ × yˆ = −xˆ, xˆ × zˆ = −yˆ.
+
+You can also remember which way the cross product points by using your hand, similar to the way we distinguished between left-handed and right-handed coordinate spaces in Section 1.3.3. Since we’re using a lefthanded coordinate space in this book, we’ll show how it’s done using your left hand. Let’s say you have two vectors, a and b, and you want to ﬁgure out which direction a × b points. Point your thumb in the direction of a, and your index ﬁnger (approximately) in the direction of b. If a and b are pointing in nearly the opposite direction, this may be diﬃcult. Just make sure that if your thumb points exactly in the direction of a; then your index ﬁnger is on the same side of a as the vector b is. With your ﬁngers in this position, extend your third ﬁnger to be perpendicular to your thumb and
+
+Cross product of the cardinal axes
+
+70
+
+2. Vectors
+
+index ﬁnger, similar to what we did in Section 1.3.3. Your third ﬁnger now points in the direction of a × b.
+Of course, a similar trick works with your right hand for right-handed coordinate spaces.
+One of the most important uses of the cross product is to create a vector that is perpendicular to a plane (see Section 9.5), triangle (Section 9.6), or polygon (Section 9.7).
+
+2.13 Linear Algebra Identities
+The Greek philosopher Arcesilaus reportedly said, “Where you ﬁnd the laws most numerous, there you will ﬁnd also the greatest injustice.” Well, nobody said vector algebra was fair. Table 2.2 lists some vector algebra laws that are occasionally useful but should not be memorized. Several identities are obvious and are listed for the sake of completeness; all of them can be derived from the deﬁnitions given in earlier sections.
+
+Identity a+b=b+a a − b = a + (−b) (a + b) + c = a + (b + c)
+s(ta) = (st)a k(a + b) = ka + kb
+ka = |k| a
+a ≥0 a 2+ b 2 = a+b 2
+a + b ≥ a+b
+a · b =√b · a a = a·a k(a · b) = (ka) · b = a · (kb) a · (b + c) = a · b + a · c
+a×a=0
+a × b = −(b × a) a × b = (−a) × (−b) k(a × b) = (ka) × b = a × (kb) a × (b + c) = a × b + a × c
+
+Comments Commutative property of vector addition Deﬁnition of vector subtraction Associative property of vector addition Associative property of scalar multiplication Scalar multiplication distributes over vector addition Multiplying a vector by a scalar scales the magnitude by a factor equal to the absolute value of the scalar The magnitude of a vector is nonnegative The Pythagorean theorem applied to vector addition. Triangle rule of vector addition. (No side can be longer than the sum of the other two sides.) Commutative property of dot product Vector magnitude deﬁned using dot product Associative property of scalar multiplication with dot product Dot product distributes over vector addition and subtraction The cross product of any vector with itself is the zero vector. (Because any vector is parallel with itself.) Cross product is anticommutative. Negating both operands to the cross product results in the same vector. Associative property of scalar multiplication with cross product. Cross product distributes over vector addition and subtraction.
+
+Table 2.2 Table of vector algebra identities
+
+2.14. Exercises
+
+71
+
+2.14 Exercises
+
+(Answers on page 746.)
+
+1. Let
+
+a = −3
+
+8,
+
+4 b = 0,
+5
+
+ 16  c = −41.
+6
+
+(a) Identify a, b, and c, as row or column vectors, and give the dimension of each vector.
+(b) Compute by + cw + ax + bz.
+2. Identify the quantities in each of the following sentences as scalar or vector. For vector quantities, give the magnitude and direction. (Note: some directions may be implicit.)
+
+(a) How much do you weigh? (b) Do you have any idea how fast you were going? (c) It’s two blocks north of here. (d) We’re cruising from Los Angeles to New York at 600 mph, at an
+altitude of 33,000 ft.
+
+3. Give the values of the following vectors. The darker grid lines represent one unit.
+
+72
+
+2. Vectors
+
+4. Identify the following statements as true or false. If the statement is false, explain why.
+
+(a) The size of a vector in a diagram doesn’t matter; we just need to draw it in the right place.
+(b) The displacement expressed by a vector can be visualized as a sequence of axially aligned displacements.
+(c) These axially aligned displacements from the previous question must occur in order.
+(d) The vector [x, y] gives the displacement from the point (x, y) to the origin.
+
+5. Evaluate the following vector expressions:
+
+(a) − 3 7 (b) −12 5 (c) 8 −3 1/2 (d) 3 4 −7 0 (e) 4 5 /2
+
+6. Normalize the following vectors:
+
+(a) 12 5 (b) 0 743.632 (c) 8 −3 1/2 (d) −12 3 −4 (e) 1 1 1 1
+
+7. Evaluate the following vector expressions:
+
+(a) 7 −2 −3 + 6 6 −4
+
+(b) 2 9 −1 + −2 −9 1
+
+3  8 
+
+(c) 10 − −7
+
+7
+
+4
+
+ 4  −4
+
+(d)  5  − −5
+
+−11
+
+11
+
+a  2 
+
+(e) 3b − 4 10 
+
+c
+
+−6
+
+2.14. Exercises
+
+73
+
+8. Compute the distance between the following pairs of points:
+
+(a)
+
+10 6
+
+,
+
+−14 30
+
+(b)
+
+0 0
+
+,
+
+−12 5
+
+3  8  (c) 10, −7
+74
+
+−2  6  (d) −4, −7
+9 9.5
+
+ 4  −6
+
+(e)
+
+−−44,
+
+  
+
+6 6
+
+  
+
+4 −6
+
+9. Evaluate the following vector expressions:
+
+(a)
+
+2 6
+
+·
+
+−3 8
+
+(b) −7 1 2 · 11 −4
+
+−5  4 
+
+(c) 10 +  1  · −13
+
+3
+
+9
+
+−2  8  0
+
+(d) 3 0  ·  −2  + 9
+
+4
+
+3/2
+
+7
+
+10. Given the two vectors
+4 v =  3 ,
+−1
+
+√ √2/2 nˆ =  2/2,
+0
+
+separate v into components that are perpendicular and parallel to nˆ. (As the notation implies, nˆ is a unit vector.)
+11. Use the geometric deﬁnition of the dot product
+
+a · b = a b cos θ
+
+to prove the law of cosines.
+12. Use trigonometric identities and the algebraic deﬁnition of the dot product in 2D
+
+a · b = axbx + ayby
+
+to prove the geometric interpretation of the dot product in 2D. (Hint: draw a diagram of the vectors and all angles involved.)
+
+74
+
+2. Vectors
+
+13. Calculate a × b and b × a for the following vectors: (a) a = 0 −1 0 , b = 0 0 1 (b) a = −2 4 1 , b = 1 −2 −1 (c) a = 3 10 7 , b = 8 −7 4
+14. Prove the equation for the magnitude of the cross product
+
+a × b = a b sin θ.
+
+(Hint: make use of the geometric interpretation of the dot product and try to show how the left and right sides of the equation are equivalent, rather than trying to derive one side from the other.)
+15. Section 2.8 introduced the norm of a vector, namely, a scalar value associated with a given vector. However, the deﬁnition of the norm given in that section is not the only deﬁnition of a norm for a vector. In general, the p-norm of an n-dimensional vector is deﬁned as
+
+x p≡
+
+n
+|xi|p
+i=1
+
+1/p
+.
+
+Some of the more common p-norms include: • The L1 norm, a.k.a. Taxicab norm (p = 1):
+
+n
+x 1 ≡ |xi|.
+i=1
+
+• The L2 norm, a.k.a. Euclidean norm (p = 2). This is the most common and familiar norm, since it measures geometric length:
+
+x 2≡
+
+n
+x2i .
+i=1
+
+• The inﬁnity norm, a.k.a. Chebyshev norm (p = ∞):
+x ∞ ≡ max (|x1|, . . . , |xn|) .
+Each of these norms can be thought of as a way to assigning a length or size to a vector. The Euclidean norm was discussed in Section 2.8. The Taxicab norm gets its name from how a taxicab would measure distance driving the streets of a city laid out in a grid (e.g., Cartesia from Section 1.2.1). For example, a taxicab that drives 1 block east and 1 block north drives a total distance of 2 blocks, whereas a bird ﬂying “as the √crow ﬂies” can ﬂy in a straight line from start to ﬁnish and travel only 2 blocks (Euclidean norm). The Chebyshev norm is simply the absolute value of the vector component with the largest absolute value. An example of how this norm
+
+2.14. Exercises
+
+75
+
+can be used is to consider the number of moves required to move a king in a game of chess from one square to another. The immediately surrounding squares require 1 move, the squares surrounding those require 2 moves, and so on.
+(a) For each of the following ﬁnd x 1, x 2, x 3, and x ∞:
+(1) 3 4 (2) 5 −12 (3) −2 10 −7 (4) 6 1 −9 (5) −2 −2 −2 −2
+*(b) Draw the unit circle (i.e., the set of all vectors with x p = 1) centered at the origin for the L1 norm, L2 norm, and inﬁnity norm.
+16. A man is boarding a plane. The airline has a rule that no carry-on item may be more than two feet long, two feet wide, or two feet tall. He has a very valuable sword that is three feet long, yet he is able to carry the sword on board with him.9 How is he able to do this? What is the longest possible item that he could carry on?
+17. Verify Figure 2.11 numerically.
+18. Is the coordinate system used in Figure 2.27 a left-handed or right-handed coordinate system?
+19. One common way of deﬁning a bounding box for a 2D object is to specify a center point c and a radius vector r, where each component of r is half the length of the side of the bounding box along the corresponding axis.
+(a) Describe the four corners pUpperLeft, pUpperRight, pLowerLeft, and pLowerRight .
+(b) Describe the eight corners of a bounding cube, extending this idea into 3D.
+
+9Please ignore the fact that nowadays this could never happen for security reasons. You can think of this exercise as taking place in a Quentin Tarantino movie.
+
+76
+
+2. Vectors
+
+20. A nonplayer character (NPC) is standing at location p with a forward direction of v.
+(a) How can the dot product be used to determine whether the point x is in front of or behind the NPC?
+(b) Let p = −3 4 and v = 5 −2 . For each of the following points x determine whether x is in front of or behind the NPC:
+(1) x = 0 0 (2) x = 1 6 (3) x = −6 0 (4) x = −4 7 (5) x = 5 5 (6) x = −3 0 (7) x = −6 −3.5
+21. Extending the concept from Exercise 20, consider the case where the NPC has a limited ﬁeld of view (FOV). If the total FOV angle is φ, then the NPC can see to the left or right of its forward direction by a maximum angle of φ/2.
+(a) How can the dot product be used to determine whether the point x is visible to the NPC?
+(b) For each of the points x in Exercise 20 determine whether x is visible to the NPC if its FOV is 90◦.
+(c) Suppose that the NPC’s viewing distance is also limited to a maximum distance of 7 units. Which points are visible to the NPC then?
+22. Consider three points labeled a, b, and c in the xz plane of our left-handed coordinate system, which represent waypoints on an NPC’s path.
+(a) How can the cross product be used to determine whether, when moving from a to b to c, the NPC makes a clockwise or counterclockwise turn at b, when viewing the path from above?
+(b) For each of the following sets of three points, determine whether the NPC is turning clockwise or counterclockwise when moving from a to b to c:
+(1) a = 2 0 3 , b = −1 0 5 , c = −4 0 1 (2) a = −3 0 −5 , b = 4 0 0 , c = 3 0 3 (3) a = 1 0 4 , b = 7 0 −1 , c = −5 0 −6 (4) a = −2 0 1 , b = 1 0 2 , c = 4 0 4
+
+2.14. Exercises
+
+77
+
+23. In the derivation of a matrix to scale along an arbitrary axis, we reach a step where we have the vector expression
+p′ = p + (k − 1) (p · n) n,
+where n is an arbitrary vector [nx, ny, nz] and k is an arbitrary scalar, but p is one of the cardinal axes. Plug in the value p = [1, 0, 0] and simplify the resulting expression for p′. The answer is not a vector expression, but a single vector, where the scalar expressions for each coordinate have been simpliﬁed.
+24. A similar problem arises with the derivation of a matrix to rotate about an arbitrary axis. Given an arbitrary scalar θ and a vector n, substitute p = [1, 0, 0] and simplify the value of p′ in the expression
+p′ = cos θ (p − (p · n) n) + sin θ (n × p) + (p · n) n.
+
+What’s our vector, Victor? — Captain Oveur in Airplane! (1980)
+
+Chapter 3
+Multiple Coordinate Spaces
+The boundary lines have fallen for me in pleasant places; surely I have a delightful inheritance.
+— Psalm 16:6 (New International Version)
+Chapter 1 discussed how we can establish a coordinate space anywhere we want simply by picking a point to be the origin and deciding how we want the axes to be oriented. We usually don’t make these decisions arbitrarily; we form coordinate spaces for speciﬁc reasons (one might say “diﬀerent spaces for diﬀerent cases”). This chapter gives some examples of common coordinate spaces that are used for graphics and games. We will then discuss how coordinate spaces are nested within other coordinate spaces.
+This chapter introduces the idea of multiple coordinate systems. It is divided into ﬁve main sections.
+• Section 3.1 justiﬁes the need for multiple coordinate systems. • Section 3.2 introduces some common coordinate systems. The main
+concepts introduced are ◦ world space ◦ object space ◦ camera space ◦ upright space
+• Section 3.3 describes coordinate-space transformations. ◦ Section 3.3.1 exposes a duality between two ways of thinking about coordinate-space transformations. ◦ Section 3.3.2 describes how to specify one coordinate system in terms of another. ◦ Section 3.3.3 discusses the very important concept of basis vectors.
+79
+

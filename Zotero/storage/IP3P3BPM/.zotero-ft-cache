@@ -1,0 +1,471 @@
+The 42nd International Conference and Exhibition on Computer Graphics and Interactive Techniques
+Extending the Disney BRDF to a BSDF with Integrated Subsurface Scattering Brent Burley Walt Disney Animation Studios
+©Disney
+This talk will show how we extended our BRDF to include refraction and subsurface scattering.
+
+Wreck-It Ralph (2012)
+Developed physically based BRDF for Wreck-It Ralph Used on everything but hair
+
+©Disney Enterprises, Inc.
+
+Disney BRDF
+
+subsurface
+
+0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
+
+metallic
+
+specular
+
+specularTint
+
+roughness anisotropic
+
+0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
+
+sheen
+
+sheenTint
+
+clearcoat
+
+clearcoatGloss
+
+It had 10 uniform parameters, all combinations were plausible, or at least well behaved.
+
+©Disney Enterprises, Inc.
+
+Frozen (2013)
+BRDF unmodified for Frozen Refraction and subsurface blended in separately by artists
+
+©Disney Enterprises, Inc.
+
+©Disney Enterprises, Inc.
+For Big Hero 6 we switched to path-traced GI. This required refraction and subsurface to be integrated to ensure energy conservation. Also needed efficient sampling because we needed to shaded 1000 times as many shading points, and we wanted to improve the ease of use.
+
+BRDF
+
+diffuse
+
+specular
+
+subsurface
+
+transmission transmission scattering
+
+refraction
+
+Examples of effects we wanted to achieve. Need to support thin surfaces as well as solids.
+
+Disney BRDF
+
+metallic BRDF
+
+mix
+metallic
+
+dielectric BRDF
+To recap, our BRDF was a blend of two distinct material models. Our goal wasn’t to make plasti-metal. Rather, we want to allow all parameters to be driven with texture maps.
+
+Disney BSDF
+
+specular BSDF
+
+metallic BRDF
+
+mix
+specTrans
+dielectric BRDF
+For our BSDF we blended in a third model with a new parameter, specTrans. Metallic takes precedence - metal over glass.
+
+mix
+metallic
+
+surface
+
+diffuse
+
+subsurface
+For subsurface, most models assume the bounding surface is perfectly smooth.
+
+micro-surface
+retro-reﬂection
+
+diffuse
+
+sheen
+
+subsurface
+Instead, we view the surface as having micro-surface diffuse effects: retro-reflection and sheen For subsurface scattering we want to replace just the diffuse portion
+
+micro-surface
+retro-reﬂection
+
+diffuse
+
+sheen
+
+http://blog.selfshadow.com/publications/s2012-shading-course/burley/ s2012_pbs_disney_brdf_notes_v3.pdf
+
+subsurface
+
+See our 2012 course notes for more details. Note: Additional details such as a description of sheen were added in v3 in 2014.
+
+micro-surface
+retro-reﬂection
+
+diffuse
+
+sheen
+
+http://blog.selfshadow.com/publications/s2012-shading-course/burley/ s2012_pbs_disney_brdf_notes_v3.pdf
+
+subsurface
+
+See our 2012 course notes for more details. Note: Additional details such as a description of sheen were added in v3 in 2014.
+
+Outline
+• Specular transmission • Subsurface scattering • Thin surface approximation • Layered shader UI • Production results
+
+Specular Transmission
+
+Specular Transmission
+clearcoat specular
+
+specular reﬂection = FDG specular transmission = f(η) (1-F)DG
+Microfacet Models for Refraction, Walter et al., 2007
+This is just the Walter model which is the standard now. Same as reflection but with 1-F and IOR correction.
+Couple things to be careful about: - not reciprocal ... be careful about direction - there’s a factor omitted from Walter to account for solid angle compression that you may or may not need Details in the notes.
+
+©Disney Enterprises, Inc.
+
+Furnace Test
+Rough glass sphere
+The microfacet model is known to lose energy due to shadowing. Rough glass sphere is rendered with path tracing and fails furnace test. Eric Heitz showed that Smith shadowing used by Walter conserves energy if you measure energy leaving the microsurface before shadowing. He calls this the weak furnace test, but it still loses energy in practice. This is visible in practice and our artists complain about this darkening.
+
+Furnace Test
+
+Rough glass sphere
+
++ sheen
+
+Interestingly, adding sheen can replace the lost energy. Note: this is very approximate, and doesn’t work as well for other roughness values and justifies our motivation more than exact implementation, though it suggests it’s at least in the ballpark.
+
+1.0
+
+0.8
+
+0.6
+
+F (✓)
+
+0.4
+
+0.2
+
+critical angle for
+
+total internal reﬂection
+
+0.0 0
+
+There’s a problem when using Schlick for internal reflection. Should go to 1 at critical angle for total internal reflection. Easy fix: use θt instead of θi. Details in course notes.
+
+Fresnel (⌘ = 0.4) Schlick Schlick (✓t)
+
+✓c
+
+⇡/2
+
+✓
+
+1.0
+
+Fresnel (⌘ = 1.02)
+
+0.8
+
+Schlick
+
+0.6
+
+F (✓)
+
+0.4
+
+0.2
+
+0.0 0
+
+⇡/2
+
+✓
+
+Another problem when IOR is near 1.0. 1.02 is the relative IOR of ice in water. Schlick is up to 40x too bright.
+For refraction, real Fresnel is almost as cheap as Schlick given that you need to compute θt anyway, so we just use the real thing.
+
+1.02 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0 IOR specTrans
+0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 2.0
+
+Example of our new parameters. IOR controls bending and strength of specular highlight. 1-2 roughly corresponds to specular 0-1 of our BRDF. Note: 1.0 would be invisible.
+
+©Disney Enterprises, Inc.
+
+Transmittance
+
+Beer-Lambert Law
+Transmittance is exponentially proportional to distance times absorption coefficient, but parameterization is not intuitive.
+
+©Disney Enterprises, Inc.
+
+Transmittance
+
+T: 1.0, 0.7, 0.1
+
+d: 16
+
+8
+
+4
+
+2
+
+Beer-Lambert Law
+
+Instead, we allow specification of a transmittance color and a distance at which that color is reached, and we infer the absorption coefficient.
+
+1
+©Disney Enterprises, Inc.
+
+Subsurface Scattering
+
+Refactored Diffuse Lobe
+diffuse/retro-reﬂection +
+sheen
+
+For subsurface, we want to replace just the diffuse lobe.
+To do this, we had to refactor our retroreflection to be additive. Details in the course notes.
+
+©Disney Enterprises, Inc.
+
+Refactored Diffuse Lobe
+diffuse/retro-reﬂection +
+sheen
+
+For subsurface, we want to replace just the diffuse lobe.
+To do this, we had to refactor our retroreflection to be additive. Details in the course notes.
+
+diffuse or subsurface +
+retroreﬂection +
+sheen
+©Disney Enterprises, Inc.
+
+Subsurface Scattering
+Path Tracing
+Subsurface scattering can be computed using random path tracing. This has traditionally been considered prohibitive so a diffusion approximation is used.
+
+Subsurface Scattering
+
+r Rd(r)
+
+Diffusion
+
+A random distance is chosen and a precomputed diffusion profile is used to estimate how much energy would make it to that point. An semi-infinite solid is assumed
+
+Dipole is too soft and has cyan band. Artists would typically use two dipoles combined in an ad-hoc way.
+
+Monte Carlo reference dipole
+©Disney Enterprises, Inc.
+
+r Rd(r)
+
+Monte Carlo reference 0.031 exp(-0.41 r) + .02 exp(-1.7 r) MC excluding single-scattering dipole
+r
+We fit first exponential to tail - (exp is a line in log space) We fit second exponential to residual
+
+r Rd(r)
+
+Monte Carlo reference
+0.031 exp(-0.41 r) 0.031 exp(-0.41 r) + .02 exp(-1.7 r) MC excluding single-scattering dipole
+r
+We fit first exponential to tail - (exp is a line in log space) We fit second exponential to residual
+
+r Rd(r)
+
+Monte Carlo reference
+0.031 exp(-0.41 r) 0.031 exp(-0.41 r) + .02 exp(-1.7 r) MC excluding single-scattering dipole
++ 0.02 exp(-1.7 r)
+r
+We fit first exponential to tail - (exp is a line in log space) We fit second exponential to residual
+
+r Rd(r)
+
+Monte Carlo reference
+0.031 exp(-0.41 r) 0.031 exp(-0.41 r) + .02 exp(-1.7 r) MC excluding single-scattering dipole
++ 0.02 exp(-1.7 r)
+r
+We fit first exponential to tail - (exp is a line in log space) We fit second exponential to residual
+
+r Rd(r)
+
+Monte Carlo reference 0.031 exp(-0.41 r) + .02 exp(-1.7 r) MC excluding single-scattering dipole
+r
+Excellent fit with dipole shown for reference Blue dots exclude first scattering event and still don’t fit the dipole
+
+Subsurface Scattering - investigation
+exponential ﬁt Monte Carlo reference dipole
+
+Our fit is visually indistinguishable from reference.
+
+©Disney Enterprises, Inc.
+
+r Rd(r)
+
+Monte Carlo reference 0.031 exp(-0.41 r) + .02 exp(-1.7 r) MC excluding single-scattering dipole
+≈ exp(-r/3) + exp(-r)
+r
+Fitting 1000’s of profiles, we found this to be a representative shape in terms of the relative weight and scale of the lobes. It’s not perfect so the constants are intentionally imprecise.
+
+Normalized Diffusion
+Normalized in plane. d is the scatter distance. Mult. by baseColor at end - no albedo inversion required Can directly importance sample (as two lobes)
+
+©Disney Enterprises, Inc.
+
+Per Christensen was able to find a mapping to our profile from standard scattering parameters and use it as a drop-in replacement. He found that it has less error that state of the art physically based profiles, and it is easier to compute.
+
+scatterDist [0,0,0]
+
+[0.5, 0.25, 0.125]
+
+We do diffusion when scatterDist is non-zero, BRDF otherwise. You can see here that it converges exactly. 0.5 also goes about 1/2 way through the unit sphere.
+
+Diffusion is not perfect. Here’s a surface cavity and a path-traced path.
+
+Here’s how diffusion sees the surface. It transports too much energy.
+
+We compensate by fading out the diffusion when the normals are opposing.
+
+© DISNEY
+It breaks down completely on more complex geometry. The small globules are too dark, and the complex areas on the base are too bright. This is because diffusion assumes the surface is an infinite slab (which is never the case).
+
+Diffusion
+
+Path Tracing
+
+© DISNEY
+We found that path tracing subsurface can now actually be practical. The result is more plausible and consistent.
+
+Path-traced Subsurface Scattering
+
+We used path-traced subsurface on Frozen Fever. Snow and ice integrated well. Very easy to set up.
+
+©Disney Enterprises, Inc.
+
+Thin Surface BSDF
+
+Thin Surface - Specular Transmission
+clearcoat specular
+
+specular reﬂection = FDG specular transmission = (1-F)DG
+Just like solid but with no bending. But what value for roughness? Same as reflection? More, because there are two scattering events?
+
+©Disney Enterprises, Inc.
+
+≠ Reﬂection lobe width
+
+Refraction lobe width
+
+To our surprise, and artists, transmission is often less blurry than reflection. This figure illustrates why the reflection spreads twice as much as the angle between microfacets the refraction bends only a little bit and spreads less. depends on IOR. IOR=1 would be no bend.
+
+Solid Specular Transmission
+1.2 1.4 IOR 1.6 1.8 2.0
+Roughness=0.35
+Example on thin solid shows effect of IOR or specular transmission.
+
+©Disney Enterprises, Inc.
+
+Solid
+
+Thin
+
+1.2 1.4 1.6 1.8 2.0 IOR
+Roughness=0.35
+Hack - we can remap transmission roughness based on IOR. Not quite right for all angles and values, but better than nothing.
+
+0.15 0.20 0.24 0.29 0.33 Roughness
+©Disney Enterprises, Inc.
+
+Thin Surface - Diffuse Transmission
+
+diffTrans 0.0 diffTrans 0.5
+
+diffuse sheen retroreﬂection
+
+diffTrans 1.0
+Diffuse transmission forward vs back-scattering of diffuse. Note: no Fresnel on back side, multiple scattering events means no directionality
+
+©Disney Enterprises, Inc.
+
+Shader UI
+
+Solid Thin
+
+specTrans ior
+
+scatrDist R G B
+
+specTrans ior ﬂatness diffTrans
+
+Two shading models New parameters highlighted Flatness is alternate, flatter diffuse shape (previously called subsurface)
+
+Parameter Pass-through
+
+Our parameter layers now support pass-through for selective masking. Esp. needed for subsurface which wants a different mask.
+
+©Disney Enterprises, Inc.
+
+Parameter Pass-through
+
+This is a production example.
+
+©Disney Enterprises, Inc.
+
+Production Impact
+
+© DISNEY
+When we started building the renderer, we tried matching various objects and materials in our photo lab
+
+PHOTO REFERENCE
+
+HYPERION RENDER
+
+© DISNEY
+We did really well, but were surprised that the ping pong ball was the hardest thing to render. It turned out the ping pong ball needed lost of internal bounces.
+
+PHOTO REFERENCE
+
+HYPERION RENDER
+
+© DISNEY
+We did really well, but were surprised that the ping pong ball was the hardest thing to render. It turned out the ping pong ball needed lost of internal bounces.
+
+Big Hero 6 (2014)
+BSDF used on everything except hair. Baymax is a thin surface blend of spec and diffuse transmission. Thin also used for cloth and paper. Windows typically refractive solids.
+
+©Disney Enterprises, Inc.
+
+Big Hero 6 (2014)
+Refraction was used extensively. No longer just a hero effect. Subsurface was also widely used, not just for skin. Materials and lighting were very predictable.
+
+©Disney Enterprises, Inc.
+
+Future
+• Energy conserving microsurface scattering • Better thin surface BSDF • Better metal
+See course notes for more discussion and possible directions
+
+Acknowledgements
+Chuck Tappan Matt Chiang Peter Kutz Christian Eisenacher Greg Nichols
+Special Thanks Stephen Hill
+Stephen McAuley
+

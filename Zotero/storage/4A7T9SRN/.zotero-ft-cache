@@ -1,0 +1,1523 @@
+AMD RYZEN™ PROCESSOR SOFTWARE
+OPTIMIZATION
+PRESENTED BY KENNETH MITCHELL
+LET’S BUILD… 2020 MAY 15, 2020
+
+ABSTRACT
+
+Join AMD Game Engineering team members for an introduction to the AMD Ryzen™ family of processors followed by advanced optimization topics. Learn about the high-performance AMD "Zen 2" microarchitecture and profiling tools. Gain insight into code optimization opportunities and lessons learned. Examples may include C/C++, assembly, and hardware performance-monitoring counters.
+
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 2
+
+SPEAKER BIOGRAPHY
+Ken Mitchell is a Principal Member of Technical Staff in the Radeon™ Technologies Group/AMD ISV Game Engineering team where he focuses on helping game developers utilize AMD processors efficiently. His previous work includes automating and analyzing PC applications for performance projections of future AMD products as well as developing benchmarks. Ken studied computer science at the University of Texas at Austin.
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 3
+
+AGENDA
+
+• Success Stories • “Zen 2” Architecture Processors • AMD uProf Profiler • Optimizations and Lessons
+Learned • Contacts
+
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 4
+
+SUCCESS STORIES
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 5
+
+SUCCESS STORIES
+
+BORDERLANDS 3
+
+GEARS 5
+
+WORLD WAR Z
+
+DirectX® 12
+
+DirectX® 12
+
+Vulkan®
+
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 6
+
+“ZEN 2” ARCHITECTURE PROCESSORS
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 7
+
+“ZEN 2” PRODUCT EXAMPLES
+
+NOTEBOOK
+
+DESKTOP
+
+HIGH END DESKTOP
+
+“Renoir”
+AMD Ryzen™ 7 4800U 8-Core Processor
+
+“Matisse”
+AMD Ryzen™ 9 3950X 16-Core Processor
+
+“Castle Peak”
+AMD Ryzen™ Threadripper™ 3990X 64-Core Processor
+
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 8
+
+MICROARCHITECTURE
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 9
+
+ADVANCES IN “ZEN 2” MICROARCHITECTURE
+
+32K ICACHE 8 way
+
+BRANCH PREDICTION
+
+DECODE
+
+OP CACHE
+
+4 instructions/cycle Micro-op Queue 8 ops/cycle
+
+6 ops dispatched INTEGER
+Integer Rename
+
+FLOATING POINT
+Floating Point Rename
+
+Sche Sche Sche Sche Sche Sche Sche duler duler duler duler duler duler duler
+Integer Physical Register File
+ALU ALU ALU ALU AGU AGU AGU
+
+Scheduler FP Register File MUL ADD MUL ADD
+
+2 loads + 1 store LOAD/STORE 32K DCACHE
+
+per cycle
+
+QUEUES
+
+8 way
+
+512K L2 (I+D)CACHE
+8 way
+
+• +15% IPC Improvement from “Zen” to “Zen 2” • 2x op cache capacity • Reoptimized L1I cache • 3rd address generation unit • 2x FP data path width • 2x L3 capacity • Improved branch prediction accuracy • Hardware optimized Security Mitigations • Secure Virtualization with Guest Mode Execute Trap (GMET) • Improved SMT fairness
+• for ALU and AGU schedulers • Improved Write Combining Buffer
+
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 10
+
+DATA FLOW
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 11
+
+“RENOIR” 8 CORE PROCESSOR
+
+32B fetch
+
+32K I-Cache 8-way
+
+2*32B load
+1*32B store cclk
+
+32K D-Cache 8-way
+
+32B/cycle
+
+32B/cycle
+
+512K L2
+I+D Cache 8-way
+
+32B/cycle 4M L3
+I+D Cache 16-way
+l3clk
+
+32B/cycle
+
+Data Fabric
+
+Unified 32B/cycle Memory
+Controller uclk
+
+16B/cycle DRAM Channel
+memclk
+
+32B/cycle GFX9 
+32B/cycle Media
+
+
+fclk
+
+64B/cycle
+
+IO Hub Controller
+
+lclk
+
+AMD Ryzen™ 7 4800U, 15W TDP, 8 Cores, 16 Threads, 4.2 GHz max boost clock, 1.8 GHz base clock, integrated GPU. * Monolithic Die. Each 4M L3 Cache has its own 32B/cycle link to the data fabric. 64b DDR4 Channel Shown.
+
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 12
+
+“MATISSE” 16 CORES PROCESSOR
+
+CCD CCD
+
+IOD
+
+32B fetch
+
+32K I-Cache 8-way
+
+2*32B load
+1*32B store cclk
+
+32K D-Cache 8-way
+
+32B/cycle
+
+32B/cycle
+
+512K L2
+I+D Cache 8-way
+
+32B/cycle
+
+16M L3 32B/cycle R I+D Cache
+16-way 16B/cycle W
+
+Data Fabric
+
+l3clk
+
+fclk
+
+Unified 32B/cycle Memory
+Controller uclk
+
+16B/cycle DRAM Channel
+memclk
+
+64B/cycle IO Hub Controller
+lclk
+
+AMD Ryzen™ 9 3950X, 105W TDP, 16 Cores, 32 Threads, 4.7 GHz max boost clock, 3.5 GHz base clock. * Two Core Complex Die (CCD). Each CCD has two 16M L3 Cache Complexes. * The L3 Cache Complexes within a CCD share a single link to the Data Fabric.
+
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 13
+
+“CASTLE PEAK” 64 CORE PROCESSOR
+
+01
+
+45
+
+IOD
+
+23
+
+67
+
+32B fetch
+
+32K I-Cache 8-way
+
+2*32B load
+1*32B store cclk
+
+32K D-Cache 8-way
+
+32B/cycle
+512K L2
+I+D Cache 32B/cycle 8-way
+
+32B/cycle
+
+16M L3 32B/cycle R
+
+Data
+
+I+D Cache
+
+Fabric
+
+16-way 16B/cycle W Quadrant
+
+Unified 32B/cycle Memory
+Controller uclk
+
+16B/cycle DRAM Channel
+memclk
+
+l3clk
+
+fclk
+
+64B/cycle IO Hub Controller
+lclk
+
+AMD Ryzen™ Threadripper™ 3990X, 280W TDP, 64 Cores, 128 Threads, 4.3 GHz max boost clock, 2.9 GHz base clock. * Two CCDs per Data Fabric Quadrant. * Two Data Fabric Quadrants have Unified Memory Controllers and two have IO Hubs.
+
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 14
+
+INSTRUCTION SET
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 15
+
+INSTRUCTION SET EVOLUTION
+
+CLWB ADX
+CLFLUSHOPT RDSEED SHA SMAP XGETBV XSAVEC XSAVES AVX2 BMI2 MOVBE RDRND SMEP
+FSGSBASE XSAVEOPT
+BMI FMA F16C AES AVX OSXSAVE PCLMULQDQ SSE4.1 SSE4.2 XSAVE SSSE3 MONITORX CLZERO WBNOINVD FMA4 TBM XOP
+
+YEAR FAMILY PRODUCT FAMILY
+
+EXAMPLE ARCHITECTURE PRODUCT
+
+2019 17h “Matisse”
+
+“Zen2”
+
+Ryzen™ 9 3950X 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0
+
+2017 17h “Summit Ridge”, ”Pinnacle Ridge” “Zen”, “Zen+” Ryzen™ 7 2700X 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0
+
+2015 15h “Carrizo”, “Bristol Ridge”
+
+“Excavator” A12-9800
+
+000000000111111111111111111100111
+
+2014 15h “Kaveri”, “Godavari”
+
+“Steamroller” A10-7890K
+
+000000000000001111111111111000111
+
+2012 15h “Vishera”
+
+“Piledriver” FX-8370
+
+000000000000000011111111111000111
+
+2011 15h “Zambezi”
+
+“Bulldozer” FX-8150
+
+000000000000000000011111111000101
+
+2013 16h “Kabini”
+
+“Jaguar”
+
+A6-1450
+
+000000000001000110111111111000000
+
+2011 14h “Ontario”
+
+“Bobcat”
+
+E-450
+
+000000000000000000000000001000000
+
+2011 12h “Llano”
+
+“Husky”
+
+A8-3870
+
+000000000000000000000000000000000
+
+“Zen 2” added CLWB and the AMD vendor specific instruction WBNOINVD.
+
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 16
+
+SOFTWARE PREFETCH LEVEL INSTRUCTIONS
+
+Prefetch T0|T1|T2|NTA
+L1
+L2
+
+Aggressively Evict
+Prefetch NTA
+
+L3
+
+memory
+
+• Loads a cache line from the specified memory address into the datacache level specified by the locality reference T0, T1, T2, or NTA.
+• If a memory fault is detected, a bus cycle is not initiated and the instruction is treated as an NOP.
+• Prefetch levels T0/T1/T2 are treated identically in “Zen” & “Zen 2” microarchitectures.
+• The non-temporal cache fill hint, indicated with PREFETCHNTA, reduces cache pollution for data that will only be used once. It is not suitable for cache blocking of small data sets. Lines filled into the L2 cache with PREFETCHNTA are marked for quicker eviction from the L2 and when evicted from the L2 are not inserted into the L3.
+• The operation of this instruction is implementation-dependent. Prefetch fill & evict policies may differ for other processor vendors or microarchitecture generations.
+
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 17
+
+“MATISSE” CACHE AND MEMORY
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 18
+
+CACHE LATENCY
+
+Level
+
+Count/ CCD
+
+Capacity
+
+Sets
+
+Ways
+
+Line Size
+
+Latency
+
+uop 8 4 K uops 64 8 8 uops
+
+NA
+
+L1I 8
+
+32 KB 64 8
+
+64 B 4 clocks
+
+L1D 8
+
+32 KB 64 8
+
+64 B 4 clocks
+
+L2U 8 512 KB 1024 8
+
+64 B 12 clocks
+
+• Cache line size is 64 Bytes. • 2 cpu clock cycles to move a single cache line.
+• L2 is inclusive of L1. • lines filled into L1 are also filled into L2.
+• L3 is filled from L2 victims of all 4 cores within its CCX. • L2 tags are duplicated in its L3 for fast cache transfers within a CCX.
+• L2 capacity evictions may cause L3 capacity evictions.
+• “Matisse” products may have 1 or 2 CCDs. • Each CCD Core Complex Die (CCD) may have two CCX. • CCX: Core Complex (4 Cores, 8 Logical Processors, 16MB).
+
+L3U 2 16 MB 16384 16 64 B 39 clocks
+
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 19
+
+REFILL WITHIN SAME CCX
+
+CCX0 CCM0
+CS0 UMC DDR4
+
+CCX1
+
+CCX2
+
+CCM1
+
+CCM2
+
+SDF Transport Layer
+
+CS1
+
+UMC
+
+DDR4
+
+CCX3 CCM3
+
+• Refills within the same CCX may be relatively low cost! • Some operating system schedulers are CCX aware.
+• CCX: Core Complex (4 Cores, 8 Logical Processors, 16MB). • IFOP: Infinity Fabric™ On-Package.
+• CCM: Cache-Coherent Master has the memory map. • SDF Transport Layer: Scalable Data Fabric Transport
+Layer. • CS: Coherent Slave responsible for cache coherency. • Electrical interface between chiplets not shown. • UMC: Unified Memory Controller.
+
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 20
+
+REFILL FROM LOCAL DRAM
+
+CCX0 CCM0
+CS0 UMC DDR4
+
+CCX1
+
+CCX2
+
+CCM1
+
+CCM2
+
+SDF Transport Layer
+
+CS1
+
+UMC
+
+DDR4
+
+CCX3 CCM3
+
+• Minimize refills from local DRAM.
+• CCX: Core Complex (4 Cores, 8 Logical Processors, 16MB). • IFOP: Infinity Fabric™ On-Package.
+• CCM: Cache-Coherent Master has the memory map. • SDF Transport Layer: Scalable Data Fabric
+Transport Layer. • CS: Coherent Slave responsible for cache coherency. • Electrical interface between chiplets not shown. • UMC: Unified Memory Controller.
+
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 21
+
+REFILL FROM LOCAL DRAM
+
+CCX0 CCM0
+CS0 UMC DDR4
+
+CCX1
+
+CCX2
+
+CCM1
+
+CCM2
+
+SDF Transport Layer
+
+CS1
+
+UMC
+
+DDR4
+
+CCX3 CCM3
+
+• Minimize refills from local DRAM.
+• CCX: Core Complex (4 Cores, 8 Logical Processors, 16MB). • IFOP: Infinity Fabric™ On-Package.
+• CCM: Cache-Coherent Master has the memory map. • SDF Transport Layer: Scalable Data Fabric
+Transport Layer. • CS: Coherent Slave responsible for cache coherency. • Electrical interface between chiplets not shown. • UMC: Unified Memory Controller.
+
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 22
+
+REFILL FROM ANY OTHER CCX
+
+CCX0 CCM0
+CS0 UMC DDR4
+
+CCX1
+
+CCX2
+
+CCM1
+
+CCM2
+
+SDF Transport Layer
+
+CS1
+
+UMC
+
+DDR4
+
+CCX3 CCM3
+
+• Refill from any other CCX cost may be similar to memory latency.
+• CCX: Core Complex (4 Cores, 8 Logical Processors, 16MB). • IFOP: Infinity Fabric™ On-Package.
+• CCM: Cache-Coherent Master has the memory map. • SDF Transport Layer: Scalable Data Fabric
+Transport Layer. • CS: Coherent Slave responsible for cache coherency. • Electrical interface between chiplets not shown. • UMC: Unified Memory Controller.
+
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 23
+
+REFILL FROM ANY OTHER CCX
+
+CCX0 CCM0
+CS0 UMC DDR4
+
+CCX1
+
+CCX2
+
+CCM1
+
+CCM2
+
+SDF Transport Layer
+
+CS1
+
+UMC
+
+DDR4
+
+CCX3 CCM3
+
+• Refill from any other CCX cost may be similar to memory latency.
+• CCX: Core Complex (4 Cores, 8 Logical Processors, 16MB). • IFOP: Infinity Fabric™ On-Package.
+• CCM: Cache-Coherent Master has the memory map. • SDF Transport Layer: Scalable Data Fabric
+Transport Layer. • CS: Coherent Slave responsible for cache coherency. • Electrical interface between chiplets not shown. • UMC: Unified Memory Controller.
+
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 24
+
+AMDUPROF PROFILER
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 25
+
+NEW IN V3.2
+THREAD CONCURRENCY
+
+FLAME GRAPH
+
+SYMBOLS
+
+Scaled chart for Threadripper™
+
+Sorted call stacks
+
+Improved symbol path support
+
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 26
+
+7-zip 19.00 x64 benchmark “7z.exe b” shown. Testing done by AMD technology labs, February 9, 2019 on the following system. Test configuration: AMD Ryzen™ Threadripper™ 3970X Processor, AMD Wraith Ripper™ Cooler, 64GB (4 x 16GB DDR4-3200 at 22-22-22-52) memory, Radeon™ RX 580 GPU with driver 20.1.3 (January 17, 2020), 2TB M.2 NVME SSD, AMD Ryzen™ Reference Motherboard, Windows® 10 x64 build 1909, 1920x1080 resolution. Actual results may vary. You may need to run AMDuProf as administrator to see this advanced option.
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 27
+
+Horizontal: normalized inclusive samples. Vertical: call stack
+Color: Module Name
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 28
+
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 29
+
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 30
+
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 31
+
+I recommend this profile.
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 32
+
+I recommend Enabling Call Stack Sampling (CSS) with Frame Pointer Omission (FPO) for Flame Graph Analysis.
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 33
+
+A 5 second delay may allow you to change the
+foreground window before profiling starts.
+I often collect 30 or 60 seconds of samples.
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 34
+
+Enable loading from the Microsoft Symbol Server – especially if you have not defined _NT_SYMBOL_PATH
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 35
+
+OPTIMIZATIONS AND LESSONS LEARNED
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 36
+
+TOPICS
+
+• General Guidance
+• Use Best Practices with Scalability
+• Verify Parallel DX12 Pipeline State Creation
+• Verify Parallel DX12 Command List Generation
+• Use Best Practices with Locks
+• Reorder Hot Struct Members
+• Use Prefetch Level while iterating std::vector<T*>
+
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 37
+
+GENERAL GUIDANCE
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 38
+
+USE THE LATEST COMPILER & SDK
+
+• “Zen 2” recommended compiler flags: • /GL /arch:AVX2 /MT /fp:fast /favor:blend
+• JeMalloc may benefit some applications. • See http://jemalloc.net/
+
+Guidance for “Zen 2” and subject to change. Use /favor:blend and NOT /favor:amd64.
+
+Year Visual Studio Changes
+
+2019 2017
+2015
+
+Additional SIMD intrinsics optimizations including constant-folding and arithmetic simplifications. Build throughput improvements. New -Ob3 inlining option. Memcpy & Memset optimizations.
+Update v15.9.14 and later may improve AMD Ryzen™ memcpy/memset performance. Improved code generation of loops: Support for automatic vectorization of division of constant integers, better identification of memset patterns. Added Cmake support. Added faster database engine. Improved STL & .NET optimizations. New /Qspectre option.
+Improved autovectorization & scalar optimizations. Faster build times with /LTCG:incremental. Added assembly optimized memset & memcpy using ERMS & SSE2.
+
+AMD Products (implicit) “Pinnacle Ridge”
+“Summit Ridge”
+“Kaveri”
+
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 39
+
+USE A SUPPORTED INSTRUCTION SET
+
+%Radeon™ Users
+
+Instruction Set Supported
+
+100% 90% 80% 70% 60% 50% 40% 30% 20% 10% 0%
+
+AMD Processor Intel Processor 100%100%
+
+83% 69%
+
+66%
+
+49%
+
+SSE2
+
+AVX
+
+AVX2
+
+Instruction Set
+
+0% 0% AVX512
+
+• Using /arch:AVX or /arch:AVX2 may improve code gen of inline code. • memcpy & memset may be inline if the length is known at compile time.
+• AVX is supported on many systems and growing over time.
+• AVX512 is not supported by AMD processors and was present on less than 1% of users with Intel processors.
+• Source: AMD User Experience Program Users Survey including 4 Million systems sampled from January 2019 to October 2019.
+
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 40
+
+USE ALL PHYSICAL CORES
+
+• This advice is specific to AMD processors and is not general guidance for all processor vendors.
+• Generally, applications show SMT benefits and use of all logical processors is recommended.
+• However, games often suffer from SMT contention on the main or render threads during gameplay. • One strategy to reduce this contention is to create threads based on physical core count rather than logical processor count. • Profile your application/game to determine the ideal thread count. • Recommend game options to: • Set Max Thread Pool Size • Force Thread Pool Size • Force SMT • Force Single NUMA Node (implicitly Group) • Avoid setting thread pool size as a constant.
+• See https://gpuopen.com/cpu-core-count-detection-windows/
+
+// This advice is specific to AMD processors and is // not general guidance for all processor vendors DWORD get_default_thread_count() {
+DWORD cores, logical; get_processor_count(cores, logical); DWORD count = logical; char vendor[13]; get_cpuid_vendor(vendor); if (0 == strcmp(vendor, "AuthenticAMD")) {
+if (0x15 == get_cpuid_family()) { // AMD "Bulldozer" family microarchitecture count = logical;
+} else { count = cores;
+} } return count; }
+
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 41
+
+DISABLE DEBUG FEATURES BEFORE YOU SHIP
+
+• While investigating open issues, developers may submit change requests which enable debug features on Test and Shipping configurations. These debug features may greatly reduce performance due to disabling multi-threading, cache pollution from STATS, and increased serialization from logging.
+
+• Some Unreal Engine settings to verify include: • Build.h #define FORCE_USE_STATS and #define STATS • See 4.24/Engine/Source/Runtime/Core/Public/Misc/Build.h
+• Parallel Rendering CVARS
+• See 4.24/Engine/Source/Runtime/RHI/Private/RHICommandList.cpp • See https://docs.unrealengine.com/en-US/Programming/Rendering/ParallelRendering
+
+Command r.rhicmdbypass r.rhicmdusedeferredcontexts r.rhicmduseparallelalgorithms r.rhithread.enable
+
+Recommended Value 0 1 1 1
+
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 42
+
+USE BEST PRACTICES WITH SCALABILITY
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 43
+
+OPTIMIZE SCALABILITY FOR INTEGRATED GRAPHICS
+• Goal: >= 60 FPS Average at 720p 100% Very Low • Try:
+• Use DXGI_FORMAT_R11G11B10_FLOAT rather than DXGI_FORMAT_R16G16B16A16_FLOAT
+• Reduce shadow map quality • Reduce volumetric fog quality • Disable Ambient Occlusion • For Unreal Engine • r.SceneColorFormat • r.AmbientOcclusionLevels=0
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 44
+
+USE PROPER VIDEO MEMORY BUDGET FOR APU
+• AGS SDK 5.4 • Added isAPU flag. • If true, set the video memory budget to sharedMemoryInBytes for APU (AMD Accelerated Processing Unit with integrated graphics). • If false, set the video memory budget to localMemoryInBytes for discrete GPU. • Example: • unsigned long long memory_budget = (device.isAPU)? device.sharedMemoryInBytes: device.localMemoryInBytes; • See https://gpuopen.com/ags-sdk-5-4-improves-handlingvideo-memory-reporting-apus/
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 45
+
+VERIFY PARALLEL DX12 PIPELINE STATE CREATION
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 46
+
+VERIFY PARALLEL DX12 PIPELINE STATE CREATION
+• Game shows parallel DX12 Pipeline State Creation. • Performance of binary compiled with:
+• Microsoft® Visual Studio 2019 v16.4.5. • UnrealEngine-4.24.2-release from
+https://github.com/EpicGames/UnrealEngine • Windows (64-bit) Packaged Project “Infiltrator Demo” from Epic
+Games Store; https://www.unrealengine.com/marketplace/enUS/product/infiltrator-demo • Testing done by AMD technology labs, February 18, 2020 on the following system. Test configuration: AMD Ryzen™ 9 3950X Processor, AMD Wraith Prism Cooler, 16GB (2 x 8GB DDR4-3200 at 22-22-22-52) memory, Radeon™ VII GPU with driver 20.1.4 (January 24, 2020), 2TB M.2 NVME SSD, AMD Ryzen™ Reference Motherboard, Windows® 10 x64 build 1909, 1920x1080 resolution. Actual results may vary.
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 47
+
+UE4.24 PARALLELIZED DX12 PIPELINE STATE CREATION 
+
+Before
+https://github.com/EpicGames/UnrealEngine/blob/ 4.23/Engine/Source/Runtime/D3D12RHI/Private/ D3D12Pipelinestate.cpp#L473
+
+After https://github.com/EpicGames/UnrealEngine/blob/4.24/ Engine/Source/Runtime/D3D12RHI/Private/D3D12Pipeli nestate.cpp#L488
+Hello Parallelism! 
+
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 48
+
+TEST COLD SHADER CACHE
+
+• Using a cold shader cache may simplify verifying if D3D12.dll!CDevice::CreatePipelineSta te was called in parallel.
+• Install the Windows® SDK Windows® Performance Toolkit. Add the GPUView folder to the PATH.
+• Applications and games may vary configurations of shader caches on disk yielding different results.
+• Results may vary based on GPU vendor & driver versions used.
+
+rmdir /s /q "%LOCALAPPDATA%\D3DSCache" rmdir /s /q "%LOCALAPPDATA%\AMD\DxCache" rmdir /s /q "%LOCALAPPDATA%\AMD\VkCache" rmdir /s /q "%LOCALAPPDATA%\AMD\GLCache"
+call log.cmd
+pushd "C:\WindowsNoEditor" start InfiltratorDemo.exe -dx12 popd
+timeout.exe /t 10
+call log.cmd
+
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 49
+
+Cold shader cache shown. Add CPU Usage (Precise). Add Flame Graph, Find all D3D12.dll!CDevice::CreatePipelineState. See parallelism highlighted in CPU Usage (Precise). This is easiest to find using a cold shader cache.
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 50
+
+Warm shader cache shown. See parallelism highlighted in CPU Usage (Precise).
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 51
+
+VERIFY PARALLEL DX12 COMMAND LIST GENERATION
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 52
+
+VERIFY PARALLEL DX12 COMMAND LIST GENERATION
+• Game shows parallel DX12 Command List Generation. • Performance of binary compiled with:
+• Microsoft® Visual Studio 2019 v16.4.5. • UnrealEngine-4.24.2-release from
+https://github.com/EpicGames/UnrealEngine • Windows (64-bit) Packaged Project “Infiltrator Demo” from Epic
+Games Store; https://www.unrealengine.com/marketplace/enUS/product/infiltrator-demo • Testing done by AMD technology labs, February 13, 2020 on the following system. Test configuration: AMD Ryzen™ 9 3950X Processor, AMD Wraith Prism Cooler, 16GB (2 x 8GB DDR4-3200 at 22-22-22-52) memory, Radeon™ VII GPU with driver 20.1.4 (January 24, 2020), 2TB M.2 NVME SSD, AMD Ryzen™ Reference Motherboard, Windows® 10 x64 build 1909, 1920x1080 resolution. Actual results may vary.
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 53
+
+Run: InfiltratorDemo.exe -dx12 Run as admin: timeout.exe /t 5 call log.cmd timeout.exe /t 3 call log.cmd Open merged.etl using the Windows® Performance Analyzer. Zoom to single frame using Present markers. Move CPU Column next to Task Name then filter and expand CommandList.
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 54
+
+USE BEST PRACTICES WITH LOCKS
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 55
+
+SUMMARY
+
+• Use modern OS synchronization APIs • Recommended: • std::mutex • std::shared_mutex • SRWLock • EnterCriticalSection • May allow more efficient scheduling and longer battery life
+
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 56
+
+SUMMARY
+
+• Otherwise, for user spin locks: • Use the pause instruction • Alignas(64) lock variable • Test and test-and-set • Avoid lock prefix instructions • The OS may be unaware that threads are spinning; scheduling efficiency and battery life may be lost • Use spin locks only if held for a very short time
+
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 57
+
+“ZEN 1” PERFORMANCE
+
+Elapsed Time (ms)
+
+1,800,000 1,600,000 1,400,000 1,200,000 1,000,000
+800,000 600,000 400,000 200,000
+-
+
+Ryzen™ 7 2700X Locks Benchmark
+(less is better)
+6921%
+105% 100% 100% 100% 101% 108%
+
+• Binaries compiled using best practices show improved performance.
+• Performance of binary compiled with Microsoft Visual Studio 2019 v16.4.5.
+• Testing done by AMD technology labs, February 13, 2020 on the following system. Test configuration: AMD Ryzen™ 7 2700X Processor, AMD Wraith Prism Cooler, 16GB (2 x 8GB DDR4-2667 at 20-19-19-43) memory, Radeon™ RX 5700 XT GPU with driver 20.1.4 (January 24, 2020), 512GB M.2 NVME SSD, AMD Ryzen™ Reference Motherboard, Windows® 10 x64 build 1909, 1920x1080 resolution. Actual results may vary.
+
+binary
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 58
+
+“ZEN 2” PERFORMANCE
+
+Elapsed Time (ms)
+
+29,000 28,000 27,000 26,000 25,000 24,000 23,000 22,000 21,000
+
+119%
+
+Ryzen™ 7 3700X Locks Benchmark
+(less is better)
+
+110%
+
+100% 100% 100% 100% 101%
+
+binary
+
+• “Zen 2” improved SMT fairness for ALU schedulers.
+• This helps mitigate bad user spin lock code .
+• Binaries compiled using best practices show improved performance.
+• Performance of binary compiled with Microsoft Visual Studio 2019 v16.4.5.
+• Testing done by AMD technology labs, February 13, 2020 on the following system. Test configuration: AMD Ryzen™ 7 3700X Processor, AMD Wraith Prism Cooler, 16GB (2 x 8GB DDR4-3200 at 22-22-22-52) memory, Radeon™ RX 5700 XT GPU with driver 20.1.4 (January 24, 2020), 512GB M.2 NVME SSD, AMD Ryzen™ Reference Motherboard, Windows® 10 x64 build 1909, 1920x1080 resolution. Actual results may vary.
+
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 59
+
+“ZEN 2” PERFORMANCE
+
+Ryzen™ 7 3700X
+
+Locks Benchmark
+
+(higher is better)
+
+100%
+
+91% 91% 91% 91% 93%
+
+90%
+
+80%
+
+70%
+
+60%
+
+50%
+
+40% 30%
+
+23%
+
+20% 10%
+
+5%
+
+0%
+
+• Binaries compiled using best practices shows improved idle.
+• Performance of binary compiled with Microsoft Visual Studio 2019 v16.4.5.
+• Testing done by AMD technology labs, February 13, 2020 on the following system. Test configuration: AMD Ryzen™ 7 3700X Processor, AMD Wraith Prism Cooler, 16GB (2 x 8GB DDR4-3200 at 22-22-22-52) memory, Radeon™ RX 5700 XT GPU with driver 20.1.4 (January 24, 2020), 512GB M.2 NVME SSD, AMD Ryzen™ Reference Motherboard, Windows® 10 x64 build 1909, 1920x1080 resolution. Actual results may vary.
+
+%idle
+
+binary
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 60
+
+PROFILING
+• Use AMD uProf to find possible user spin locks • AMD uProf v3.2 "Assess Performance (Extended)" Event Based Sampling Profile • ALUTokenStall PTI • >= 3K Per Thousand Instructions is bad for top functions • Replace user spin locks with modern OS synchronization APIs when possible. Otherwise, use best practices.
+• Use Microsoft Windows® Performance Analyzer to find call stacks using OS synchronization APIs • rem Recommend using public Microsoft symbol server • rem _NT_SYMBOL_PATH=srv*http://msdl.microsoft.com/download/symbols • rem “–start gpu –start video” wpr profiles are useful for game analysis for short durations • wpr.exe –setprofint 1221 –start power –filemode • test.exe • wpr.exe –stop log.etl
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 61
+
+EXAMPLES SHARED CODE
+
+#include "intrin.h" #include "stdio.h" #include "windows.h" #include <chrono> #include <numeric> #include <thread> #include <mutex> #include <shared_mutex>
+#define LEN 512 alignas(64) float b[LEN][4][4]; alignas(64) float c[LEN][4][4];
+int main(int argc, char* argv[]) { using namespace std::chrono; float b0 = (argc > 1) ? strtof(argv[1], NULL) : 1.0f; float c0 = (argc > 2) ? strtof(argv[2], NULL) : 2.0f; std::fill((float*)b, (float*)(b + LEN), b0); std::fill((float*)c, (float*)(c + LEN), c0); int num_threads = std::thread::hardware_concurrency(); HANDLE* threads = new HANDLE[num_threads];
+
+high_resolution_clock::time_point t0 = \ high_resolution_clock::now();
+for (size_t i = 0; i < num_threads; ++i) { threads[i] = CreateThread(NULL, \ 0, ThreadProcCallback, NULL, 0, NULL);
+} WaitForMultipleObjects(num_threads, \
+threads, TRUE, INFINITE);
+high_resolution_clock::time_point t1 = \ high_resolution_clock::now();
+duration<double> time_span = \ duration_cast<duration<double>>(t1 - t0);
+printf("time (milliseconds): %lf\n", \ 1000.0 * time_span.count());
+delete[] threads; return EXIT_SUCCESS; }
+
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 62
+
+EXAMPLE 1 BAD USER SPIN LOCK
+
+namespace MyLock {
+
+typedef unsigned LOCK, * PLOCK;
+
+enum { LOCK_IS_FREE = 0, LOCK_IS_TAKEN = 1 };
+
+void Lock(PLOCK pl) {
+
+while (LOCK_IS_TAKEN == \
+
+_InterlockedCompareExchange( \
+
+pl, LOCK_IS_TAKEN, LOCK_IS_FREE)) {
+
+} } void Unlock(PLOCK pl) {
+
+Warning! Not best practices for spin lock.
+
+_InterlockedExchange(pl, LOCK_IS_FREE);
+
+}
+
+}
+
+alignas(64) MyLock::LOCK gLock; DWORD WINAPI ThreadProcCallback(LPVOID data) {
+alignas(64) float a[LEN][4][4]; std::fill((float*)a, (float*)(a + LEN), 0.0f); float r = 0.0; for (size_t iter = 0; iter < 100000; iter++) {
+MyLock::Lock(&gLock); for (int m = 0; m < LEN; m++)
+for (int i = 0; i < 4; i++) for (int j = 0; j < 4; j++) for (int k = 0; k < 4; k++) a[m][i][j] += b[m][i][k] * c[m][k][j];
+r += std::accumulate((float*)a, \ (float*)(a + LEN), 0.0f);
+MyLock::Unlock(&gLock); } printf("result: %f\n", r); return 0; }
+
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 63
+
+Warning! 3K ALU Token Stalls PTI!
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 64
+
+Warning! 26K ALU Token Stalls PTI!
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 65
+
+Warning! No pause instruction
+in spin loop! 
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 66
+
+EXAMPLE 2 IMPROVED USER SPIN LOCK
+
+namespace MyLock {
+
+typedef unsigned LOCK, * PLOCK;
+
+enum { LOCK_IS_FREE = 0, LOCK_IS_TAKEN = 1 };
+
+void Lock(PLOCK pl) {
+
+while ((LOCK_IS_TAKEN == *pl) || \
+
+(LOCK_IS_TAKEN == \
+
+_InterlockedExchange(pl, LOCK_IS_TAKEN))) {
+
+_mm_pause(); } }
+
+Good! Applied best practices for spin lock.
+
+void Unlock(PLOCK pl) {
+
+_InterlockedExchange(pl, LOCK_IS_FREE);
+
+}
+
+}
+
+alignas(64) MyLock::LOCK gLock; DWORD WINAPI ThreadProcCallback(LPVOID data) {
+alignas(64) float a[LEN][4][4]; std::fill((float*)a, (float*)(a + LEN), 0.0f); float r = 0.0; for (size_t iter = 0; iter < 100000; iter++) {
+MyLock::Lock(&gLock); for (int m = 0; m < LEN; m++)
+for (int i = 0; i < 4; i++) for (int j = 0; j < 4; j++) for (int k = 0; k < 4; k++) a[m][i][j] += b[m][i][k] * c[m][k][j];
+r += std::accumulate((float*)a, \ (float*)(a + LEN), 0.0f);
+MyLock::Unlock(&gLock); } printf("result: %f\n", r); return 0; }
+
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 67
+
+Good! Low ALU Token Stalls PTI.
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 68
+
+Good! Low ALU Token Stalls PTI.
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 69
+
+Good! Pause instruction in spin
+loop.
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 70
+
+EXAMPLE 3 STD::MUTEX
+
+// MyLock not required. Let the OS do the work!
+
+std::mutex mutex; DWORD WINAPI ThreadProcCallback(LPVOID data) {
+alignas(64) float a[LEN][4][4]; std::fill((float*)a, (float*)(a + LEN), 0.0f); float r = 0.0; for (size_t iter = 0; iter < 100000; iter++) {
+mutex.lock(); for (int m = 0; m < LEN; m++)
+for (int i = 0; i < 4; i++) for (int j = 0; j < 4; j++) for (int k = 0; k < 4; k++) a[m][i][j] += b[m][i][k] * c[m][k][j];
+r += std::accumulate((float*)a, \ (float*)(a + LEN), 0.0f);
+mutex.unlock(); } printf("result: %f\n", r); return 0; }
+
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 71
+
+Found msvcp140.dll mtx_do_lock. 
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 72
+
+EXAMPLE 4 STD::SHARED_MUTEX
+
+// MyLock not required. Let the OS do the work!
+
+std::shared_mutex mutex; DWORD WINAPI ThreadProcCallback(LPVOID data) {
+alignas(64) float a[LEN][4][4]; std::fill((float*)a, (float*)(a + LEN), 0.0f); float r = 0.0; for (size_t iter = 0; iter < 100000; iter++) {
+mutex.lock(); for (int m = 0; m < LEN; m++)
+for (int i = 0; i < 4; i++) for (int j = 0; j < 4; j++) for (int k = 0; k < 4; k++) a[m][i][j] += b[m][i][k] * c[m][k][j];
+r += std::accumulate((float*)a, \ (float*)(a + LEN), 0.0f);
+mutex.unlock(); } printf("result: %f\n", r); return 0; }
+
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 73
+
+The compiler has substituted
+std::shared_mutex lock() for SRWLock.
+
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 74
+
+EXAMPLE 5 SRWLOCK
+
+// MyLock not required. Let the OS do the work!
+
+SRWLOCK lock; DWORD WINAPI ThreadProcCallback(LPVOID data) {
+alignas(64) float a[LEN][4][4]; std::fill((float*)a, (float*)(a + LEN), 0.0f); float r = 0.0; for (size_t iter = 0; iter < 100000; iter++) {
+AcquireSRWLockExclusive(&lock); for (int m = 0; m < LEN; m++)
+for (int i = 0; i < 4; i++) for (int j = 0; j < 4; j++) for (int k = 0; k < 4; k++) a[m][i][j] += b[m][i][k] * c[m][k][j];
+r += std::accumulate((float*)a, \ (float*)(a + LEN), 0.0f);
+ReleaseSRWLockExclusive(&lock); } printf("result: %f\n", r); return 0; } int main(int argc, char* argv[]) { InitializeSRWLock(&lock); // ...
+
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 75
+
+Found ntdll.dll RtlAcquireSRWLock
+Exclusive. 
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 76
+
+EXAMPLE 6 CRITICAL SECTION
+
+// MyLock not required. Let the OS do the work!
+
+CRITICAL_SECTION cs; DWORD WINAPI ThreadProcCallback(LPVOID data) {
+alignas(64) float a[LEN][4][4]; std::fill((float*)a, (float*)(a + LEN), 0.0f); float r = 0.0; for (size_t iter = 0; iter < 100000; iter++) {
+EnterCriticalSection(&cs); for (int m = 0; m < LEN; m++)
+for (int i = 0; i < 4; i++) for (int j = 0; j < 4; j++) for (int k = 0; k < 4; k++) a[m][i][j] += b[m][i][k] * c[m][k][j];
+r += std::accumulate((float*)a, \ (float*)(a + LEN), 0.0f);
+LeaveCriticalSection(&cs); } printf("result: %f\n", r); return 0; } int main(int argc, char* argv[]) { InitializeCriticalSection(&cs); // ...
+
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 77
+
+Found ntdll.dll RtlpEnterCriticalSection.
+
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 78
+
+EXAMPLE 7 WAITFORSINGLEOBJECT
+
+// MyLock not required. Let the OS do the work!
+
+HANDLE hMutex; DWORD WINAPI ThreadProcCallback(LPVOID data) {
+alignas(64) float a[LEN][4][4]; std::fill((float*)a, (float*)(a + LEN), 0.0f); float r = 0.0; for (size_t iter = 0; iter < 100000; iter++) {
+WaitForSingleObject(hMutex, INFINITE); for (int m = 0; m < LEN; m++)
+for (int i = 0; i < 4; i++) for (int j = 0; j < 4; j++) for (int k = 0; k < 4; k++) a[m][i][j] += b[m][i][k] * c[m][k][j];
+r += std::accumulate((float*)a, \ (float*)(a + LEN), 0.0f);
+ReleaseMutex(hMutex); } printf("result: %f\n", r); return 0; } int main(int argc, char* argv[]) { hMutex = CreateMutex(NULL,FALSE,NULL); // ...
+
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 79
+
+Found kernelbase.dll WaitForSingleObject. Recommending investigating if replacing WaitForSingleObject with SRWLock or similar is possible in these call stacks.
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 80
+
+REMINDER
+
+• Recommended modern OS synchronization APIs: • std::mutex • std::shared_mutex • SRWLock • EnterCriticalSection
+
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 81
+
+REORDER HOT STRUCT MEMBERS
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 82
+
+SUMMARY
+• Use AMDuProf to find plateaus of hot functions where there are many Data Cache refills from DRAM.
+• If the hot function includes a loop which indirectly accesses struct data members spread over many cache lines, try reordering the struct.
+
+#if 0 /* bad */ struct S { double x, y, z, w; char name[256]; double s, t, u, v;}; #else /* good */ struct S { double x, s, y, z, w; char name[256]; double t, u, v;}; #endif for (size_t i = 0; i < list.size(); i++) {
+const S* e = list[i]; foo(e->x); bar(e->s); }
+
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 83
+
+PERFORMANCE
+
+Average FPS
+
+3rd Gen AMD Ryzen(tm) Engineering Sample manufactured with 4MB L3 Cache, NVidia®
+GeForce® RTX 2080 Ti, KaplaDemo (higher is better)
+
+160 141
+
+140
+
+126
+
+120
+
+100
+
+80
+
+60
+
+40
+
+20
+
+0 before
+
+reorder
+
+binary
+
+• 12% faster after optimization!
+• Performance of binaries compiled with Microsoft Visual Studio 2019 v16.4.5.
+• Testing done by AMD technology labs, February 15, 2020 on the following system. Test configuration: 3rd Gen AMD Ryzen™ Engineering Sample manufactured with 4MB L3 Cache, AMD Wraith Prism Cooler, 16GB (2 x 8GB DDR4-3200 at 22-22-22-52) memory, NVidia® GeForce® RTX 2080 Ti GPU with driver 441.87 (December 24, 2019), 2TB M.2 NVME SSD, AMD Ryzen™ Reference Motherboard, Windows® 10 x64 build 1909, 1920x1080 resolution. Actual results may vary.
+
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 84
+
+Found three large plateaus at getGlobalPose using many CPU clocks.
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 85
+
+These same functions have many refills from DRAM.
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 86
+
+No loop iteration found in
+getGlobalPose. But there are many cache accesses
+where misses are refilled from DRAM
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 87
+
+Loading mPxActor doesn’t appear to
+use many CPU Clocks. But loading mLocalPose used many CPU Clocks
+and shows many refills from DRAM.
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 88
+
+Found loop calling getGlobalPose in
+the call stack.
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 89
+
+mMaterialOffset has refills from DRAM in
+hot loop too.
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 90
+
+mSurfaceMaterialId & mMaterialId have refills from DRAM in
+hot loop too.
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 91
+
+CODE SAMPLE
+// Before Reorder Optimization
+protected: void clear();
+… Compound *mParent; PxRigidActor *mPxActor; PxTransform mLocalPose; PxConvexMesh *mPxConvexMesh;
+PxBounds3 mBounds; mutable float mVolume; mutable bool mVolumeDirty; PxVec3 mMaterialOffset; float mTexScale; int mModelIslandNr; …
+
+Copyright (c) 2019 NVIDIA Corporation. All rights reserved https://github.com/NVIDIAGameWorks/PhysX/tree/4.1/physx ConvexBase.h
+// After Reorder Optimization
+protected: // Reorder Begin PxRigidActor* mPxActor; PxTransform mLocalPose; PxVec3 mMaterialOffset; int mSurfaceMaterialId; int mMaterialId; // Reorder End
+void clear(); void finalize(); void updateBounds(); void updatePlanes(); …
+
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 92
+
+WINDBG
+
+Copyright (c) 2019 NVIDIA Corporation. All rights reserved https://github.com/NVIDIAGameWorks/PhysX/tree/4.1/physx ConvexBase.h
+
+Before optimization hot data spread over many cache lines.
+
+WinDbg
+
+dt KaplaDemo!Convex
+
++0x000 __VFN_table : Ptr64
+
++0x008 mScene
+
+: Ptr64 physx::fracture::base::SimScene
+
+…
+
++0x0f8 mPxActor : Ptr64 physx::PxRigidActor
+
++0x100 mLocalPose : physx::PxTransform
+
+…
+
++0x148 mMaterialOffset : physx::PxVec3
+
+…
+
++0x160 mMaterialId : Int4B
+
++0x164 mSurfaceMaterialId : Int4B
+
+…
+
+After optimization hot data spread on one cache line if struct aligned.
+
+WinDbg
+
+dt KaplaDemo!Convex
+
++0x000 __VFN_table : Ptr64
+
++0x008 mPxActor : Ptr64 physx::PxRigidActor
+
++0x010 mLocalPose : physx::PxTransform
+
++0x02c mMaterialOffset : physx::PxVec3
+
++0x038 mSurfaceMaterialId : Int4B
+
++0x03c mMaterialId : Int4B
+
++0x040 mScene
+
+: Ptr64 physx::fracture::base::SimScene
+
+…
+
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 93
+
+ACCESS PATTERN BEFORE OPTIMIZATION
+
+• Contiguous array of pointers (8 Bytes) to data structures (372 Bytes each) with similar byte offset accesses.
+
+0 Pointer
+
+1 Pointer
+
+2 Pointer
+
+3 Pointer
+
+4 Pointer
+
+5 Pointer
+
+Byte Offset Byte Offset Byte Offset Byte Offset Byte Offset Byte Offset
+
+Data Structure
+
+-1
+
+0
+
+1
+
+0
+
+64
+
+128
+
+192
+
+256 320
+
+384
+
+Data Structure
+
+-1
+
+0
+
+1
+
+0
+
+64
+
+128
+
+192
+
+256 320
+
+384
+
+Data Structure
+
+-1
+
+0
+
+1
+
+0
+
+64
+
+128
+
+192
+
+256 320
+
+384
+
+Data Structure
+
+-1
+
+0
+
+1
+
+0
+
+64
+
+128
+
+192
+
+256 320
+
+384
+
+Data Structure
+
+-1
+
+0
+
+1
+
+0
+
+64
+
+128
+
+192
+
+256 320
+
+384
+
+Data Structure
+
+-1
+
+0
+
+1
+
+0
+
+64
+
+128
+
+192
+
+256 320
+
+384
+
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 94
+
+ACCESS PATTERN AFTER OPTIMIZATION
+
+• Contiguous array of pointers (8 Bytes) to data structures (372 Bytes each) with similar byte offset accesses.
+
+0 Pointer
+
+1 Pointer
+
+2 Pointer
+
+3 Pointer
+
+4 Pointer
+
+5 Pointer
+
+Byte Offset Byte Offset Byte Offset Byte Offset Byte Offset Byte Offset
+
+Data Structure
+
+-1
+
+0
+
+1
+
+0
+
+64
+
+128
+
+192
+
+256 320
+
+384
+
+Data Structure
+
+-1
+
+0
+
+1
+
+0
+
+64
+
+128
+
+192
+
+256 320
+
+384
+
+Data Structure
+
+-1
+
+0
+
+1
+
+0
+
+64
+
+128
+
+192
+
+256 320
+
+384
+
+Data Structure
+
+-1
+
+0
+
+1
+
+0
+
+64
+
+128
+
+192
+
+256
+
+320
+
+384
+
+Data Structure
+
+-1
+
+0
+
+1
+
+0
+
+64
+
+128
+
+192
+
+256
+
+320
+
+384
+
+Data Structure
+
+-1
+
+0
+
+1
+
+0
+
+64
+
+128
+
+192
+
+256
+
+320
+
+384
+
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 95
+
+Before Optimization.
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 96
+
+After Optimization. Plateaus are relatively smaller for
+updateTransformations.
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 97
+
+Before Optimization.
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 98
+
+After Optimization. Plateaus are relatively smaller for
+updateTransformations.
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 99
+
+Before Optimization.
+AMD PUBLIC | LET’S BUILD… 2020 | AMD RYZEN™ PROCESSOR SOFTWARE OPTIMIZATION | MAY 15, 2020 | 100
+

@@ -1,0 +1,716 @@
+Dallas, August 18-22
+
+Volume 20, Number 4, 1986
+
+I
+
+I
+
+A RADIOSITY METHODFOR NON-DIFFUSE ENVIRONMENTS
+David S. Immel, Michael F. Cohen, Donald P. Greenberg Cornell University Ithaca, N.Y. 14853
+
+ABSTRACT
+A general radiosity method accounting for all interreflections of light between diffuse and nondiffuse surfaces in complex environments is i n t r o duced. As contrasted with previous r a d i o s i t y methods, surfaces are no longer required to be perfectly diffuse reflectors and emitters. A complete, viewer independent description of the light leaving each surface in each direction is computed, allowing dynamic sequences of images to be rendered with l i t t l e additional computation per image. Phenomena such as "reflection tracking", reflections following a moving observer across a
+specular surface are produced. Secondary l i g h t sources, such as the light from a spotlight reflecting off a mirror onto a wail are also accounted for.
+
+CR Categories and Subject Descriptors: 1.3.7
+
+[Computer Graphics]: Three-Dimensional Graphics
+
+and Realism:
+
+1.3.3 [Computer Graphics]:
+
+Picture/Image Generation
+
+General Terms: Algorithms
+
+Additional Keywords and Phrases: Radiosity, intensity, bi-directional reflectance, hiddensurface, depth buffer, non-diffuse reflection.
+INTRODUCTION
+The production of r e a l i s t i c images requires the a b i l i t y to simulate the propagation of light in an environment. This requires two steps: modeling the interaction of l i g h t with an individual surface and combining the effects of emission, transmission and reflection between a l l the surfaces in the environment. In the past, computer generated pictures were obtained by simulating how l i g h t is reflected from an individual surface, ignoring the interreflections from surface to surface. A number of reflection models were developed, ranging from a simple Lambertian diffuse
+
+Permission to copy without fee all or part of this material is granted provided that the copies are not made or distributed for direct commercial advantage, the ACM copyright notice and the title of the publication and its date appear, and notice is given that copying is by permission of the Association for Computing Machinery. To copy otherwise, or to republish, requires a fee and/or specific permission.
+
+© 1986
+
+ACM0-89791-196-2/86/008/0133
+
+$00.75
+
+model in which a l l l i g h t is reflected with equal intensity in all directions, to more complex models including non-uniform specular d i s t r i butions based on geometric and electromagnetic properties of the surface. For any given reflection model, images were created by determining the visible surface at each screen pixel location, and then computing the intensity of l i g h t leaving that surface in the direction of the eye. T h i s intens i t y was t y p i c a l l y found f r o m the geometric relationships between the visible surface, the light sources, and the eye.
+Ray-tracing was the f i r s t method introduced which attempted to include the effects of shadowing and reflections from neighboring surfaces [1]. In ray-tracing, an additional intensity contribution from secondary reflected and transmitted rays is added from the mirror and refracted directions. The fact that a limited number of rays are traced from the eye into the environment precludes the a b i l i t y to completely account for the global illumination arising from complex interreflections within the environment.
+Although ray-tracing techniques have been able to produce s t r i k i n g l y r e a l i s t i c images, only radiosity methods can account for the complex d i f fuse interreflections within an environment. The radiosity method, borrowed from thermal engineering techniques [2] [3], was introduced in the context of computer graphics by Goral in 1984 [4] and was extended for use in complex environments by Cohen [5] [6] and Nishita [7]. T h i s method is based on the fundamental Law of Conservation of Energy within closed systems. I t entails perfor-
+ming a simultaneous global solution for the intensity of l i g h t leaving each surface by constructing and solving a set of linear equations describing the transfer of diffuse l i g h t energy between all surfaces. Calculations are performed independently for any number of discrete wavelength bands. The advantages of t h i s method are the increased accuracy in simulating the global i l l u mination effects and the fact that a l l of the intensity calculations are independent of viewing parameters, thus allowing e f f i c i e n t rendering of dynamic sequences.
+An underlying assumption in a l l previous radiosity methods has been that a l l surfaces exhibit perfect Lambertian diffuse reflections. Environments c o u l d not contain surfaces with specular properties. T h i s paper demonstrates a method which removes this restriction by generalizing the radiosity formulation to include
+
+133
+
+//
+
+S I G G R A P H '86
+
+directional reflection properties, while s t i l l maintaining the advantages of accurate global illumination and view independence.
+To correctly determine the illumination of an environment, one must simulate the spatial and spectral intensity distribution of light leaving each d i f f e r e n t i a l surface area (or point) within the environment. There are two requirements to predict this intensity distribution. First, the spatial and spectral d i s t r i b u t i o n of the l i g h t arriving at the point must be specified. This
+"incident" l i g h t is a function of the point's geometric relationship to a l l other surfaces in the environment and the l i g h t leaving those surfaces in the direction of the point. Second, a reflection model must be specified which describes how l i g h t of any spectral content, which arrives from any arbitrary direction, is scattered from the surface. This may include transmission as well as reflection and is usually referred to as the bidirectional reflectance of a surface. Since the l i g h t arriving at any surface is a function of the l i g h t leaving a l l other surfaces, i t is apparent that a simultaneous solution for the global illumination must be performed.
+The solution would contain a l l of the i n f o r mation necessary to render an image of any part of the environment from any viewpoint. As with standard diffuse radiosity solutions, the complex interreflections within an environment are correctly modeled, yielding "color bleeding" effects, which occur when one surface acts to illuminate another surface, as well as s o f t shadows and penumbrae, which are associated with area l i g h t sources. The new procedure for non-diffuse environments inherently contains additional directional phenomena such as specular reflections, which follow the viewer as the eye position changes. This "reflection tracking" can be seen by moving your head from side to side while looking at a shiny surface. Secondary l i g h t sources, such as the l i g h t from a spot l i g h t bouncing o f f a mirror onto the f l o o r , are also accounted f o r . This source of secondary i l l u m i nation has been ignored by a l l previous image
+synthesis methods.
+
+THEORETICAL CONCEPTS
+The intensity of a point in a certain direction, or "directional i n t e n s i t y " , is the sum of the total reflected intensity from the point in that direction and, i f the surface is an emitter, the l i g h t intensity emitted from the point in that direction:
+
+/,(~o) =/,(~o) +/,(~o)
+
+(i)
+
+Figure 1 shows the hemisphere of directions surrounding the normal to a point, or d i f f e r e n t i a l area, dAl , through which and f r o m which i t receives and reflects l i g h t . The intensity emitted d i r e c t l y from ~ l i n outgoing direction o is
+simply:
+
+[,('~Foj) = el(~IJo.1)
+
+(2)
+
+The subscript 1 has been added to indicate that the emittance and reflected i n t e n s i t y terms emanate from surface 1.
+
+Table 1 D eflnition of Terms
+W represents a vector direction to or from a surface.
+~Fi.1 = i n c o m i n g direction to surface 1 ~i.2 = incoming direction to surface 2 ~Po.l = incoming direction from surface 1 "Fo.2 = i n c o m i n g d i r e c t i o n from surface 2 8t = angle away from the normal to surface 1 El = directional emission from surface 1 p'~ = bidirectional refletance of surface 1 dz01 = differential solid angle a r o u n d surface 1 Ei.l = energy incident to surface 1 I,j = intensity reflected from surface 1 I,.~ = intensity emitted from surface 1 I,.1 = total directional intensity leaving surface 1 I,.2 = total directional intensity leaving surface 2 flea = total solid angle encompassing surface 2
+when viewed from surface 1
+
+•
+
+I energy
+
+J
+
+Hemisphere
+
+of Directions to a Differential Area
+FIGURE 1
+
+The spectral and spatial d i s t r i b u t i o n of the reflected light is a function of the material properties of the surface from which it reflects. The l i g h t i n t e n s i t y r e f l e c t e d from a p o i n t can be found given a f u l l d e s c r i p t i o n of the l i g h t arriving at that point and the surface's bidirectional reflectance. The bidirectional reflectance of a surface defines the relationship between the l i g h t energy arriving at some point and the intensity of light leaving that point:
+
+I,
+
+#':
+
+(3)
+
+The t o t a l incoming energy i s a f u n c t i o n of the incoming intensity li, the solid angle ~i through which i t a r r i v e s , and the projected d i f f e r e n t i a l area. The incoming energy per u n i t area from direction ~IJiis thus:
+
+Ei(~'IJl) = li(~IJi)cos~dcoi
+
+(4)
+
+The r e f l e c t e d i n t e n s i t y in d i r e c t i o n To from energy incident from direction '~I~iis therefore:
+
+1,(%, ~ ) = p"(~o, ~DLcos~,~.oi
+
+(5)
+
+134
+
+Dallas, August 18-22
+
+Volume 20, Number 4, 1986
+
+Consider an environment consisting of only two surfaces, A i and Az (Figure 2). Intensity radiates from d i f f e r e n t i a l area ~L~l in direction o due to both emission and r e f l e c t i o n . The reflected i n t e n s i t y in the outgoing direction results from energy a r r i v i n g a t ~ 1 fromA2. Let Ii.i be the incident i n t e n s i t y through solid angle ~ . By integrating Equation 5 over the solid angle encompassing area A2, the total i n t e n s i t y reflected in direction o due to the l i g h t energy a r r i v i n g from A2 i s :
+[r(~'iJ°'l) = fnl., ~Od~(~'~°'~'l'Tffi'l)[i'l(~'ili'l)c°sOi'ld~'Oi'l (6 )
+
+-I
+
+Outgoing intensity
+
+~/
+
+from dL~z,
+
+/ / o.2
+
+A2
+
+][o, l
+
+1
+
+/
+
+/ Outgoing intensities from
+
+i,i intensities to dA r
+
+In Equation 6, the incoming intensities,
+
+Ii.l , result from and are equal to the outgoing
+
+intensities, ItS , fromA2:
+
+A~
+
+i~ i ( ~ : ) =/,~(%,=)
+
+(7)
+
+A simple en~ro~ment of two surfaces, each
+
+Substituting the outgoing i n t e n s i t i e s from A2 f o r
+
+w i t h its o w n set of directions.
+
+the incoming i n t e n s i t i e s to ~ I , Equation 6 becomes:
+z'(%a) = / a i.=Pl"(~iJo.l,~'iJi,t)l t,2(~ffo.2)c°s~,ldcoi,1 (8)
+
+FIGURE 2
+d i r e c t i o n a l i n t e n s i t y in d i r e c t i o n f then becomes i t s emission in d i r e c t i o n f plus the sum of the reflected intensities from discrete directions d,
+
+Therefore, the directional intensity from surface dAl in d i r e c t i o n o i s the sum of the
+emitted i n t e n s i t y (Equation 2) and the reflected intensity (Equation 8):
+
+which encompasses the hemisphere above the patch (Equation 10). d- I represents the outgoing directions from patch 2 which point towards patch I , and are thus in the opposite d i r e c t i o n from d.
+D
+
+I,,1(~'lJol,) = ~(~'laot,) + / P~(~lJo.t,~'IJi,l)ILl(~'lJi,l)cos~,Idg.ot,l (~)
+
+/, t(f) = etV') + ~ # i ' ( f , m / , ~ ( a - 1 ) c ~ e ~ ClO)
+d: 1 Figure 3 shows the results of two incoming
+
+Similar equations define i n t e n s i t i e s leaving
+
+directions with several outgoing directions from a patch.
+
+~ t for a l l other directions within the hemisphere in the simple two-surface environment considered above. Each outgoing directional i n t e n s i t y from
+
+A set of simultaneous l i n e a r equations can now be formed, defining the unknown d i r e c t i o n a l intensities for all directions, given the bidirec-
+
+~ is a function of the directional intensities
+
+t i o n a l reflectivities and emissions of each patch.
+
+leaving area A 2 . In an equivalent manner, the directional intensities leaving each differential
+
+So f a r , the method has been i l l u s t r a t e d by an environment consisting of only two surfaces. The
+
+area of Az are a function of the directional i n tensities leaving area A~. Thus, a l l of the outgoing directional i n t e n s i t i e s from both surfaces must be solved simultaneously.
+In addition to the directional v a r i a t i o n , intensities may vary continuously according to
+
+form of the relationships remains the same for
+
+dlstrlbuti~ more complex environments except that light
+
+incoming
+
+ipt=~=ity
+
+l
+
+spatial position across a surface, or according to
+
+wavelength across the v i s i b l e spectrum, since the
+
+spectral d i s t r i b u t i o n s and bidirectional reflec-
+
+tances are wavelength dependent. Thus, there are
+
+t h e o r e t i c a l l y an i n f i n i t e number of unknown inten-
+
+s i t y values to be simultaneously solved.
+
+The problem is made tractable by d i s c r e t i z i n g
+
+the surfaces, the v i s i b l e spectrum, and the hemi-
+
+sphere of incoming and outgoing directions. As
+
+with previous radiosity approaches, surfaces are
+
+divided into small discrete areas, or "patches",
+
+with the assumption that for each direction, the
+
+intensities arriving and leaving the patch are constant over the whole patch. The v i s i b l e spectrum is likewise divided into a small number
+
+/
+
+of wavelength bands. Each wavelength band is
+
+assumed to be independent f r o m each other,
+
+allowing a separate solution for the l i g h t i n t e r -
+
+ation for each band. The hemisphere above the patch is also dis-
+
+The outgoing distributions from all incoming energies are sumzl~ed, resulting in an aggregate distribution.
+
+cretized into a f i n i t e number of directions, or solid angles. Thus, for a particular patch, the
+
+FIGURE 3
+
+135
+
+S I G G R A P H '86
+
+arrives at a patch from many surfaces. An addi-
+
+tional problem arises from the possible occlusion
+
+of one patch from another due to intervening sur-
+
+faces. Thus, the directional i n t e n s i t i e s of each
+
+patch depend on the directional i n t e n s i t i e s of a l l
+
+other patches and the v i s i b i l i t y between them.
+
+Let N be the number of patches in an environment
+
+and D be the number of directions on the hemi-
+
+sphere. The outgoing i n t e n s i t y of a patch i is
+
+given by:
+
+N D
+
+z,, ~f) = ~i(f) + ~ ~ ' ( f , a)1,j(a-')cosOd~dZID(i d, d)
+
+j=l~=l
+
+(11)
+
+where
+
+I Patch i sccs patch j in direction d
+
+HID(i,j,d) = 0 Otherwise
+
+(12)
+
+for environments with hidden surfaces. At f i r s t glance, Equation 11 appears immen-
+sely more complicated than previous radiosity solutions, since i n t e n s i t i e s must be solved for each patch for each direction. However, certain properties of the matrix and the environment can be e f f e c t i v e l y exploited to obtain tractable solutions. For example, i f in an environment, there are 1000 patches, and the hemisphere of directions is divided into 1000 small solid angles, then there are 1,000,000 unknowns and 1,000,000 squared or I0x2 matrix c o e f f i c i e n t s . Fortunately, t h i s matrix is VERY sparse. This can easily be seen since each patch receives energy from only 1000 directions. T h u s , each row of the coefficient matrix has only 1000 non-zero HID terms, and the matrix is 99.9% sparse. In addition, i f some surfaces are d i f f u s e , each of t h e i r patches w i l l e x h i b i t a single constant directional i n t e n s i t y over a l l d i r e c t i o n s , and the 1000 d i r e c t i o n a l equations can be reduced to a single linear equat i o n . These facts are taken advantage of in the implementation, which is described in the
+following sections.
+PROGRAM OVERVIEW ~ ' i ~ e directional radiosity analysis is comprised of a series of separate steps analagous to previous diffuse radiosity methods (Figure 4 ) . F i r s t , the environment geometry and material properties such as the bidirectional reflectance must be specified. An additional i n i t i a l requirement for radiosity analyses is that each surface must be subdivided into discrete surface patches.
+The second step is to determine the geometric
+and v i s i b i l i t y relationship between every pair of patches in the environment.
+Given the set of equations, a simultaneous solution for the directional i n t e n s i t i e s of each patch is then performed. This global patch solution is then used along with the vertex to patch v i s i b i l i t y relationships to determine the directional intensity distribution at each vertex grid point on every surface. The resulting f u l l description of the i n t e n s i t y leaving each surface in a l l directions provides the means to render an image of the environment from any given viewpoint.
+Given an eye position and viewing direction, the i n t e n s i t i e s pointing back to the eye from each vertex are used to render an image. Succesive images of the environment can be rendered from
+different viewpoints.
+
+136
+
+-ModelLng m:id Mesb.i.nti (Interactive)
+• lobnl Cube Preprocessi (Non-interactive)
+
+E GlobalSolution (Non-interactive)
+
+New Eye |
+
+RenderizLg
+
+Position L (Non-interactive)
+
+Program Flow FIGURE 4
+
+2oj2 :;b;;:(Ztod
+
+\ \
+
+/ Everyotherpatch intheenvironment
+
+\
+
+J
+
+is projected onto the cube.
+
+FIGURE 5
+
+THE GLOBAL CUBE The l i g h t l e a v i n g a patch depends on the
+l i g h t a r r i v i n g at i t and the direction(s) from which i t arrives. This impinging l i g h t is the
+result of light leaving the other patches in the environment, and thus a determination must be made of which patches are v i s i b l e from each patch. Each patch has a view of i t s environment across the hemisphere of directions surrounding i t s normal. This continuum of directions is approximated by finding the v i s i b l e patches in a f i n i t e number of discrete solid angles which cumulatively are equivalent to the hemisphere.
+The hemisphere can be replaced by the upper half of a cube, or "hemi-cube" (Figure 5), creating f i v e separate 90 degree viewing frustums through which to project the environment [ 5 ] .
+
+Dallas, August 18-22
+
+Volume 20, Number 4, 1986
+
+Each surface of the cube becomes an imaginary screen which can be d i v i d e d i n t o small square c e l l s . Each of these cells defines a small solid angle of view from the patch at the center of the cube. Depth buffer algorithms are performed for each frustum to determine the patch "seen" through each c e l l . To obtain an accurate view of the environment from a patch, a series of sample points within the patch from which to view the environment are selected. A grid is established on the patch defining a series of sub-patches or "elements". A view is taken from each grid vertex and may vary across the grid. The f i n a l view of the environment from a patch is taken as a weighted average of the views from the individual grid vertices. This is analogous to the "substructuring" described in [ 6 ] .
+The hemi-cube can be oriented so t h a t the patch normal always coincides with the center of the hemi-cube's top face. This allows for the same set of small solid angles to be located in the same directions r e l a t i v e to each patch. However, since the orientations are always in the
+
+Each hemi-cube
+
+has its own local orientation.
+FIGURE 6
+
+patch's local coordinate system, there is no single directional relationship between hemi-cubes
+
+(Figure 6).
+
+In previous diffuse radiosity
+
+methods, since each patch was defined to have a
+
+s i n g l e i n t e n s i t y equal in a l l d i r e c t i o n s , the
+
+directional relationship was unimportant. When the i n t e n s i t i e s are allowed to vary
+
+d i r e c t i o n a l l y , i t is important to equate the i n -
+
+coming directions of the receiving patch with the reciprocal outgoing directions from the sending
+
+patches. Rather than reorienting a hemi-cube for each patch, a f u l l cube surrounding each vertex is
+
+maintained, oriented along the global axes (Figure 7). The advantage l i e s in the fact that i f patch
+
+i sees patch j through the c e l l oriented in the
+
+X,Y,Z d i r e c t i o n , then the reciprocal cell from
+
+patch j is simply in the -X,-Y,-Z d i r e c t i o n . The
+
+cube is stored as a vector of v i s i b l e patch iden-
+
+t i f i c a t i o n numbers. I f the faces of the cube are oriented as in Figure 8a and the vector is ordered
+
+as in Figure 8b, then the reciprocal global cube
+
+locations may be t r i v i a l l y calculated. For a global cube with D discrete directions, the cell with
+
+the reciprocal direction from a cell with index c tO <= C <= D-I) w i l l simply have index D - c - 1.
+
+The projection of the environment on a "glo-
+
+bal cube" surrounding a vertex solves the hidden
+
+surface problem providing the HID terms in equa-
+
+tion 11. The 8 terms are found by the dot product
+
+of the patch normal and the global orientation of
+
+the c e l l . A small solid angle, ~ , is associated
+
+with each c e l l , providing the necessary infor-
+
+mation to simultaneously solve for the directional
+
+radiosities of each patch.
+
+Rows
+
++Y
+
+p Columns
+
+Starting
+
+PIxel
+
+-X
+
++Z
+
++X
+
+m
+-y
+
+T h e cells within the f a c e s of t h e global c u b e are o r d e r e d so that the reciprocal global cube locations may be trivially calculated.
+(a)
+Vector of cube locations
+
+E a c h global c u b e is p l a c e d in a global oriezltation.
+FIGURE 7
+
+T h e ordering within e a c h face is in r o w m a j o r order. T h e r o w s a.ud columns are determined by the diagram above.
+(b)
+FIGURE 8
+137
+
+~ S I G G R A P H '86
+
+BIDIRECTIONAL REFLECTANCE Until now, the actual bidirectional reflec-
+tance, which is derived from a model describing how l i g h t scatters from a surface, has not been specified. The choice of a specific reflection model is independent of the methods introduced in t h i s p a p e r . However, in this context there are two requirements a reflection model must s a t i s f y . The f i r s t requirement is t h a t the model must exhibit reciprocity. T h a t is, the fraction of outgoing i n t e n s i t y to incoming energy for any pair of directions must be the same i f the incoming and outgoing directions are reversed.
+
+In other words:
+
+f'(~,, ~i) = p"(~, ~,)
+
+(13)
+
+The second requirement i s t h a t energy must be conserved. The t o t a l amount of i n c i d e n t energy to a patch must be greater than or equal to the t o t a l amount of r e f l e c t e d energy from the patch. A patch cannot reflect more energy than i t receives. Thus,
+
+E i ~ f ~ E, = f ~ l,cosSdZ,o ~ , = hem~phere (14)
+
+Two d i f f e r e n t b i d i r e c t i o n a l r e f l e c t a n c e r e l a t i o n s h i p s were t e s t e d . One r e l a t i o n s h i p i s a mirror-like reflection, in which the incoming intensity leaves in the mirror direction tempered
+only by a reflectance between 0 and 1. The other
+r e l a t i o n s h i p is based on work done by Phong [ 8 ] . The "Phong-like" b i d i r e c t i o n a l reflectance used is:
+p,, k, rk, 1 .
+
+where ka = the f r a c t i o n o f energy d i f f u s e l y
+
+r e f l e c t e d , and k: = the f r a c t i o n of energy specu-
+
+]arly reflected:
+
+k a + k , ~ 1 . ~ is the angle
+
+between the mirror e~rection and the reflection
+
+direction, r , and Sa and Ss are constant factors
+
+which must be included to conserve energy:
+
+S , = f ~ ak0= = and S, =,,~L c°s('+l)~ doJ (16)
+h
+
+GLOBAL SOLUTION A simultaneous solution to the matrix of
+Equations 11 is required to find a l l of the di-
+rectional radiosities for a l l of the surfaces of an environment. The matrix to be solved is too large to be solved using direct solution methods.
+However, the Gauss-Siedel i t e r a t i v e technique, which was found effective for previous radiosity methods is well suited for t h i s problem [ 9 ] . The i t e r a t i o n method allows the matrix coefficients to be computed as they are needed. The solution converges in a small number of i t e r a t i o n s since the
+matrix is diagonally dominant. An i n i t i a l estimate for the radiosity solu-
+tion is set equal to the emissions of the l i g h t sources with a l l other patch radiosities i n i t i a l l y zero. The global cube a n a l y s i s provides the patches and directions from those patches which i l l u m i n a t e a p a r t i c u l a r patch. Based on t h i s information and the current solution estimate, a global cube of incoming i n t e n s i t i e s to a patch
+
+through a l l directions is assembled. From Equation 11, each outgoing i n t e n s i t y can be computed from these incoming i n t e n s i t i e s and the given bidirectional reflectance of the patch. These new directional patch radiosities are used in the current solution estimate for subsequent patches. E v e r y patch is solved in t u r n , and the whole process iterates u n t i l the solution converges.
+After every i t e r a t i o n step, e a c h patch receives a more accurate set of incoming intens i t i e s , and therefore, reflects a more accurate set of outgoing i n t e n s i t i e s (Figure 9). Every directional i n t e n s i t y value is compared with the same directional i n t e n s i t y value from the previous i t e r a t i o n . I f no pair of values d i f f e r by more than a prespecified margin, the solution process is said to have converged, and no further i t e r a tions are required. In pseudo-code, the procedure is as follows:
+/* Initial estimate for directional intensities */
+FOR each direction d and patch p DO
+IntIp]ldl = EmisslP]ldl END FOR each iteration DO
+FOR each patch p DO
+/* Set each new intensity to be its emission */
+FOR each direction d DO
+Newintlpl[d] = Emiss[pl[d]
+END /* Take energy from incoming directions in and * /
+/* distribute it to all outgoing directions out */
+FOR each direction in DO
+/* Calculate energy from in */
+Energylin] = IntICubelPllin]l[D-in-l] cos0o~[in]
+For each direction out DO Newint[p][out] + = p"(p, in, out)Energy[in]
+END
+END /* Replace old intensities with new and test */
+/* for convergence */ FOR each direction d DO
+Compare Intlp][d] with Newintlp][dl
+IntlPlld] = NewintiP]ld] END
+END
+END
+The number of i t e r a t i o n s required f o r convergence of the patch solution depends on the order in which patch equations are solved since the i n coming i n t e n s i t i e s to a patch result from the outgoing i n t e n s i t i e s of previously solved patches. I t thus makes sense to solve for the patches in roughly the same order that l i g h t is propagated through the environment (Figure 10). T h u s , the emitters are solved f i r s t , because they are the originators of energy for the solution; next, the patches that see the emitters are solved, and thus become secondary emitters; next, those that see the secondary emitters; etc. The results of the global cube provide the v i s i b l e surfaces seen from each surface. A l i s t is compiled of the secondary l i g h t sources by examining the global cubes of the primary emitters. Analogously, a l i s t of t e r t i a r y l i g h t sources is compiled from the global cubes of
+
+138
+
+Dallas, August 18-22
+
+Volume 20, Number 4, 1986
+
+the secondary sources, etc. The patch solution provides the i n t e n s i t y of
+l i g h t leaving each patch in each direction. At this point, an analogous solution must be found for each grid vertex, as i t is the vertex directional i n t e n s i t i e s that w i l l be used during the rendering process. Each grid vertex has an associated global cube of v i s i b l e patches, from the original global cube analysis. A cube of directional intensities for each grid vertex is f i l l e d by back s u b s t i t u t i o n of the p r e v i o u s l y solved patch i n t e n s i t i e s . The outgoing intens i t i e s are calculated from the incoming intens i t i e s and the bidirectional reflectance of the vertex's surface.
+=,..\ \
+
+RENDERING At t h i s point, a view independent radiosity
+solution has been calculated. The f i n a l rendering stage is simply a post process to display intens i t i e s pointing in the direction of the eye. To render an image, an eye p o s i t i o n and viewing direction are specified w h i c h establishes the d i r e c t i o n s from each vertex back to the eye. The particular i n t e n s i t i e s pointing to the eye are extracted from the global cubes of directional i n t e n s i t i e s (Figure 11). These are obtained by b i l i n e a r l y interpolating between the nearest vertex cube directional i n t e n s i t i e s . This results in a single i n t e n s i t y value for each grid vertex in the environment from t h a t v i e w p o i n t . At t h i s point the rendering process becomes identical to the process described in [ 6 ] , where the pixel i n t e n s i t i e s are b i l i n e a r l y interpolated from the vertex i n t e n s i t i e s . Additional views of the environment are rendered from the same global radiosity solution simply by specifying a new view point.
+
+Outgoing Intensities
+
+Iteration
+
+1
+
+2
+
+3
+
+After each iteration, each patch receives a more accurate set o2 Incoming intensities, and therefore, reflects a more accurate set of outgoing intensities.
+FIGURE 9
+
+i,9.~.~~ Patch4 IPatc...Ih.ji4ltltIr.Ii
+
+Patch g Patch 9 matrix terms
+
+!
+
+×
+
+=
+
+Correct
+
+Patch 7
+
+l,..~>~ 9 Patch4 latch4.m.aF.tIr.ifx
+
+Patch7 arch7trix ....ixl
+Patch9 ahtc°'trXt°r°s]
+Incorrect
+To decrease the number of iterations, solve for the patches in r o u g h l y the s a m e o r d e r that light is p r o p o g a t e d t h r o u g h t h e environment.
+FIGURE 10
+
+The particular intensities pointing to the eye are extracted from the global cubes of directlonal intensities,
+FIGURE 11
+
+RESULTS
+
+The following images were rendered from two
+
+global solutions of the same environment. Each
+
+set of figures contains a series of views (a)
+
+i l l u s t r a t i n g the view independence of the solu-
+
+tion.
+
+Notice the reflections in the f l o o r
+
+tracking the eye as the viewer position is
+
+changed. The two larger images (b and c) in each
+
+set are enlargements from the series above them.
+
+The primary difference between the two sets of
+
+images is the bidirectional reflectance models.
+
+The algorithms outlined in t h i s paper are inde-
+
+pendent of any p a r t i c u l a r reflectance model. The
+
+s o l u t i o n f o r the images in Figure 12 used the
+
+Phong-like reflectance model. For Figure 13, the
+
+solution used the simpler m i r r o r - l i k e
+
+bidirectional reflectance.
+
+The environmental modeling and meshing for the images was performed using the testbed image syn-
+thesis system at Cornell's Program of Computer Graphics. The system was written in C under a VMS operating system and ran on a VAX 11/780. An Evans and Sutherland picture system was used for the modeling and meshing, a Floating Point Systems FPS264 attached to a VAX 11/750 was used for the solution process, and the pictures were displayed using a Rastertek 1280x1024x24 b i t s frame b u f f e r .
+
+139
+
+,~ S I G G R A P H '86
+
+(a)
+
+(b)
+
+(c)
+
+PBONG-LIKE REFLECTION
+
+Number of Specular Patches : 64
+
+Number of Diffuse Patches : 93
+
+Number of Specular Vertices: 1089
+
+Number of Diffuse Vertices : 1400
+
+Number of Cube Directions : 24576
+
+Number of Vavelengths
+
+: 4
+
+PROCESS
+
+CPUTIME (Hrs)
+
+...............................
+
+Visible Surfaces
+
+8
+
+Solution
+
+192
+
+Render
+
+1
+
+FIGURE 12
+
+As can be seen from the s t a t i s t i c s l i s t e d below each set of images, the computation time, particularly for the solution process, is nont r i v i a ] . The time required f o r the s o l u t i o n process is a f u n c t i o n of the number of cube directions and the number of patches and vertices, more s p e c i f i c a l l y , the number of specular patches and vertices. The amount of time is s i g n i f i c a n t l y reduced by using the simpler m i r r o r - l i k e reflection model in Figure 13 since incoming energy is not scattered in a l l directions.
+An a r t i f a c t due to the nature of the algorithm becomes v i s i b l e when the reflection becomes more m i r r o r - l i k e . Recall that the rendering is based on the vertex solution which is in turn based on the patch solution. Thus, the discrete patches become v i s i b l e in the r e f l e c t i o n . T h i s resulted in the increased number of d i f f u s e patches in Figure 13.
+
+CONCLUSION A general radiosity method which accounts for
+a l l i n t e r r e f l e c t i o n s from both diffuse and non-
+diffuse surfaces has been introduced. The procedure computes an intensity d i s t r i b u t i o n for every surface in an environment, consisting of directional intensities for a number of discrete directions. The rendering process then becomes one of only looking up the intensities that point back to
+the eye and displaying them. This method makes i t possible to precalculate
+the energy leaving specular surfaces regardless of
+the viewing direction. Since this global solution is view independent, successive views of the same environment can be calculated using the same directional intensity information, and the phenomenon of reflection tracking can be observed.
+The a d d i t i o n of specular surfaces to the radiosity method is s i g n i f i c a n t , since radiosity methods need no longer be limited to environments
+
+140
+
+Dallas, August 18-22
+IIII
+
+Volume 20, Number 4, 1986
+
+I
+
+I
+
+(a)
+
+(b)
+
+(c)
+
+MIRROR-LIKE REFLECTION
+
+Number of Specular Patches : 64
+
+Number of D i f f u s e P a t c h e s : 237
+
+Number of S p e c u l a r V e r t i c e s : 1089
+
+Number of Diffuse Vertices : 1400
+
+Number of Cube Direetlons : 15000
+
+Number of V a v e l e n g t h s
+
+: 4
+
+PROCESS
+
+CPU TIHE ( R r s )
+
+Visible Surfaces
+
+7
+
+Solution
+
+25
+
+Render
+
+1
+
+FIGURE 13
+
+containing only purely d i f f u s e surfaces. The methodology is independentof a particular reflection model, t h u s any reflection model which relates incoming energy from one direction to outgoing intensity in another direction can be used. The only restriction placed on the model is that i t must conform to the physical Taws of recipro-
+city and the conservation of energy as discussed in the paper.
+A few problems exist that must be dealt with in the future. Errors in approximation occur because environments have been discret~zed. Discret i z i n g the number of directions on the global cube results in misrepresenting the incoming energy because of aliasing on the faces of the global cube. Reflections from a highly reflective surface may appear blurred due to d i s c r e t i z i n g the surface, as well as interpolating between outgoing intensities in rendering.
+
+Future work should include the addition of non-planar and textured surfaces, as well as transparent and translucent surfaces. The framework of the method is general enoughto accomodate these additions by simply using different reflection functions. Althoughthis method currently requires very large computational resources for complex environments due to the volume of i n f o r mation that must be processed, this research was undertaken to provide a s c i e n t i f i c b a s i s for modeling complex interreflections within an environment. In the future, as storage and computational power increases, global solutions of more complexenvironments w i l l be within reach.
+
+141
+
+ACKNOWLEDGMENTS The authors would l i k e to thank a l l those who helped in the preparation of the article. Thanks go to Professor Kenneth Torrance, Holly Rushmeier, and Kevin Koestner for their help in laying the theoretical groundwork. Thanks also go to Dan Baum, Janet Brown-Aist, and Emil Ghinger for their help in coding and preparation of the article. This research was conducted at the Cornel] University Program of Computer Graphics, under a grant from the National Science Foundation #DCR-8203979. The VAX computers used were made possible by a large grant from the Digital Equipment Corporation and use of the Floating Point Systems Advanced Processor through Cornell University's Center for Theory and Simulation in Science and Engineering.
+REFERENCES
+[ I ] Whitted, Turner, "An Improved Illumination Model for Shaded Display," Communications of the ACM, Vol. 23, No. 6, June 1980, pp. 3 4 - ~ 9 .
+[2] Siegel, Robert and John R. Howell, Thermal Radiation Heat Transfer, Hemisphere Publishing Corp., Washington DC., 1981.
+[3] Sparrow, E. M. and R. D. Cess, Radiation Heat Transfer, Hemisphere Publishing Corp., Washington DC., 1978.
+[4] Goral, Cindy M., Kenneth E. Torrance, Donald P. Greenberg, Bennet Battaile, "Modeling the Interaction of Light Between Diffuse Surfaces," CACoMm p u t e r Graphics (Proceedings 1984), pp. 213-222.
+[5] Cohen, Michael F. and Donald P. Greenberg, "A Radiosity Solution for Complex Environments," ACM Computer Graphics (Proceedings 1985), pp. 31-40.
+[6] Cohen, Michael F., Donald P. Greenberg, David S. Immel, Philip J. Brock, "An E f f i c i e n t Radiosity Approach for Realistic Image Synthesis," IEEE Computer Graphics and Applications, March 1986.
+[7] Nishita, Tomoyuki, and Eihachiro Nakamae, "Continuous Tone Representation of Three-Dimensional Objects Taking Account of Shadows and Interreflection," ACM Computer Graphics (Proceedings 1985), pp. 22-30.
+[8] Phong, Bui Tuong, Illumination for Computer Generated Images, P h . D . Dissertation, University of Utah, 1973.
+[9] Hornbeck, Robert W., Numerical Methods, Quantum Publishers, New York, NY, 1974, pp. 101-106.
+142
+
+~. S I G G R A P H '86
+

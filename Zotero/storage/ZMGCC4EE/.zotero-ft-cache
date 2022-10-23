@@ -1,0 +1,612 @@
+Recent Advances in Physically Based Shading
+Naty Hoffman Lucasfilm
+1
+Hi. As Steve mentioned, my intro is a bit different this year - covering recent work in the ﬁeld instead of physics & math fundamentals. And ﬁrst I want to set expectations regarding...
+
+Scope
+2
+...scope. This course covers all topics related to physically based shading — from material authoring tools to volume appearance models. Due to time limitations...
+
+Scope
+3
+...this survey will have a somewhat smaller scope than that.
+
+Shading Models
+4
+I’ll be talking speciﬁcally about advances in shading models.
+
+Surface Shading Models
+5
+More speciﬁcally, surface shading models.
+
+BRDF Surface Shading Models
+6
+Even more speciﬁcally, BRDF models.
+
+General BRDF Surface Shading Models
+7
+And yet more speciﬁcally, reasonably general BRDFs, not models that are focused on a specialized class of materials like cloth or car paint or (as we will hear about from Brian Karis later today) hair. Yet even with this modest scope, there will be plenty to talk about.
+
+State of the Art
+8
+Before we go into the future with the latest shading model research, let’s ﬁrst take stock of what models are used in the present, in ﬁlm and game production.
+
+f (l, v) = fspecular(l, v) + fdi↵use(l, v)
+9
+Of course, all these models include separate terms for specular and diffuse.
+
+fspecular(l,
+
+v)
+
+=
+
+Xn
+
+ki
+
+Fi(l,
+
+h)Gi(l, v, h)Di(h) 4(n · l)(n · v)
+
+i=0
+
+10
+The specular term is based on microfacet lobes. Games typically only use one lobe, but ﬁlm shaders often have multiple.
+
+F (l, h)G(l, v, h)D(h) 4(n · l)(n · v)
+11
+The NDF used is typically...
+
+DTR
+
+(h,
+
+↵,
+x
+
+↵
+y
+
+)
+
+F (l, h)G(l, v, h)D(h)
+4(n · l)(n · v)
+12
+...Trowbridge-Reitz (also called GGX or GTR2), though some models use Beckmann, typically as an artist-selected option. Here we show an anisotropic NDF with separate x and y roughness parameters. Games tend to rely mainly on isotropic lobes, with anisotropy kept for rare special cases. Film materials tend to use anisotropy more often.
+
++(l · h) +(v · h)
+
+1 + ⇤(l) + ⇤(v)
+
+DTR
+
+(h,
+
+↵,
+x
+
+↵
+y
+
+)
+
+F (l, h)G(l, v, h)D(h) 4(n · l)(n · v)
+13
+Current best practice for G is the height-correlated form of Smith, which is more accurate than the uncorrelated form and no more expensive.
+
++(l · h) +(v · h)
+
+1 + ⇤(l) + ⇤(v)
+
+FSchlick(F0, h)
+
+DTR
+
+(h,
+
+↵,
+x
+
+↵
+y
+
+)
+
+F (l, h)G(l, v, h)D(h) 4(n · l)(n · v)
+14
+The Schlick approximation of Fresnel, with its convenient F0 parameterization, used to be almost universal. And it still is quite common, though there are some other alternatives being used.
+
+RF 0.8 0.6 0.4 0.2
+0
+
+0.8
+
+0.6
+
+0.4
+
+0.2
+
+0 0 10 20 30 40 50 60 70 80 90 angle of incidence θi
+
+copper aluminum iron
+
+diamond
+
+glass
+
+water
+
+Image from “Real-Time Rendering, 3rd Edition”, A K Peters 2008
+
+15
+While it’s a pretty cFliogsuerem7a.t2ch0.foSrcmholisctkm’saateprpiarlosx, ifomrastoimone tmoeFtarelssntheel rSecﬂhelicctkaanpcperocoximmpaatiorend(dtotttehdelcinoersreinctthviaslcuheasrt) can diverge a bit at glancing angfleosr ferxotmertnhealtrrueeﬂeFcrteisonnelfrcoumrveasv(asroileidtylinoefss)u. Fbostraenxcaemsp(lseewpaercaatnedseinettohatwt tohegrdaieplehcstrfiocrscalnadrictyo)p.per are pretty
+close, but iron andTahluemsionluimd lainreesdewﬁenriteelcyoambpituotfef.d from the full Fresnel equations (in the case of copper and
+
+aluminum, this computation was performed at a dense sampling of frequencies and the
+
+resulting spectral distribution was converted to RGB values). The dotted lines are the
+
+result of Schlick’s approximation (computed separately for R, G, and B in the case of
+
+copper and aluminum).
+
+Artist Friendly Metallic Fresnel (JCGT, 2014)
+Image from “Artist Friendly Metallic Fresnel”, Gulbrandsen, JCGT 2014
+16
+Some ﬁlm shaders have been using RGB-valued n,k complex index of refraction values to work around that problem. There are a few reasons why RGB values for those quantities is rather nonsensical, but I won’t get into that now. More importantly, they aren’t very intuitive for artists to use, so about two years ago Gulbrandsen from Framestore came up with a more intuitive parameterization, which is now being used in a few different places.
+
+Equations from “Extending the Disney BRDF to a BSDF with Integrated Subsurface Scattering”, Burley, SIGGRAPH Course Notes 2015
+17
+The diffuse BRDF that Brent Burley presented in the course last year is a good example of a state-of-the-art diffuse model; most ﬁlm shaders use something similar. As do some games, though many still use Lambert.
+
+State of the Art
+18
+The current state of the art isn’t too bad overall; people are making some mighty ﬁne-looking movies and games with these.
+
+Issues and Limitations
+19
+However, this status quo has some issues and limitations worth discussing.
+
+DTR
+
+(h,
+
+↵,
+x
+
+↵
+y
+
+)
+
+F (l, h)G(l, v, h)D(h) 4(n · l)(n · v)
+20
+Two of these have to do with the available NDFs.
+
+Coarse Microgeometry
+Image from “Rendering Glints on High-Resolution Normal-Mapped Specular Surfaces”, Yan et al., SIGGRAPH 2014
+21
+The NDFs used today are all smooth, like the one on the left. This is a good representation of very fine-grained microgeometry; with each pixel covering many tens of thousands of surface details. But many surfaces have coarser-grained microstructure, with a pixel only covering perhaps a few dozen surface elements. In that case the NDF looks more like the one on the right, giving the surface a complex “glint” appearance that can’t be reproduced by currently used models.
+
+Shape Control
+Chart from “Physically Based Shading at Disney”, Burley, SIGGRAPH Course Notes 2012
+22
+Another issue has to do with shape control. GGX is popular due to its relatively broad “tail”, but many materials have broader tails still. It would be great to be able to control that, and in 2012 Brent Burley proposed the Generalized Trowbridge-Reitz (or GTR) NDF to do just that. However, four years have passed and GTR is still not widely used. Why is that?
+
+Shape Invariance
+
+D(✓m, ↵)
+
+=
+
+f
+
+(
+
+tan ✓m ↵
+
+)
+
+↵2
+
+4
+cos
+
+✓m
+
+23
+I believe that the reason has to do with NDF shape invariance. As Eric Heitz showed in his excellent 2014 paper, an isotropic NDF is shape-invariant if it has the form shown here, in other words if it can be written as some function of tan θm over the roughness parameter α, divided by α2 times cos4θm. GGX and Beckmann have this form, but GTR does not.
+
+Slope Space
+
+22
+
+4
+
+P (xm˜ , ym˜ ) = D(✓m, ↵) cos ✓m
+
+P 22(xm˜ , ym˜ ) =
+
+1
+2
+
+f
+
+(
+
+tan
+
+✓m
+
+)
+
+↵↵
+
+24
+This can be more easily understood by looking at the NDF as P22, a distribution of 2D slopes, instead of D, a distribution of 3D vectors. Then we can see that for a distribution with the shape-invariant form, linearly scaling the roughness α causes the distribution in slope space to stretch linearly.
+
+Shape Invariance
+↵
+
+↵
+
+2X
+
+2
+
+↵
+
+2X
+
+4
+
+25
+And stretching the distribution of slopes is equivalent to stretching the microgeometry, so we see that for shape-invariant NDFs, scaling the roughness parameter is equivalent to stretching the microgeometry by the reciprocal amount.
+
+Shape Invariance - Benefits
+• Derivation of normalized anisotropic version • Derivation of Smith G()
+– One curve (analytic or tabulated) for all roughnesses and anisotropies
+• Derivation of importance sampling based on NDF or distribution of visible normals
+– As for Smith G(), a low-dimension function or table handles all roughnesses and anisotropies
+26
+This property brings many benefits. It makes it much easier to extend the NDF to an anisotropic form, to derive the Smith shadowingmasking function, and to perform importance sampling based on either the NDF or the distribution of visible normals (an effective variance-reducing technique recently introduced by Heitz and D’Eon).
+
+Shape Invariance + Shape Control?
+
+D(✓m, ↵,
+
+f
+
+(
+
+tan ✓m ↵
+
+,
+
+)
+
+)=
+
+↵2
+
+4
+cos
+
+✓m
+
+27
+So we want an NDF that (like GTR) has a parameter γ (gamma) to change its shape, but that (unlike GTR) is shape-invariant with respect to the roughness parameter α. But there is no NDF like that in current production use.
+
+?F (l, h)G(l, v, h)D(h) 4(n · l)(n · v)
+28
+The other two issues I’ll discuss aren’t problems with the NDF or some other part of the microfacet BRDF, but basic limitations of microfacet theory itself. Microfacet theory is a very nice and elegant tool which derives BRDF math directly from the surface physical properties — but this very elegance comes from some over-simplified assumptions, which can limit the realism and accuracy of our shading models.
+
+Shadowing and Masking
+
+shadowing
+
+masking
+
+Images from “Real-Time Rendering, 3rd Edition”, A K Peters 2008
+29
+One of these is related to the usage of the G() function, which determines what percentage of otherwise contributing microfacets are occluded from the light or view direction. Which is fine...
+
+Multiple Surface Bounces
+Image from “Real-Time Rendering, 3rd Edition”, A K Peters 2008
+30
+...as long as the light that those occluded facets contribute via multiple surface bounce is accounted for.
+
+Multiple Surface Bounces
+Image from “Real-Time Rendering, 3rd Edition”, A K Peters 2008
+31
+But microfacet theory doesn’t account for this, causing an over-darkening due to lost energy. This is sometimes addressed with nonphysical correction factors like the Disney model’s “sheen” term.
+
+Geometric Optics Physical Optics
+32
+An even more fundamental limitation of microfacet theory is that it’s strictly based on ray, or geometric optics, and not the more accurate wave, or physical optics. For many years the rendering community mostly assumed it doesn’t matter, but there is recent work indicating that it does. More on this topic in a little bit.
+
+Data-Driven Microfacet Models
+33
+And now we are finally starting to look at the new stuff. First up, some work on data-driven microfacet models.
+
+Extracting Microfacet-based BRDF Parameters from Arbitrary Materials with Power Iterations (EGSR 2015)
+Image from “Extracting Microfacet-based BRDF Parameters from Arbitrary Materials with Power Iterations”, Dupuy et al., EGSR 2015
+34
+This paper uses an interesting model for fitting purposes.
+
+F (l, h)G(l, v, h)D(h) 4(n · l)(n · v)
+Images from “Extracting Microfacet-based BRDF Parameters from Arbitrary Materials with Power Iterations”, Dupuy et al., EGSR 2015
+35
+It can be seen as a middle ground between fully tabulated and fully analytic models. It has the familiar microfacet structure, but D and F are tables extracted from measured BRDF data instead of analytic functions. G is computed as the Smith function based on the extracted D. The NDF is extracted in slope space, which makes it shape-invariant by construction, allowing for varying the roughness and anisotropy. The authors also tried fitting analytic NDFs to the measured ones, and found that GGX produced a reasonable fit in many cases.
+
+Match the theory?
+36
+So to what extent do the measurements match the predictions of microfacet theory? We know dielectrics won’t match well since no diffuse lobe was extracted (an odd choice considering that most of the materials in the MERL database are dielectrics), but the metals are worth looking at. We won’t find any contradictions in the extracted NDFs since microfacet theory allows for arbitrary NDFs - but the extracted Fresnel factor can be compared against the expected Fresnel curve for that material.
+
+alum-bronze
+
+aluminium
+
+brass
+
+chrome-steel
+
+chrome
+
+grease-covered-steel
+
+nickel
+
+steel
+
+two-layer-gold
+
+two-layer-silver
+
+Images from “Extracting Microfacet-based BRDF Parameters from Arbitrary Materials with Power Iterations”, Dupuy et al., EGSR 2015
+
+37
+Here we show the extracted Fresnel curves for all the pure metals (as opposed to oxidized metals or metallic paints) in the MERL database. They look quite different than theory predicts, decreasing towards glancing angles instead of increasing.
+
+Chart from “Physically Based Shading at Disney”, Burley, SIGGRAPH Course Notes 2012
+38
+It’s interesting to compare to a similar graph that Brent Burley showed in the 2012 course, also taken from the MERL database. This shows an increase for most materials, though some peak around 70 degrees and those could be the same materials as the previous graph. Worth a closer look.
+
+A Non-Parametric Factor Microfacet Model for Isotropic BRDFs (SIGGRAPH 2016)
+Images from “A Non-Parametric Factor Microfacet Model for Isotropic BRDFs”, Bagher et al., SIGGRAPH 2016
+39
+This paper covers some similar ground to the last one, but with some important differences. It uses more of an optimization or fitting approach, is restricted to isotropic BRDFs, and it has a Lambertian term in addition to the microfacet one.
+
+F (l, h)G(l, h)G(v, h)D(h)
+
+⇢d + ⇢s
+
+(n · l)(n · v)
+
+40
+More importantly, their model is much less constrained by microfacet theory than that of the previous paper. They fit separate D and G functions per color channel, and they have a specular coefficient that doesn’t match any aspect of the theoretical model. Regarding G, they tried two options: deriving it from D using the generalized Smith approach (like the last paper), and fitting an independent curve.
+
+Match the theory?
+41
+It’s worth asking the same question.
+
+Chart from “A Non-Parametric Factor Microfacet Model for Isotropic BRDFs”, Bagher et al., SIGGRAPH 2016
+42
+The authors claimed that the independent G (red) did much better than Smith G (light green), especially for more diffuse materials (which are to the right in this graph). If true, that would be a point against the accuracy of Smith G. The difference in accuracy didn’t seem that striking to me when I looked at the data, but I only had time for a relatively quick look.
+
+Charts from “A Non-Parametric Factor Microfacet Model for Isotropic BRDFs”, Bagher et al., SIGGRAPH 2016
+43
+Another potential contradiction with microfacet theory would be if the color channels of the G or D function differed significantly. From my quick look, they seemed to be pretty close except for some structured materials where such differences would not be unexpected (one of them - metallic red paint - is shown on the slide). Overall, I’d say the data is worth a closer look.
+
+Analytic Microfacet Models
+44
+We’ll now go over some recently published analytic microfacet models.
+
+genBRDF: Discovering New Analytic BRDFs with Genetic Programming (SIGGRAPH 2014)
+Image from “genBRDF: Discovering New Analytic BRDFs with Genetic Programming”, Brady et al., SIGGRAPH 2014
+45
+This paper took an interesting approach to finding analytic models that were a good fit for measured materials — genetic programming. They had a few promising results, at least one of which was further tweaked and turned into a model we’ll discuss in a little bit.
+
+Shape Invariance + Shape Control?
+
+D(✓m, ↵,
+
+f
+
+(
+
+tan ✓m ↵
+
+,
+
+)
+
+)=
+
+↵2
+
+4
+cos
+
+✓m
+
+46
+I mentioned earlier the need for an NDF that combines shape control and shape invariance. Well, while doing research for this talk I ran into two candidates. I haven’t had a chance to try them out much, so I’m putting them out there for other people to experiment with.
+
+NDF: Generalized Beckmann
+
+⇣ tan2 ✓ ⌘
+
+DGB(✓) = ⇡↵2 /
+
+4 ✓e
+
+↵2
+
+(1 ) cos
+
+47
+Generalized Beckmann is based on one of the results from the genBRDF paper I mentioned earlier, though the shape-invariance was added later. It’s a secondary contribution in an upcoming white paper by Holzschuch and Pacanowski — I’ll be discussing the paper a bit later, so for now let’s focus on the NDF. It has a shape parameter γ, and a roughness parameter α — when γ is equal to 1 then it’s identical to Beckmann. Like regular Beckmann, Generalized Beckmann is shape-invariant with respect to α. The γ parameter controls the kurtosis of the distribution - smaller values give it a spikier peak and a long, even lumpy tail.
+
+NDF: Hyper-Cauchy
+
+p2 2
+
+DHC(✓)
+
+=
+
+( ⇡↵2
+
+1) 4✓
+
+cos
+
+2
+tan2 ✓
+2 + ↵2
+
+48
+The Hyper-Cauchy distribution originated in a 2006 paper by Wellems et al., but it came to my attention in a paper by Butler, who proposed using it to fit measured BRDFs. Like generalized Beckmann, it has a shape control parameter, and a roughness parameter, to which it is shape-invariant.
+
+Charts from “Robust Categorization of Microfacet BRDF Models to Enable Flexible Application-specific BRDF Adaptation”, Butler & Marciniak, Proc. SPIE 9205, Reflection, Scattering, and Diffraction from Surfaces IV, (2014)
+49
+And it looks like Butler knew what he was talking about. Here’s an attempt to fit the MERL Nickel BRDF with Beckmann. The three colors are three different incidence angles, the symbols are the measured data and the dashed or solid lines are the fit.
+
+Charts from “Robust Categorization of Microfacet BRDF Models to Enable Flexible Application-specific BRDF Adaptation”, Butler & Marciniak, Proc. SPIE 9205, Reflection, Scattering, and Diffraction from Surfaces IV, (2014)
+50
+And here’s a fit with Hyper-Cauchy. A lot better. Another interesting fact about Hyper-Cauchy: when setting γ to a value of 2, it becomes very similar to GGX (at least in terms of the math — I haven’t compared the curves yet). So maybe this could be a good replacement for GTR.
+
+Microflakes and Multiple Surface Scattering
+51
+The next part of the talk will cover microflake theory and multiple surface scattering.
+
+Microflakes
+Image from “A Radiative Transfer Framework for Rendering Materials with Anisotropic Structure”, Jakob et al., SIGGRAPH 2010
+52
+Microﬂakes were ﬁrst introduced in 2010, to model volumes with anisotropic structure, such as cloth and ﬁbrous tissue. They are an extension of the concept of scattering particles, which may have an anisotropic phase function but are themselves isotropic in the sense that the properties of the medium are invariant to rotation.
+
+The SGGX Microflake Distribution (SIGGRAPH 2015)
+Image from “The SGGX Microflake Distribution”, Heitz et al., SIGGRAPH 2015
+53
+In 2015 Heitz et al. introduced the SGGX microﬂake distribution, an extension of the GGX microfacet distribution to the full sphere. It had many advantages over existing microﬂake distributions, allowing for linear interpolation, analytical evaluation and importance sampling of visible normals.
+
+Multiple Surface Scattering
+54
+Now we’ll switch gears for a moment. As I mentioned earlier, the lack of multiple bounce scattering is one of the fundamental limitations of microfacet theory.
+
+Multiple Surface Scattering: Analytical Models
+55
+There have been some attempts at corrective factors to add back the missing energy. The upper one is from the Eurographics 2001 paper by Kelemen & Szirmay-Kalos, and the lower one is the multiple scattering term for metals from the SIGGRAPH 2014 paper on layered materials by Jakob et al. (the paper also has a term for dielectrics).
+
+Multiple-Scattering Microfacet BSDFs with the Smith Model (SIGGRAPH 2016)
+Images from “Multiple-Scattering Microfacet BSDFs with the Smith Model”, Heitz et al., SIGGRAPH 2016
+56
+And now tying together the two topics of microflakes and multiple surface scattering, this rather ingenious paper models a surface as a microflake volume with certain properties. Methods typically used to render participating media can be used to effectively render multiple surface bounces on a microfacet surface. Unfortunately, this model is stochastic so it’s not suitable for real-time rendering applications.
+
+Images from “Multiple-Scattering Microfacet BSDFs with the Smith Model”, Heitz et al., SIGGRAPH 2016
+57
+The paper also showed what multiple scattering looks like — what we’re missing by not having it. Now rougher surfaces increase in saturation, instead of becoming darker due to lost energy. This is especially noticeable in the case of Spatially varying roughness.
+
+Additional Progress Towards the Unification of Microfacet and Microflake Theories
+Image from “Additional Progress Towards the Unification of Microfacet and Microflake Theories”, Dupuy et al., EGSR 2016
+58
+This paper did a simpler derivation of surface multi-scattering, also based on microflakes but using a semi-infinite homogeneous volume instead of the variable-density volume used in the earlier paper. The authors also discuss potentially extending the NDFs beyond the hemisphere to model extremely rough or porous surfaces, and to create a continuum between surface and volume modeling, as shown in the figure.
+
+Coarse Microgeometry
+59
+The ability to model coarse or “glinty” microgeometry was another one of the limitations I discussed at the beginning of the talk. I’ll quickly go over some recent work that offers solutions in this area.
+
+Discrete Stochastic Microfacet Models (SIGGRAPH 2014)
+Image from “Discrete Stochastic Microfacet Models”, Jakob et al., SIGGRAPH 2014
+60
+This paper uses a microfacet model with a discrete distribution of scattering particles instead of the usual continuous distribution. The particles are generated stochastically in a temporally coherent way, over a 4D domain that includes the pixel footprint on the surface and the set of microfacet directions that reflect light into a small cone of outgoing directions.
+
+Multiscale BRDF
+61
+An important concept introduced in this paper is that of a multiscale BRDF, defined over patches of surface and cones of area instead of infinitesimal points and rays. This concept is actually closer to the way BRDFs are implemented in practice, and given the intimate relationship of BRDF models to scale, I consider the multiscale BRDF to be in a way more fundamental than the BRDF as originally defined.
+
+Real-time Rendering of Procedural Multiscale Materials (I3D 2016)
+Image from “Real-time Rendering of Procedural Multiscale Materials”, Zirr & Kaplanyan, I3D 2016
+62
+The technique in the previous paper was too slow for real-time rendering applications. This paper speeds things up by carefully designing a real-time-friendly datastructure for evaluating a multiscale NDF.
+
+Multi-Scale Rendering of Scratched Materials using a Structured SV-BRDF Model (SIGGRAPH 2016)
+Images from “Multi-Scale Rendering of Scratched Materials using a Structured SV-BRDF Model”,
+Raynond et al., SIGGRAPH 2016
+63
+The technique in this paper is specialized to scratches specifically. In the top row we can see the steps of the algorithm. The authors precompute various scratch BRDFs (including multiple bounces within each scratch, which ties into a previous topic as well). This is stored with a novel 2D parameterization (shown on the bottom row), and then used in combination with a local scratch density to build a spatially varying BRDF which is used to render the surface.
+
+Physical Optics (Wave) Models
+64
+The last part of this talk will be about addressing the other fundamental limitation of microfacet theory, looking at ways to use wave optics to model reflectance. First I want to correct and extend some of the comments I made about wave reflectance last year; I now understand the topic a bit better (though there is still a lot to learn!)
+
+Light Waves and Surface Scale
+65
+We’ll start with light coming in at normal incidence, for simplicity. There are a few different domains of surface scale that have different effects on the light. But first it’s important to note that not all scale is created equal. It turns out that scale in the direction of light propagation (surface height, in this case where light is coming in at normal incidence) is different than scale perpendicular to the light direction (in this case, scale along the surface).
+
+Light Waves and Surface Scale
+66
+Height scale is just a matter of degree. More height causes a larger effect, less height causes a smaller effect — there are no cutoff points where we move into a new scale domain and different phenomena start happening.
+
+Light Waves and Surface Scale
+67
+But when it comes to scale along the surface, that’s a different matter. There definitely are different domains with different effects. But in one respect both kinds of scale are the same — they are both relative to the light wavelength. So what matters is not the absolute size of the surface detail, but how many multiples of the light wavelength it is.
+
+Nanogeometry
+1 λ – 100 λ
+68
+Since I haven’t been able to find out any “proper” terms for these I will use completely non-standard terminology that I made up. I’ll start with nanogeometry, a term I used last year to define geometry that causes diffraction. The relevant scale along the surface for nanogeometry is between one and about one hundred light wavelengths.
+
+Diffraction
+1 λ – 100 λ
+69
+Very smooth surfaces like this one, with only this scale of roughness, return light back in the reflection direction like a perfect mirror. Diffraction doesn’t spread this reflection...
+
+Diffraction
+1 λ – 100 λ
+70
+...it weakens it, stealing part of its energy and spreading that. So now you have a combination of a perfect delta-function spike of mirror reflection, and an incoherent cone of diffracted light. The amount of light diffracted depends on the height, and the angle of the diffracted light depends on the scale of surface roughness along the surface. Usually there’s a mix of scales so the light is spread in a continuous cone. Since these angles depend on the scale relative to the light wavelength, that means red light and green light and yellow light etc. will all diffract at slightly different angles, which causes some angular color variation.
+
+Diffraction
+
+1 λ
+
+100 λ
+
+71
+A bit counter-intuitively, the smaller the detail the wider the diffraction angle. The surface details that are 1 wavelength wide will diffract the light at 90 degrees; the ones that are around a hundred or more wavelengths wide will diffract the light a half degree or less so it starts merging indistinguishably into the mirror reflection. And that’s why scales outside that range have no effect. Light can’t be diffracted more than 90 degrees, so details smaller than a wavelength don’t diffract at all. And details much larger than 100 wavelengths don’t diffract at all either, for the opposite reason.
+
+Band-Limiting
+1 λ 100 λ
+72
+Since wavelengths outside this range don’t affect diffraction, you can think of the diffraction as seeing the surface through a bandlimiting filter, that throws away all the spatial frequencies that are too large, like the big bump in the middle of the bottom surface, or too small, like all the sharp jaggies in it. And the result is a surface like the top one. And the roughness height of that surface is the one that’s relevant for calculating the amount of diffraction. Now all of this was for normal incidence - for other light angles just think of the relevant directions as shifting with the light, and otherwise the picture stays the same.
+
+Band-Limiting
+microgeometry
+nanogeometry
+picogeometry
+73
+Now the filtered detail doesn’t go away entirely — the detail that’s too big to be nanogeometry, too big to cause diffraction is the microgeometry we all know and love from microfacet theory. And the detail that’s too small to cause diffraction I’ll call picogeometry, which isn’t an official term of any kind but that’s what I’ve got. Picogeometry actually affects light in a different way, but that will have to wait for another day.
+
+Why do we care?
+74
+So why do we care about this now, when we didn’t for some decades? As I mentioned last year, there has been some work showing that everyday materials have some visible diffraction, and some of the “long tails” we are seeing are from that and not from the NDF.
+
+A Physically-Based Reflectance Model Combining Reflection and Diffraction
+Image from “A Physically-Based Reflectance Model Combining Reflection and Diffraction”, Holzschuch & Pacanowski, INRIA Research Report 2016
+75
+This is a white paper by Nicolas Holzschuch & Romain Pacanowski which is about to be published in the next few days; Nicolas & Romain were kind enough to give me early access to it for the purpose of this talk. It’s where I got the Generalized Beckmann NDF I discussed earlier, but that’s a very minor part of the paper.
+
+A Physically-Based Reflectance Model Combining Reflection and Diffraction
+Image from “A Physically-Based Reflectance Model Combining Reflection and Diffraction”, Holzschuch & Pacanowski, INRIA Research Report 2016
+76
+This white paper has a model which combines a Cook-Torrance style microfacet model (this is the part that uses Generalized Beckmann) with a diffraction model using the latest optical theory - the Generalized Harvey-Shack (GHS) theory, dating from 2006. For context, most of the previous wave optics work in computer graphics has been using theory from the 60s, or the 80s. And GHS is pretty important — all the previous theories had limitations to only smooth surfaces, or only small incidence angles, etc. GHS is the first fully general theory of surface diffraction. And this paper combines it with microfacet theory by treating the GHS BRDF as the BRDF for the individual microfacets, which makes sense considering the band-limiting stuff I talked about earlier. We’re out of time so I won’t be able to go into more detail, but the white paper itself should be up really soon and I recommend you read it if you want to learn about this new direction in shading models.
+
+Acknowledgements
+• Steve Hill: assistance with course notes & slides, WebGL framework used for Fresnel visualization • Brent Burley, Paul Edelstein, Yoshiharu Gotanda, Eric Heitz, Christophe Hery, Sébastien Lagarde, Dimitar Lazarov, Cedric Perthuis, Brian Smits: inspirational discussions on physically based shading models •Nicolas Holzschuch and Romain Pacanowski: for early access to, and illuminating discussion about, their latest work on combining physical and geometric optics models
+77
+To wrap up, I’d like to thank some people who helped me with this talk, and thank you for listening.
+

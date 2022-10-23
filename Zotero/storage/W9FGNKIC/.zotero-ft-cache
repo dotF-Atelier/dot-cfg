@@ -1,0 +1,3431 @@
+Assembly Language Step-by-Step
+
+Assembly Language Step-by-Step
+Programming with Linux® Third Edition
+Jeff Duntemann
+Wiley Publishing, Inc.
+
+Assembly Language Step-by-Step
+Published by Wiley Publishing, Inc. 10475 Crosspoint Boulevard Indianapolis, IN 46256
+www.wiley.com
+Copyright © 2009 by Jeff Duntemann
+Published by Wiley Publishing, Inc., Indianapolis, Indiana
+Published simultaneously in Canada
+ISBN: 978-0-470-49702-9
+Manufactured in the United States of America
+10 9 8 7 6 5 4 3 2 1
+No part of this publication may be reproduced, stored in a retrieval system or transmitted in any form or by any means, electronic, mechanical, photocopying, recording, scanning or otherwise, except as permitted under Sections 107 or 108 of the 1976 United States Copyright Act, without either the prior written permission of the Publisher, or authorization through payment of the appropriate per-copy fee to the Copyright Clearance Center, 222 Rosewood Drive, Danvers, MA 01923, (978) 750-8400, fax (978) 646-8600. Requests to the Publisher for permission should be addressed to the Permissions Department, John Wiley & Sons, Inc., 111 River Street, Hoboken, NJ 07030, (201) 748-6011, fax (201) 748-6008,
+or online at http://www.wiley.com/go/permissions.
+Limit of Liability/Disclaimer of Warranty: The publisher and the author make no representations or warranties with respect to the accuracy or completeness of the contents of this work and speciﬁcally disclaim all warranties, including without limitation warranties of ﬁtness for a particular purpose. No warranty may be created or extended by sales or promotional materials. The advice and strategies contained herein may not be suitable for every situation. This work is sold with the understanding that the publisher is not engaged in rendering legal, accounting, or other professional services. If professional assistance is required, the services of a competent professional person should be sought. Neither the publisher nor the author shall be liable for damages arising herefrom. The fact that an organization or Web site is referred to in this work as a citation and/or a potential source of further information does not mean that the author or the publisher endorses the information the organization or Web site may provide or recommendations it may make. Further, readers should be aware that Internet Web sites listed in this work may have changed or disappeared between when this work was written and when it is read.
+For general information on our other products and services please contact our Customer Care Department within the United States at (877) 762-2974, outside the United States at (317) 572-3993 or fax (317) 572-4002.
+Wiley also publishes its books in a variety of electronic formats. Some content that appears in print may not be available in electronic books.
+Library of Congress Control Number: 2009933745
+Trademarks: Wiley and the Wiley logo are trademarks or registered trademarks of John Wiley & Sons, Inc. and/or its afﬁliates, in the United States and other countries, and may not be used without written permission. Linux is a registered trademark of Linus Torvalds. All other trademarks are the property of their respective owners. Wiley Publishing, Inc. is not associated with any product or vendor mentioned in this book.
+
+To the eternal memory of Kathleen M. Duntemann, Godmother
+1920– 1999 who gave me books when all I could do was put teeth marks on them.
+There are no words for how much I owe you!
+
+About the Author
+Jeff Duntemann is a writer, editor, lecturer, and publishing industry analyst. In his thirty years in the technology industry he has been a computer programmer and systems analyst for Xerox Corporation, a technical journal editor for Ziff-Davis Publications, and Editorial Director for Coriolis Group Books and later Paraglyph Press. He is currently a technical publishing consultant and also owns Copperwood Press, a POD imprint hosted on lulu.com. Jeff lives with his wife Carol in Colorado Springs, Colorado.
+vii
+
+Credits
+
+Executive Editor Carol Long
+Project Editor Brian Herrmann
+Production Editor Rebecca Anderson
+Copy Editor Luann Rouff
+Editorial Director Robyn B. Siesky
+Editorial Manager Mary Beth Wakeﬁeld
+Production Manager Tim Tate
+Vice President and Executive Group Publisher Richard Swadley
+
+Vice President and Executive Publisher Barry Pruett
+Associate Publisher Jim Minatel
+Project Coordinator, Cover Lynsey Stanford
+Proofreader Dr. Nate Pritts, Word One
+Indexer J&J Indexing
+Cover Image © Jupiter Images/Corbis/ Lawrence Manning
+
+ix
+
+Acknowledgments
+First of all, thanks are due to Carol Long and Brian Herrmann at Wiley, for allowing this book another shot, and then making sure it happened, on a much more aggressive schedule than last time.
+As for all three previous editions, I owe Michael Abrash a debt of gratitude for constant sane advice on many things, especially the arcane differences between modern Intel microarchitectures.
+Although they might not realize it, Randy Hyde, Frank Kotler, Beth, and all the rest of the gang on alt.lang.asm were very helpful in several ways, not least of which was hearing and answering requests from assembly language newcomers, thus helping me decide what must be covered in a book like this and what need not.
+Finally, and as always, a toast to Carol for the support and sacramental friendship that has enlivened me now for 40 years, and enabled me to take on projects like this and see them through to the end.
+xi
+
+Contents at a Glance
+
+Introduction: ‘‘Why Would You Want to Do That?’’
+Chapter 1 Another Pleasant Valley Saturday Chapter 2 Alien Bases Chapter 3 Lifting the Hood Chapter 4 Location, Location, Location Chapter 5 The Right to Assemble Chapter 6 A Place to Stand, with Access to Tools Chapter 7 Following Your Instructions Chapter 8 Our Object All Sublime Chapter 9 Bits, Flags, Branches, and Tables Chapter 10 Dividing and Conquering Chapter 11 Strings and Things Chapter 12 Heading Out to C Conclusion: Not the End, But Only the Beginning Appendix A Partial x86 Instruction Set Reference Appendix B Character Set Charts Index
+
+xxvii
+1 15 45 77 109 155 201 237 279 327 393 439 503 507 583 587
+xiii
+
+Contents
+
+Introduction: ‘‘Why Would You Want to Do That?’’
+
+Chapter 1 Chapter 2
+
+Another Pleasant Valley Saturday
+It’s All in the Plan Steps and Tests More Than Two Ways? Computers Think Like Us
+Had This Been the Real Thing . . . Do Not Pass Go
+The Game of Big Bux Playing Big Bux Assembly Language Programming As a Board Game Code and Data Addresses Metaphor Check!
+Alien Bases The Return of the New Math Monster Counting in Martian
+Dissecting a Martian Number The Essence of a Number Base Octal: How the Grinch Stole Eight and Nine Who Stole Eight and Nine? Hexadecimal: Solving the Digit Shortage From Hex to Decimal and from Decimal to Hex From Hex to Decimal From Decimal to Hex Practice. Practice! PRACTICE!
+
+xxvii
+1 1 2 3 4 4 5 6 8 9 10 11 12
+15 15 16 18 20 20 21 24 28 28 29 31
+xv
+
+xvi Contents
+
+Arithmetic in Hex
+
+32
+
+Columns and Carries
+
+35
+
+Subtraction and Borrows
+
+35
+
+Borrows across Multiple Columns
+
+37
+
+What’s the Point?
+
+38
+
+Binary
+
+38
+
+Values in Binary
+
+40
+
+Why Binary?
+
+42
+
+Hexadecimal As Shorthand for Binary
+
+43
+
+Prepare to Compute
+
+44
+
+Chapter 3 Lifting the Hood
+
+45
+
+RAXie, We Hardly Knew Ye . . .
+
+45
+
+Gus to the Rescue
+
+46
+
+Switches, Transistors, and Memory
+
+47
+
+One If by Land . . .
+
+48
+
+Transistor Switches
+
+48
+
+The Incredible Shrinking Bit
+
+50
+
+Random Access
+
+52
+
+Memory Access Time
+
+53
+
+Bytes, Words, Double Words, and Quad Words
+
+54
+
+Pretty Chips All in a Row
+
+55
+
+The Shop Foreman and the Assembly Line
+
+57
+
+Talking to Memory
+
+58
+
+Riding the Data Bus
+
+59
+
+The Foreman’s Pockets
+
+60
+
+The Assembly Line
+
+61
+
+The Box That Follows a Plan
+
+61
+
+Fetch and Execute
+
+63
+
+The Foreman’s Innards
+
+64
+
+Changing Course
+
+65
+
+What vs. How: Architecture and Microarchitecture
+
+66
+
+Evolving Architectures
+
+67
+
+The Secret Machinery in the Basement
+
+68
+
+Enter the Plant Manager
+
+70
+
+Operating Systems: The Corner Ofﬁce
+
+70
+
+BIOS: Software, Just Not as Soft
+
+71
+
+Multitasking Magic
+
+71
+
+Promotion to Kernel
+
+73
+
+The Core Explosion
+
+73
+
+The Plan
+
+74
+
+Chapter 4
+
+Location, Location, Location
+The Joy of Memory Models 16 Bits’ll Buy You 64K The Nature of a Megabyte Backward Compatibility and Virtual 86 Mode 16-Bit Blinders
+The Nature of Segments A Horizon, Not a Place Making 20-Bit Addresses out of 16-Bit Registers
+16-Bit and 32-Bit Registers General-Purpose Registers Register Halves The Instruction Pointer The Flags Register
+The Three Major Assembly Programming Models Real Mode Flat Model Real Mode Segmented Model Protected Mode Flat Model
+What Protected Mode Won’t Let Us Do Anymore Memory-Mapped Video Direct Access to Port Hardware Direct Calls into the BIOS
+Looking Ahead: 64-Bit ‘‘Long Mode’’ 64-Bit Memory: What May Be Possible Someday vs. What We Can Do Now
+
+Chapter 5
+
+The Right to Assemble
+Files and What’s Inside Them Binary Files vs. Text Files Looking at File Internals with the Bless Editor Interpreting Raw Data ‘‘Endianness’’
+Text In, Code Out Assembly Language Comments Beware ‘‘Write-Only’’ Source Code! Object Code and Linkers Relocatability
+The Assembly Language Development Process The Discipline of Working Directories Editing the Source Code File
+
+Contents xvii
+77 77 79 82 83 83 85 88 88 90 91 93 95 96 96 97 99 101 104 104 105 106 106
+107
+109 110 111 112 116 117 121 121 124 124 125 128 128 129 131
+
+xviii Contents
+
+Assembling the Source Code File
+
+131
+
+Assembler Errors
+
+132
+
+Back to the Editor
+
+133
+
+Assembler Warnings
+
+134
+
+Linking the Object Code File
+
+135
+
+Linker Errors
+
+136
+
+Testing the .EXE File
+
+136
+
+Errors versus Bugs
+
+137
+
+Are We There Yet?
+
+138
+
+Debuggers and Debugging
+
+138
+
+Taking a Trip Down Assembly Lane
+
+139
+
+Installing the Software
+
+139
+
+Step 1: Edit the Program in an Editor
+
+142
+
+Step 2: Assemble the Program with NASM
+
+143
+
+Step 3: Link the Program with LD
+
+146
+
+Step 4: Test the Executable File
+
+147
+
+Step 5: Watch It Run in the Debugger
+
+147
+
+Ready to Get Serious?
+
+153
+
+Chapter 6 A Place to Stand, with Access to Tools
+
+155
+
+The Kate Editor
+
+157
+
+Installing Kate
+
+157
+
+Launching Kate
+
+158
+
+Conﬁguration
+
+160
+
+Kate Sessions
+
+162
+
+Creating a New Session
+
+162
+
+Opening an Existing Session
+
+163
+
+Deleting or Renaming Sessions
+
+163
+
+Kate’s File Management
+
+164
+
+Filesystem Browser Navigation
+
+165
+
+Adding a File to the Current Session
+
+165
+
+Dropping a File from the Current Session
+
+166
+
+Switching Between Session Files in the Editor
+
+166
+
+Creating a Brand-New File
+
+166
+
+Creating a Brand-New Folder on Disk
+
+166
+
+Deleting a File from Disk (Move File to Trash)
+
+166
+
+Reloading a File from Disk
+
+167
+
+Saving All Unsaved Changes in Session Files
+
+167
+
+Printing the File in the Editor Window
+
+167
+
+Exporting a File As HTML
+
+167
+
+Adding Items to the Toolbar
+
+167
+
+Kate’s Editing Controls
+
+168
+
+Cursor Movement
+
+169
+
+Bookmarks
+
+169
+
+Selecting Text
+
+170
+
+Chapter 7
+
+Searching the Text Using Search and Replace Using Kate While Programming Creating and Using Project Directories Focus! Linux and Terminals The Linux Console Character Encoding in Konsole The Three Standard Unix Files I/O Redirection Simple Text Filters Terminal Control with Escape Sequences So Why Not GUI Apps? Using Linux Make Dependencies When a File Is Up to Date Chains of Dependencies Invoking Make from Inside Kate Using Touch to Force a Build The Insight Debugger Running Insight Insight’s Many Windows A Quick Insight Run-Through Pick Up Your Tools . . .
+Following Your Instructions
+Build Yourself a Sandbox A Minimal NASM Program
+Instructions and Their Operands Source and Destination Operands Immediate Data Register Data Memory Data Confusing Data and Its Address The Size of Memory Data The Bad Old Days
+Rally Round the Flags, Boys! Flag Etiquette Adding and Subtracting One with INC and DEC Watching Flags from Insight How Flags Change Program Execution
+Signed and Unsigned Values Two’s Complement and NEG Sign Extension and MOVSX
+
+Contents xix
+171 172 172 173 175 176 176 177 178 180 182 183 185 186 187 189 189 191 193 194 195 195 197 200
+201 201 202 204 204 205 207 209 210 211 211 212 215 215 216 218 221 221 224
+
+xx Contents
+
+Implicit Operands and MUL
+
+225
+
+MUL and the Carry Flag
+
+227
+
+Unsigned Division with DIV
+
+228
+
+The x86 Slowpokes
+
+229
+
+Reading and Using an Assembly Language Reference
+
+230
+
+Memory Joggers for Complex Memories
+
+230
+
+An Assembly Language Reference for Beginners
+
+231
+
+Flags
+
+232
+
+NEG: Negate (Two’s Complement; i.e., Multiply by -1)
+
+233
+
+Flags affected
+
+233
+
+Legal forms
+
+233
+
+Examples
+
+233
+
+Notes
+
+233
+
+Legal Forms
+
+234
+
+Operand Symbols
+
+234
+
+Examples
+
+235
+
+Notes
+
+235
+
+What’s Not Here . . .
+
+235
+
+Chapter 8 Our Object All Sublime
+
+237
+
+The Bones of an Assembly Language Program
+
+237
+
+The Initial Comment Block
+
+239
+
+The .data Section
+
+240
+
+The .bss Section
+
+240
+
+The .text Section
+
+241
+
+Labels
+
+241
+
+Variables for Initialized Data
+
+242
+
+String Variables
+
+242
+
+Deriving String Length with EQU and $
+
+244
+
+Last In, First Out via the Stack
+
+246
+
+Five Hundred Plates per Hour
+
+246
+
+Stacking Things Upside Down
+
+248
+
+Push-y Instructions
+
+249
+
+POP Goes the Opcode
+
+251
+
+Storage for the Short Term
+
+253
+
+Using Linux Kernel Services Through INT80
+
+254
+
+An Interrupt That Doesn’t Interrupt Anything
+
+254
+
+Getting Home Again
+
+259
+
+Exiting a Program via INT 80h
+
+260
+
+Software Interrupts versus Hardware Interrupts
+
+261
+
+INT 80h and the Portability Fetish
+
+262
+
+Designing a Non-Trivial Program
+
+264
+
+Deﬁning the Problem
+
+264
+
+Starting with Pseudo-code
+
+265
+
+Chapter 9
+
+Successive Reﬁnement Those Inevitable ‘‘Whoops!’’ Moments Scanning a Buffer ‘‘Off By One’’ Errors Going Further
+Bits, Flags, Branches, and Tables
+Bits Is Bits (and Bytes Is Bits) Bit Numbering ‘‘It’s the Logical Thing to Do, Jim. . .’’ The AND Instruction Masking Out Bits The OR Instruction The XOR Instruction The NOT Instruction Segment Registers Don’t Respond to Logic!
+Shifting Bits Shift By What? How Bit Shifting Works Bumping Bits into the Carry Flag The Rotate Instructions Setting a Known Value into the Carry Flag
+Bit-Bashing in Action Splitting a Byte into Two Nybbles Shifting the High Nybble into the Low Nybble Using a Lookup Table Multiplying by Shifting and Adding
+Flags, Tests, and Branches Unconditional Jumps Conditional Jumps Jumping on the Absence of a Condition Flags Comparisons with CMP A Jungle of Jump Instructions ‘‘Greater Than‘‘ Versus ’’Above’’ Looking for 1-Bits with TEST Looking for 0 Bits with BT
+Protected Mode Memory Addressing in Detail Effective Address Calculations Displacements Base + Displacement Addressing Base + Index Addressing Index × Scale + Displacement Addressing Other Addressing Schemes
+
+Contents xxi
+266 270 271 273 277
+279 279 280 280 281 282 283 284 285 285 286 286 287 287 288 289 289 292 293 293 295 298 298 299 300 301 301 302 303 304 306 307 308 309 310 310 312 313
+
+xxii Contents
+
+LEA: The Top-Secret Math Machine
+
+315
+
+The Burden of 16-Bit Registers
+
+317
+
+Character Table Translation
+
+318
+
+Translation Tables
+
+318
+
+Translating with MOV or XLAT
+
+320
+
+Tables Instead of Calculations
+
+325
+
+Chapter 10 Dividing and Conquering
+
+327
+
+Boxes within Boxes
+
+328
+
+Procedures As Boxes for Code
+
+329
+
+Calling and Returning
+
+336
+
+Calls within Calls
+
+338
+
+The Dangers of Accidental Recursion
+
+340
+
+A Flag Etiquette Bug to Beware Of
+
+341
+
+Procedures and the Data They Need
+
+342
+
+Saving the Caller’s Registers
+
+343
+
+Local Data
+
+346
+
+More Table Tricks
+
+347
+
+Placing Constant Data in Procedure Deﬁnitions
+
+349
+
+Local Labels and the Lengths of Jumps
+
+350
+
+’’Forcing’’ Local Label Access
+
+353
+
+Short, Near, and Far Jumps
+
+354
+
+Building External Procedure Libraries
+
+355
+
+Global and External Declarations
+
+356
+
+The Mechanics of Globals and Externals
+
+357
+
+Linking Libraries into Your Programs
+
+365
+
+The Dangers of Too Many Procedures and Too Many
+
+Libraries
+
+366
+
+The Art of Crafting Procedures
+
+367
+
+Maintainability and Reuse
+
+367
+
+Deciding What Should Be a Procedure
+
+368
+
+Use Comment Headers!
+
+370
+
+Simple Cursor Control in the Linux Console
+
+371
+
+Console Control Cautions
+
+377
+
+Creating and Using Macros
+
+378
+
+The Mechanics of Macro Deﬁnition
+
+379
+
+Deﬁning Macros with Parameters
+
+385
+
+The Mechanics of Invoking Macros
+
+386
+
+Local Labels Within Macros
+
+387
+
+Macro Libraries As Include Files
+
+388
+
+Macros versus Procedures: Pros and Cons
+
+389
+
+Contents xxiii
+
+Chapter 11 Strings and Things
+
+393
+
+The Notion of an Assembly Language String
+
+393
+
+Turning Your ‘‘String Sense’’ Inside-Out
+
+394
+
+Source Strings and Destination Strings
+
+395
+
+A Text Display Virtual Screen
+
+395
+
+REP STOSB, the Software Machine Gun
+
+402
+
+Machine-Gunning the Virtual Display
+
+403
+
+Executing the STOSB Instruction
+
+404
+
+STOSB and the Direction Flag (DF)
+
+405
+
+Deﬁning Lines in the Display Buffer
+
+406
+
+Sending the Buffer to the Linux Console
+
+406
+
+The Semiautomatic Weapon: STOSB without REP
+
+407
+
+Who Decrements ECX?
+
+407
+
+The LOOP Instructions
+
+408
+
+Displaying a Ruler on the Screen
+
+409
+
+MUL Is Not IMUL
+
+410
+
+Adding ASCII Digits
+
+411
+
+Adjusting AAA’s Adjustments
+
+413
+
+Ruler’s Lessons
+
+414
+
+16-bit and 32-bit Versions of STOS
+
+414
+
+MOVSB: Fast Block Copies
+
+414
+
+DF and Overlapping Block Moves
+
+416
+
+Single-Stepping REP String Instructions with Insight
+
+418
+
+Storing Data to Discontinuous Strings
+
+419
+
+Displaying an ASCII Table
+
+419
+
+Nested Instruction Loops
+
+420
+
+Jumping When ECX Goes to 0
+
+421
+
+Closing the Inner Loop
+
+421
+
+Closing the Outer Loop
+
+422
+
+Showchar Recap
+
+423
+
+Command-Line Arguments and Examining the Stack
+
+424
+
+Virtual Memory in Two Chunks
+
+424
+
+Anatomy of the Linux Stack
+
+427
+
+Why Stack Addresses Aren’t Predictable
+
+429
+
+Setting Command-Line Arguments with Insight
+
+429
+
+Examining the Stack with Insight’s Memory View
+
+430
+
+String Searches with SCASB
+
+432
+
+REPNE vs. REPE
+
+435
+
+Pop the Stack or Address It?
+
+436
+
+For Extra Credit . . .
+
+438
+
+xxiv Contents
+
+Chapter 12 Heading Out to C
+
+439
+
+What’s GNU?
+
+440
+
+The Swiss Army Compiler
+
+441
+
+Building Code the GNU Way
+
+441
+
+How to Use gcc in Assembly Work
+
+443
+
+Why Not gas?
+
+444
+
+Linking to the Standard C Library
+
+445
+
+C Calling Conventions
+
+446
+
+A Framework to Build On
+
+447
+
+Saving and Restoring Registers
+
+447
+
+Setting Up a Stack Frame
+
+448
+
+Destroying a Stack Frame
+
+450
+
+Characters Out via puts()
+
+451
+
+Formatted Text Output with printf()
+
+452
+
+Passing Parameters to printf()
+
+454
+
+Data In with fgets() and scanf()
+
+456
+
+Using scanf() for Entry of Numeric Values
+
+458
+
+Be a Time Lord
+
+462
+
+The C Library’s Time Machine
+
+462
+
+Fetching time_t Values from the System Clock
+
+464
+
+Converting a time_t Value to a Formatted String
+
+464
+
+Generating Separate Local Time Values
+
+465
+
+Making a Copy of glibc’s tm Struct with MOVSD
+
+466
+
+Understanding AT&T Instruction Mnemonics
+
+470
+
+AT&T Mnemonic Conventions
+
+470
+
+Examining gas Source Files Created by gcc
+
+471
+
+AT&T Memory Reference Syntax
+
+474
+
+Generating Random Numbers
+
+475
+
+Seeding the Generator with srand()
+
+476
+
+Generating Pseudorandom Numbers
+
+477
+
+Some Bits Are More Random Than Others
+
+482
+
+Calls to Addresses in Registers
+
+483
+
+How C Sees Command-Line Arguments
+
+484
+
+Simple File I/O
+
+487
+
+Converting Strings into Numbers with sscanf()
+
+487
+
+Creating and Opening Files
+
+489
+
+Reading Text from Files with fgets()
+
+490
+
+Writing Text to Files with fprintf()
+
+493
+
+Notes on Gathering Your Procedures into Libraries
+
+494
+
+Conclusion: Not the End, But Only the Beginning
+
+503
+
+Where to Now?
+
+504
+
+Stepping off Square One
+
+506
+
+Contents xxv
+
+Appenix A Partial x86 Instruction Set Reference
+
+507
+
+Notes on the Instruction Set Reference
+
+510
+
+AAA: Adjust AL after BCD Addition
+
+512
+
+ADC: Arithmetic Addition with Carry
+
+513
+
+ADD: Arithmetic Addition
+
+515
+
+AND: Logical AND
+
+517
+
+BT: Bit Test
+
+519
+
+CALL: Call Procedure
+
+521
+
+CLC: Clear Carry Flag (CF)
+
+523
+
+CLD: Clear Direction Flag (DF)
+
+524
+
+CMP: Arithmetic Comparison
+
+525
+
+DEC: Decrement Operand
+
+527
+
+DIV: Unsigned Integer Division
+
+528
+
+INC: Increment Operand
+
+529
+
+INT: Software Interrupt
+
+530
+
+IRET: Return from Interrupt
+
+531
+
+J?: Jump on Condition
+
+532
+
+JCXZ: Jump If CX=0
+
+534
+
+JECXZ: Jump If ECX=0
+
+535
+
+JMP: Unconditional Jump
+
+536
+
+LEA: Load Effective Address
+
+537
+
+LOOP: Loop until CX/ECX=0
+
+538
+
+LOOPNZ/LOOPNE: Loop While CX/ECX > 0 and ZF=0
+
+540
+
+LOOPZ/LOOPE: Loop While CX/ECX > 0 and ZF=1
+
+541
+
+MOV: Move (Copy) Right Operand into Left Operand
+
+542
+
+MOVS: Move String
+
+544
+
+MOVSX: Move (Copy) with Sign Extension
+
+546
+
+MUL: Unsigned Integer Multiplication
+
+547
+
+NEG: Negate (Two’s Complement; i.e., Multiply by -1)
+
+549
+
+NOP: No Operation
+
+550
+
+NOT: Logical NOT (One’s Complement)
+
+551
+
+OR: Logical OR
+
+552
+
+POP: Pop Top of Stack into Operand
+
+554
+
+POPA/POPAD: Pop All GP Registers
+
+555
+
+POPF: Pop Top of Stack into 16-Bit Flags
+
+556
+
+POPFD: Pop Top of Stack into EFlags
+
+557
+
+PUSH: Push Operand onto Top of Stack
+
+558
+
+PUSHA: Push All 16-Bit GP Registers
+
+559
+
+PUSHAD: Push All 32-Bit GP Registers
+
+560
+
+PUSHF: Push 16-Bit Flags onto Stack
+
+561
+
+PUSHFD: Push 32-Bit EFlags onto Stack
+
+562
+
+RET: Return from Procedure
+
+563
+
+ROL: Rotate Left
+
+564
+
+xxvi Contents
+
+ROR: Rotate Right
+
+566
+
+SBB: Arithmetic Subtraction with Borrow
+
+568
+
+SHL: Shift Left
+
+570
+
+SHR: Shift Right
+
+572
+
+STC: Set Carry Flag (CF)
+
+574
+
+STD: Set Direction Flag (DF)
+
+575
+
+STOS: Store String
+
+576
+
+SUB: Arithmetic Subtraction
+
+577
+
+XCHG: Exchange Operands
+
+579
+
+XLAT: Translate Byte via Table
+
+580
+
+XOR: Exclusive Or
+
+581
+
+Appendix B Character Set Charts
+
+583
+
+Index
+
+587
+
+Introduction: ‘‘Why Would You Want to Do That?’’
+It was 1985, and I was in a chartered bus in New York City, heading for a press reception with a bunch of other restless media egomaniacs. I was only beginning my media career (as Technical Editor for PC Tech Journal) and my ﬁrst book was still months in the future. I happened to be sitting next to an established programming writer/guru, with whom I was impressed and to whom I was babbling about one thing or another. I won’t name him, as he’s done a lot for the ﬁeld, and may do a fair bit more if he doesn’t kill himself smoking ﬁrst.
+But I happened to let it slip that I was a Turbo Pascal fanatic, and what I really wanted to do was learn how to write Turbo Pascal programs that made use of the brand-new Microsoft Windows user interface. He wrinkled his nose and grimaced wryly, before speaking the Infamous Question:
+‘‘Why would you want to do that?’’ I had never heard the question before (though I would hear it many times thereafter) and it took me aback. Why? Because, well, because . . . I wanted to know how it worked. ‘‘Heh. That’s what C’s for.’’ Further discussion got me nowhere in a Pascal direction. But some probing led me to understand that you couldn’t write Windows apps in Turbo Pascal. It was impossible. Or . . . the programming writer/guru didn’t know how. Maybe both. I never learned the truth. But I did learn the meaning of the Infamous Question. Note well: When somebody asks you, ‘‘Why would you want to do that?’’ what it really means is this: ‘‘You’ve asked me how to do something that is either impossible using tools that I favor or completely outside my experience,
+xxvii
+
+xxviii Introduction: ‘‘Why Would You Want to Do That?’’
+but I don’t want to lose face by admitting it. So . . . how ‘bout those Blackhawks?’’
+I heard it again and again over the years:
+Q: How can I set up a C string so that I can read its length without scanning it?
+A: Why would you want to do that?
+Q: How can I write an assembly language subroutine callable from Turbo Pascal?
+A: Why would you want to do that?
+Q: How can I write Windows apps in assembly language?
+A: Why would you want to do that?
+You get the idea. The answer to the Infamous Question is always the same, and if the weasels ever ask it of you, snap back as quickly as possible, ‘‘Because I want to know how it works.’’
+That is a completely sufﬁcient answer. It’s the answer I’ve used every single time, except for one occasion a considerable number of years ago, when I put forth that I wanted to write a book that taught people how to program in assembly language as their ﬁrst experience in programming.
+Q: Good grief, why would you want to do that?
+A: Because it’s the best way there is to build the skills required to understand how all the rest of the programming universe works.
+Being a programmer is one thing above all else: it is understanding how things work. Learning to be a programmer, furthermore, is almost entirely a process of leaning how things work. This can be done at various levels, depending on the tools you’re using. If you’re programming in Visual Basic, you have to understand how certain things work, but those things are by and large conﬁned to Visual Basic itself. A great deal of machinery is hidden by the layer that Visual Basic places between the programmer and the computer. (The same is true of Delphi, Java, Python, and many other very high level programming environments.) If you’re using a C compiler, you’re a lot closer to the machine, and you see a lot more of that machinery—and must, therefore, understand how it works to be able to use it. However, quite a bit remains hidden, even from the hardened C programmer.
+If, conversely, you’re working in assembly language, you’re as close to the machine as you can get. Assembly language hides nothing, and withholds no power. The ﬂip side, of course, is that no magical layer between you and the machine will absolve any ignorance and ‘‘take care of’’ things for you. If you don’t understand how something works, you’re dead in the water—unless you know enough to be able to ﬁgure it out on your own.
+
+Introduction: ‘‘Why Would You Want to Do That?’’ xxix
+That’s a key point: My goal in creating this book is not entirely to teach you assembly language per se. If this book has a prime directive at all, it is to impart a certain disciplined curiosity about the machine, along with some basic context from which you can begin to explore the machine at its very lowest levels—that, and the conﬁdence to give it your best shot. This is difﬁcult stuff, but it’s nothing you can’t master given some concentration, patience, and the time it requires—which, I caution, may be considerable.
+In truth, what I’m really teaching you here is how to learn.
+What You’ll Need
+To program as I intend to teach, you’re going to need an Intel x86-based computer running Linux. The text and examples assume at least a 386, but since Linux itself requires at least a 386, you’re covered.
+You need to be reasonably proﬁcient with Linux at the user level. I can’t teach you how to install and run Linux in this book, though I will provide hints where things get seriously non-obvious. If you’re not already familiar with Linux, get a tutorial text and work through it. Many exist but my favorite is the formidable Ubuntu 8.10 Linux Bible, by William von Hagen. (Linux for Dummies, while well done, is not enough.)
+Which Linux distribution/version you use is not extremely important, as long as it’s based on at least the version 2.4 kernel, and preferably version 2.6. The distribution that I used to write the example programs was Ubuntu version 8.10. Which graphical user interface (GUI) you use doesn’t matter, because all of the programs are written to run from the purely textual Linux console. The assembler itself, NASM, is also a purely textual creature.
+Where a GUI is required is for the Kate editor, which I use as a model in the discussions of the logistics of programming. You can actually use any editor you want. There’s nothing in the programs themselves that requires Kate, but if you’re new to programming or have always used a highly language-speciﬁc editing environment, Kate is a good choice.
+The debugger I cite in the text is the venerable Gdb, but mostly by way of Gdb’s built-in GUI front end, Insight. Insight requires a functioning X Window subsystem but is not tied to a speciﬁc GUI system like GNOME or KDE.
+You don’t have to know how to install and conﬁgure these tools in advance, because I cover all necessary tool installation and conﬁguration in the chapters, at appropriate times.
+Note that other Unix implementations not based on the Linux kernel may not function precisely the same way under the hood. BSD Unix uses different conventions for making kernel calls, for example, and other Unix versions such as Solaris are outside my experience.
+
+xxx Introduction: ‘‘Why Would You Want to Do That?’’
+The Master Plan
+This book starts at the beginning, and I mean the beginning. Maybe you’re already there, or well past it. I respect that. I still think that it wouldn’t hurt to start at the ﬁrst chapter and read through all the chapters in order. Review is useful, and hey—you may realize that you didn’t know quite as much as you thought you did. (Happens to me all the time!)
+But if time is at a premium, here’s the cheat sheet:
+1. If you already understand the fundamental ideas of computer programming, skip Chapter 1.
+2. If you already understand the ideas behind number bases other than decimal (especially hexadecimal and binary), skip Chapter 2.
+3. If you already have a grip on the nature of computer internals (memory, CPU architectures, and so on) skip Chapter 3.
+4. If you already understand x86 memory addressing, skip Chapter 4.
+5. No. Stop. Scratch that. Even if you already understand x86 memory addressing, read Chapter 4.
+Point 5 is there, and emphatic, for a reason: Assembly language programming is about memory addressing. If you don’t understand memory addressing, nothing else you learn in assembly will help you one lick. So don’t skip Chapter 4 no matter what else you know or think you know. Start from there, and see it through to the end. Load every example program, assemble each one, and run them all. Strive to understand every single line in every program. Take nothing on faith.
+Furthermore, don’t stop there. Change the example programs as things begin to make sense to you. Try different approaches. Try things that I don’t mention. Be audacious. Nay, go nuts—bits don’t have feelings, and the worst thing that can happen is that Linux throws a segmentation fault, which may hurt your program (and perhaps your self esteem) but does not hurt Linux. (They don’t call it ‘‘protected mode’’ for nothing!) The only catch is that when you try something, understand why it doesn’t work as clearly as you understand all the other things that do. Take notes.
+That is, ultimately, what I’m after: to show you the way to understand what every however distant corner of your machine is doing, and how all its many pieces work together. This doesn’t mean I explain every corner of it myself—no one will live long enough to do that. Computing isn’t simple anymore, but if you develop the discipline of patient research and experimentation, you can probably work it out for yourself. Ultimately, that’s the only way to learn it: by yourself. The guidance you ﬁnd—in friends, on the Net, in books like this—is only guidance, and grease on the axles. You have to decide who is to be the master, you or the machine, and make it so. Assembly programmers
+
+Introduction: ‘‘Why Would You Want to Do That?’’ xxxi
+are the only programmers who can truly claim to be the masters, and that’s a truth worth meditating on.
+A Note on Capitalization Conventions
+Assembly language is peculiar among programming languages in that there is no universal standard for case sensitivity. In the C language, all identiﬁers are case sensitive, and I have seen assemblers that do not recognize differences in case at all. NASM, the assembler I present in this book, is case sensitive only for programmer-deﬁned identiﬁers. The instruction mnemonics and the names of registers, however, are not case sensitive.
+There are customs in the literature on assembly language, and one of those customs is to treat CPU instruction mnemonics and register names as uppercase in the text, and in lowercase in source code ﬁles and code snippets interspersed in the text. I’ll be following that custom here. Within discussion text, I’ll speak of MOV and registers EAX and EFLAGS. In example code, it will be mov and eax and eﬂags.
+There are two reasons for this:
+In text discussions, the mnemonics and registers need to stand out. It’s too easy to lose track of them amid a torrent of ordinary words. In order to read and learn from existing documents and source code outside of this one book, you need to be able to easily read assembly language whether it’s in uppercase, lowercase, or mixed case. Getting comfortable with different ways of expressing the same thing is important.
+This will grate on some people in the Unix community, for whom lowercase characters are something of a fetish. I apologize in advance for the irritation, while insisting to the end that it’s still a fetish, and a fairly childish one at that.
+Why Am I Here Again?
+Wherever you choose to start the book, it’s time to get under way. Just remember that whatever gets in your face, be it the weasels, the machine, or your own inexperience, the thing to keep in the forefront of your mind is this: You’re in it to ﬁgure out how it works.
+Let’s go.
+Jeff Duntemann Colorado Springs, Colorado
+June 5, 2009
+www.duntemann.com/assembly.htm
+
+Assembly Language Step-by-Step
+
+CHAPTER
+1
+Another Pleasant Valley Saturday
+Understanding What Computers Really Do
+It’s All in the Plan
+’’Quick, Mike, get your sister and brother up, it’s past 7. Nicky’s got Little League at 9:00 and Dione’s got ballet at 10:00. Give Max his heartworm pill! (We’re out of them, Ma, remember?) Your father picked a great weekend to go ﬁshing. Here, let me give you 10 bucks and go get more pills at the vet’s. My God, that’s right, Hank needed gas money and left me broke. There’s an ATM over by Kmart, and if I go there I can take that stupid toilet seat back and get the right one.’’
+’’I guess I’d better make a list. . . . ’’ It’s another Pleasant Valley Saturday, and thirty-odd million suburban homemakers sit down with a pencil and pad at the kitchen table to try to make sense of a morning that would kill and pickle any lesser being. In her mind, she thinks of the dependencies and traces the route: Drop Nicky at Rand Park, go back to Dempster and it’s about 10 minutes to Golf Mill Mall. Do I have gas? I’d better check ﬁrst—if not, stop at Del’s Shell or I won’t make it to Milwaukee Avenue. Milk the ATM at Golf Mill, then cross the parking lot to Kmart to return the toilet seat that Hank bought last weekend without checking what shape it was. Gotta remember to throw the toilet seat in the back of the van—write that at the top of the list.
+1
+
+2 Chapter 1 ■ Another Pleasant Valley Saturday
+By then it’ll be half past, maybe later. Ballet is all the way down Greenwood in Park Ridge. No left turn from Milwaukee—but there’s the sneak path around behind the mall. I have to remember not to turn right onto Milwaukee like I always do—jot that down. While I’m in Park Ridge I can check to see if Hank’s new glasses are in—should call but they won’t even be open until 9:30. Oh, and groceries—can do that while Dione dances. On the way back I can cut over to Oakton and get the dog’s pills.
+In about 90 seconds ﬂat the list is complete:
+Throw toilet seat in van. Check gas—if empty, stop at Del’s Shell. Drop Nicky at Rand Park. Stop at Golf Mill teller machine. Return toilet seat at Kmart. Drop Dione at ballet (remember the sneak path to Greenwood). See if Hank’s glasses are at Pearle Vision—if they are, make sure they remembered the extra scratch coating. Get groceries at Jewel. Pick up Dione. Stop at vet’s for heartworm pills. Drop off groceries at home. If it’s time, pick up Nicky. If not, collapse for a few minutes, then pick up Nicky. Collapse!
+In what we often call a ‘‘laundry list’’ (whether it involves laundry or not) is the perfect metaphor for a computer program. Without realizing it, our intrepid homemaker has written herself a computer program and then set out (acting as the computer) to execute it and be done before noon.
+Computer programming is nothing more than this: you, the programmer, write a list of steps and tests. The computer then performs each step and test in sequence. When the list of steps has been executed, the computer stops.
+A computer program is a list of steps and tests, nothing more.
+Steps and Tests
+Think for a moment about what I call a ‘‘test’’ in the preceding laundry list. A test is the sort of either/or decision we make dozens or hundreds of times on even the most placid of days, sometimes nearly without thinking about it.
+
+Chapter 1 ■ Another Pleasant Valley Saturday 3
+Our homemaker performed a test when she jumped into the van to get started on her adventure. She looked at the gas gauge. The gas gauge would tell her one of two things: either she has enough gas or she doesn’t. If she has enough gas, then she takes a right and heads for Rand Park. If she doesn’t have enough gas, then she takes a left down to the corner and ﬁlls the tank at Del’s Shell. Then, with a full tank, she continues the program by taking a U-turn and heading for Rand Park.
+In the abstract, a test consists of those two parts:
+First, you take a look at something that can go one of two ways.
+Then you do one of two things, depending on what you saw when you took a look.
+Toward the end of the program, our homemaker gets home, takes the groceries out of the van, and checks the clock. If it isn’t time to get Nicky from Little League, then she has a moment to collapse on the couch in a nearly empty house. If it is time to get Nicky, then there’s no rest for the ragged: she sprints for the van and heads back to Rand Park.
+(Any guesses as to whether she really gets to collapse when the program ﬁnishes running?)
+More Than Two Ways?
+You might object, saying that many or most tests involve more than two alternatives. Ha-ha, sorry, you’re dead wrong—in every case. Furthermore, you’re wrong whether you think you are or not. Read this twice: Except for totally impulsive or psychotic behavior, every human decision comes down to the choice between two alternatives.
+What you have to do is look a little more closely at what goes through your mind when you make decisions. The next time you buzz down to Yow Chow Now for fast Chinese, observe yourself while you’re poring over the menu. The choice might seem, at ﬁrst, to be of one item out of 26 Cantonese main courses. Not so. The choice, in fact, is between choosing one item and not choosing that one item. Your eyes rest on chicken with cashews. Naw, too bland. That was a test. You slide down to the next item. Chicken with black mushrooms. Hmm, no, had that last week. That was another test. Next item: Kung Pao chicken. Yeah, that’s it! That was a third test.
+The choice was not among chicken with cashews, chicken with black mushrooms, or Kung Pao chicken. Each dish had its moment, poised before the critical eye of your mind, and you turned thumbs up or thumbs down on it, individually. Eventually, one dish won, but it won in that same game of ‘‘to eat or not to eat.’’
+Let me give you another example. Many of life’s most complicated decisions come about due to the fact that 99.99867 percent of us are not nudists. You’ve
+
+4 Chapter 1 ■ Another Pleasant Valley Saturday
+been there: you’re standing in the clothes closet in your underwear, ﬂipping through your rack of pants. The tests come thick and fast. This one? No. This one? No. This one? No. This one? Yeah. You pick a pair of blue pants, say. (It’s a Monday, after all, and blue would seem an appropriate color.) Then you stumble over to your sock drawer and take a look. Whoops, no blue socks. That was a test. So you stumble back to the clothes closet, hang your blue pants back on the pants rack, and start over. This one? No. This one? No. This one? Yeah. This time it’s brown pants, and you toss them over your arm and head back to the sock drawer to take another look. Nertz, out of brown socks, too. So it’s back to the clothes closet . . .
+What you might consider a single decision, or perhaps two decisions inextricably tangled (such as picking pants and socks of the same color, given stock on hand), is actually a series of small decisions, always binary in nature: pick ‘em or don’t pick ‘em. Find ‘em or don’t ﬁnd ‘em. The Monday morning episode in the clothes closet is a good analogy of a programming structure called a loop: you keep doing a series of things until you get it right, and then you stop (assuming you’re not the kind of geek who wears blue socks with brown pants); but whether you get everything right always comes down to a sequence of simple either/or decisions.
+Computers Think Like Us
+I can almost hear the objection: ‘‘Sure, it’s a computer book, and he’s trying to get me to think like a computer.’’ Not at all. Computers think like us. We designed them; how else could they think? No, what I’m trying to do is get you to take a long, hard look at how you think. We run on automatic for so much of our lives that we literally do most of our thinking without really thinking about it.
+The very best model for the logic of a computer program is the very same logic we use to plan and manage our daily affairs. No matter what we do, it comes down to a matter of confronting two alternatives and picking one. What we might think of as a single large and complicated decision is nothing more than a messy tangle of many smaller decisions. The skill of looking at a complex decision and seeing all the little decisions in its tummy will serve you well in learning how to program. Observe yourself the next time you have to decide something. Count up the little decisions that make up the big one. You’ll be surprised.
+And, surprise! You’ll be a programmer.
+Had This Been the Real Thing . . .
+Do not be alarmed. What you have just experienced was a metaphor. It was not the real thing. (The real thing comes later.) I use metaphors a lot in this book. A metaphor is a loose comparison drawn between something familiar
+
+Chapter 1 ■ Another Pleasant Valley Saturday 5
+(such as a Saturday morning laundry list) and something unfamiliar (such as a computer program). The idea is to anchor the unfamiliar in the terms of the familiar, so that when I begin tossing facts at you, you’ll have someplace comfortable to lay them down.
+The most important thing for you to do right now is keep an open mind. If you know a little bit about computers or programming, don’t pick nits. Yes, there are important differences between a homemaker following a scribbled laundry list and a computer executing a program. I’ll mention those differences all in good time.
+For now, it’s still Chapter 1. Take these initial metaphors on their own terms. Later on, they’ll help a lot.
+Do Not Pass Go
+’’There’s a reason bored and board are homonyms,’’ said my best friend, Art, one evening as we sat (two super-sophisticated twelve-year-olds) playing some game in his basement. (He may have been unhappy because he was losing.) Was it Mille Bornes? Or Stratego? Or Monopoly? Or something else entirely? I confess, I don’t remember. I simply recall hopping some little piece of plastic shaped like a pregnant bowling pin up and down a series of colored squares that told me to do dumb things like go back two spaces or put $100 in the pot or nuke Outer Mongolia.
+There are strong parallels to be drawn between that peculiar American pastime, the board game, and assembly-language programming. First of all, everything I said before still holds: board games, by and large, consist of a progression of steps and tests. In some games, such as Trivial Pursuit, every step on the board is a test: to see if you can answer, or not answer, a question on a card. In other board games, each little square along the path on the board contains some sort of instruction: Lose One Turn; Go Back Two Squares; Take a Card from Community Chest; and, of course, Go to Jail. Things happen in board games, and the path your little pregnant bowling pin takes as it works its way along the edge of the board will change along the way.
+Many board games also have little storage locations marked on the board where you keep things: cards and play money and game tokens such as little plastic houses or hotels, or perhaps bombers and nuclear missiles. As the game progresses, you buy, sell, or launch your assets, and the contents of your storage locations change. Computer programs are like that too: there are places where you store things (’’things’’ here being pure data, rather than physical tokens); and as the computer program executes, the data stored in those places will change.
+Computer programs are not games, of course—at least, not in the sense that a board game is a game. Most of the time, a given program is running all by itself. There is only one ‘‘player’’ and not two or more. (This is not
+
+6 Chapter 1 ■ Another Pleasant Valley Saturday
+always true, but I don’t want to get too far ahead right now. Remember, we’re still in metaphor territory.) Still, the metaphor is useful enough that it’s worth pursuing.
+The Game of Big Bux
+I’ve invented my own board game to continue down the road with this particular metaphor. In the sense that art mirrors life, the Game of Big Bux mirrors life in Silicon Valley, where money seems to be spontaneously created (generally in somebody else’s pocket) and the three big Money Black Holes are fast cars, California real estate, and messy divorces. There is luck, there is work, and assets often change hands very quickly.
+A portion of the Big Bux game board is shown in Figure 1-1. The line of rectangles on the left side of the page continues all the way around the board. In the middle of the board are cubbyholes to store your play money and game pieces; stacks of cards to be read occasionally; and short detours with names such as Messy Divorce and Start a Business, which are brief sequences of the same sort of action squares as those forming the path around the edge of the board. These are ‘‘side paths’’ that players take when instructed, either by a square on the board or a card pulled during the game. If you land on a square that tells you to Start a Business, you go through that detour. If you jump over the square, you don’t take the detour, and just keep on trucking around the board.
+Unlike many board games, you don’t throw dice to determine how many steps around the board you take. Big Bux requires that you move one step forward on each turn, unless the square you land on instructs you to move forward or backward or go somewhere else, such as through a detour. This makes for a considerably less random game. In fact, Big Bux is a pretty linear experience, meaning that for the most part you go around the board until you’re told that the game is over. At that point, you may be bankrupt; if not, you can total up your assets to see how well you’ve done.
+There is some math involved. You start out with a condo, a cheap car, and $250,000 in cash. You can buy CDs at a given interest rate, payable each time you make it once around the board. You can invest in stocks and other securities whose value is determined by a changeable index in economic indicators, which ﬂuctuates based on cards chosen from the stack called the Fickle Finger of Fate. You can sell cars on a secondary market, buy and sell houses, condos, and land; and wheel and deal with the other players. Each time you make it once around the board, you have to recalculate your net worth. All of this involves some addition, subtraction, multiplication, and division, but there’s no math more complex than compound interest. Most of Big Bux involves nothing more than taking a step and following the instructions at each step.
+Is this starting to sound familiar?
+
+Chapter 1 ■ Another Pleasant Valley Saturday 7
+
+Prosperity
+
+THE GAME OF “BIG BUX!” – – By Jeff Duntemann
+
+Buy option on Pomegranite Computer. Look out the window– –if you can see the moon, stock falls. Make $50,000. PAYDAY! Deposit salary into checking acct.
+Take a card from: The Fickle Finger of Fate.
+Did you get laid off? If so, detour thru Start Your Own Business.
+Are you married? If not, marry chief programmer for $10,000. If so, detour through Messy Divorce. Friday night. Are you alone? If so, get roaring drunk and jump back three squares. Total car on Highway 101. Buy antoher one of equal value.
+Is your job boring? (Prosperity Index > 0.6 but less than 1.2) If not, jump ahead 3 squares. Get promoted. Salary rises by 25%. (If unemployed, get new job at salary of $800/week.) Have an affair with the Chief Programmer. Jump back 5 squares.
+Holiday. NOTHING HAPPENS AT ALL!
+Vest 5000 stock options. Sell at $10 X economic indicator.
+Buy condo in Palo Alto for 15% down.
+Are you bankrupt? If so, move to Peoria. If not, detour through Start of Business. Friend Nick drops rumor of huge gov’t contract impending at Widgetsoft. Buy $10,000 worth of Widgetsoft stock. Did Widgetsoft contract go through? If not, jump back two squares. If so, sell and make $500,000 in one day. Brag about insider trading to friend Nick. An error. Nick is an SEC plant. Wave at Peoria. Move to Joliet. End of game.
+
+THE BANK
+Mortgage: $153,000 11% adj. Car loan: $ 15,000 10% fixed
+
+YOUR CHECKING ACCOUNT
+
+Balance:
+
+$12,255.00
+
+Line of credit: $ 8,000.00
+
+YOUR PORTFOLIO CD’s: $100.00
+12
+123 3 4
+OTHER ASSETS Salary: $1000/week
+1
+
+MARKET VALUES Porsches: $48,000 Chevies: $10,000 BMWs: $28,000 Used Fords: $2700 2br Palo Alto condo: $385,000 4br Palo Alto house: $742,000
+Messy Divorce Start Here: She moves out, rents $2000/mo. apartment. Are you bankrupt? If so, get cheap lawyer. Jump ahead 4. Hire expensive lawyer. Pay $50,000 from checking. Lawyer proves in court that wife is a chinchilla. Wife is sent to Brookfield Zoo. Return to whence you came. Lawyer proves in court that you are a chinchilla. Court and wife skin you alive. Lose 50% of everything. Start paying wife $5000/mo. for the rest of your life.
+Go back to where you came from.
+The Fickle Finger of Fate.
+
+Start a Business Start Here: Draw up a business plan and submit to a venture firm. Venture firm requires $50,000 matching capital. Have it? If not, return to where you came from. Add $850,000 to checking account. Hire 6 people. Subtract $100,000 from checking acct. Work 18 hours a day for a year. Spend $200,000. Spend $300,000 launching the new product. Take a card from: The Fickle Finger of Fate. First year’s sales: $500,000 x economic ind. Are you bankrupt? If not, jump ahead 2 squares. Go through messy divorce.
+Return to where you came from.
+Sell company for $10,000,000. Buy another $65,000 Porsche.
+Go back to where you came from.
+
+Major Bank Failure! $
+Decrement Economic Indicators line by thirty percent. Bonds tumble by 20%; housing prices by 5%. Re-valuate your portfolio. Bank cuts your line of credit by $2000. Have a good cry.
+
+1000
+100 50 30 20 12.0 7.0 4.0 2.0 1.0 0.5 0.4 0.3
+0.2
+0.1
+0.0
+$
+ECONOMIC INDICATORS
+
+PEORIA
+
+Figure 1-1: The Big Bux game board
+
+Recession
+
+8 Chapter 1 ■ Another Pleasant Valley Saturday
+Playing Big Bux
+At one corner of the Big Bux board is the legend Move In, as that’s how people start life in California—no one is actually born there. That’s the entry point at which you begin the game. Once moved in, you begin working your way around the board, square by square, following the instructions in the squares.
+Some of the squares simply tell you to do something, such as ‘‘Buy a Condo in Palo Alto for 15% down.’’ Many of the squares involve a test of some kind. For example, one square reads: ‘‘Is your job boring? (Prosperity Index 0.3 but less than 4.0.) If not, jump ahead three squares.’’ The test is actually to see if the Prosperity Index has a value between 0.3 and 4.0. Any value outside those bounds (that is, runaway prosperity or Four Horsemen–class recession) is deﬁned as Interesting Times, and causes a jump ahead by three squares.
+You always move one step forward at each turn, unless the square you land on directs you to do something else, such as jump forward three squares or jump back ﬁve squares, or take a detour.
+The notion of taking a detour is an interesting one. Two detours are shown in the portion of the board I’ve provided. (The full game has others.) Taking a detour means leaving your main path around the edge of the game board and stepping through a series of squares somewhere else on the board. When you ﬁnish with the detour, you return to your original path right where you left it. The detours involve some speciﬁc process—for example, starting a business or getting divorced.
+You can work through a detour, step by step, until you hit the bottom. At that point you simply pick up your journey around the board right where you left it. You may also ﬁnd that one of the squares in the detour instructs you to go back to where you came from. Depending on the logic of the game (and your luck and ﬁnances), you may completely run through a detour or get thrown out of the detour somewhere in the middle. In either case, you return to the point from which you originally entered the detour.
+Also note that you can take a detour from within a detour. If you detour through Start a Business and your business goes bankrupt, you leave Start a Business temporarily and detour through Messy Divorce. Once you leave Messy Divorce, you return to where you left Start a Business. Ultimately, you also leave Start a Business and return to wherever you were on the main path when you took the detour. The same detour (for example, Start a Business) can be taken from any of several different places along the game board.
+Unlike most board games, the Game of Big Bux doesn’t necessarily end. You can go round and round the board basically forever. There are three ways to end the game:
+Retire: To do this, you must have assets at a certain level and make the decision to retire.
+
+Chapter 1 ■ Another Pleasant Valley Saturday 9
+Go bankrupt: Once you have no assets, there’s no point in continuing the game. Move to Peoria in disgrace.
+Go to jail: This is a consequence of an error of judgment, and is not a normal exit from the game board.
+Computer programs are also like that. You can choose to end a program when you’ve accomplished what you planned, even though you could continue if you wanted. If the document or the spreadsheet is ﬁnished, save it and exit. Conversely, if the photo you’re editing keeps looking worse and worse each time you select Sharpen, you stop the program without having accomplished anything. If you make a serious mistake, then the program may throw you out with an error message and corrupt your data in the bargain, leaving you with less than nothing to show for the experience.
+Once more, this is a metaphor. Don’t take the game board too literally. (Alas, Silicon Valley life was way too much like this in the go-go 1990s. It’s calmer now, I’ve heard.)
+Assembly Language Programming As a Board Game
+Now that you’re thinking in terms of board games, take a look at Figure 1-2. What I’ve drawn is actually a fair approximation of assembly language as it was used on some of our simpler computers about 25 or 30 years ago. The column marked ‘‘Program Instructions’’ is the main path around the edge of the board, of which only a portion can be shown here. This is the assembly language computer program, the actual series of steps and tests that, when executed, cause the computer to do something useful. Setting up this series of program instructions is what programming in assembly language actually is.
+Everything else is odds and ends in the middle of the board that serve the game in progress. Most of these are storage locations that contain your data. You’re probably noticing (perhaps with sagging spirits) that there are a lot of numbers involved. (They’re weird numbers, too—what, for example, does ‘‘004B’’ mean? I deal with that issue in Chapter 2.) I’m sorry, but that’s simply the way the game is played. Assembly language, at its innermost level, is nothing but numbers, and if you hate numbers the way most people hate anchovies, you’re going to have a rough time of it. (I like anchovies, which is part of my legend. Learn to like numbers. They’re not as salty.) Higher-level programming languages such as Pascal or Python disguise the numbers by treating them symbolically—but assembly language, well, it’s you and the numbers.
+
+10 Chapter 1 ■ Another Pleasant Valley Saturday
+
+Program Instructions
+
+Data in Memory
+
+0040 MOVE 6 to C
+
+0000
+
+A
+
+0041 MOVE 0000 to B
+
+0001
+
+L
+
+0042 MOVE data at B to A
+
+0002
+
+e
+
+0043 COMPARE A to ' '
+
+0044 0045 0046
+
+JUMP AHEAD 9 IF A < ' '
+PUSH Program Counter onto the Stack
+CALL UpCase
+
+0047 MOVE A to data at B
+
+0048 INCREMENT B
+
+0049 DECREMENT C
+
+004A COMPARE C to 0
+
+004B JUMP BACK 9 IF C > 0
+
+004C GOTO StringReady
+
+004D ADD 128 to A
+
+004E JUMP BACK 6
+
+004F (etc....)
+
+0003
+
+r
+
+0004
+
+t
+
+0005
+
+!
+
+Program Counter 0045
+
+PROCEDURE UpCase
+
+0080 0081 0082 0083
+
+COMPARE data at A with 'a'
+JUMP AHEAD 4 IF data at A < 'a'
+COMPARE data at A with 'z'
+JUMP AHEAD 2 IF data at A > 'z'
+
+0084 ADD 32 to data at A
+
+0085
+
+POP Program Counter from Stack & Return
+
+Figure 1-2: The Game of Assembly Language
+
+Registers
+
+e
+
+A
+
+0002 B
+
+5
+
+C
+
+0
+
+D
+
+0 Carry
+
+The Stack 0000 0000 0001 0045 0002 0003 0004 0005 0006
+0001 Stack Pointer
+
+I should caution you that the Game of Assembly Language represents no real computer processor like the Pentium. Also, I’ve made the names of instructions more clearly understandable than the names of the instructions in Intel assembly language. In the real world, instruction names are typically things like STOSB, DAA, INC, SBB, and other crypticisms that cannot be understood without considerable explanation. We’re easing into this stuff sidewise, and in this chapter I have to sugarcoat certain things a little to draw the metaphors clearly.
+
+Code and Data
+Like most board games (including the Game of Big Bux), the assembly language board game consists of two broad categories of elements: game steps and places to store things. The ‘‘game steps’’ are the steps and tests I’ve been speaking of all along. The places to store things are just that: cubbyholes into which you can place numbers, with the conﬁdence that those numbers will remain where you put them until you take them out or change them somehow.
+
+Chapter 1 ■ Another Pleasant Valley Saturday 11
+In programming terms, the game steps are called code, and the numbers in their cubbyholes (as distinct from the cubbyholes themselves) are called data. The cubbyholes themselves are usually called storage. (The difference between the places you store information and the information you store in them is crucial. Don’t confuse them.)
+The Game of Big Bux works the same way. Look back to Figure 1-1 and note that in the Start a Business detour, there is an instruction reading ‘‘Add $850,000 to checking account.’’ The checking account is one of several different kinds of storage in the Game of Big Bux, and money values are a type of data. It’s no different conceptually from an instruction in the Game of Assembly Language reading ADD 5 to Register A. An ADD instruction in the code alters a data value stored in a cubbyhole named Register A.
+Code and data are two very different kinds of critters, but they interact in ways that make the game interesting. The code includes steps that place data into storage (MOVE instructions) and steps that alter data that is already in storage (INCREMENT and DECREMENT instructions, and ADD instructions). Most of the time you’ll think of code as being the master of data, in that the code writes data values into storage. Data does inﬂuence code as well, however. Among the tests that the code makes are tests that examine data in storage, the COMPARE instructions. If a given data value exists in storage, the code may do one thing; if that value does not exist in storage, the code will do something else, as in the Big Bux JUMP BACK and JUMP AHEAD instructions.
+The short block of instructions marked PROCEDURE is a detour off the main stream of instructions. At any point in the program you can duck out into the procedure, perform its steps and tests, and then return to the very place from which you left. This allows a sequence of steps and tests that is generally useful and used frequently to exist in only one place, rather than as a separate copy everywhere it is needed.
+Addresses
+Another critical concept lies in the funny numbers at the left side of the program step locations and data locations. Each number is unique, in that a location tagged with that number appears only once inside the computer. This location is called an address. Data is stored and retrieved by specifying the data’s address in the machine. Procedures are called by specifying the address at which they begin.
+The little box (which is also a storage location) marked PROGRAM COUNTER keeps the address of the next instruction to be performed. The number inside the program counter is increased by one (we say, ‘‘incremented’’ each time an instruction is performed unless the instructions tell the program counter to do something else. For example: notice the JUMP BACK 9 instruction at address 004B. When this instruction is performed, the program counter will ‘‘back up’’ by
+
+12 Chapter 1 ■ Another Pleasant Valley Saturday
+nine locations. This is analogous to the ‘‘go back three spaces’’ concept in most board games.
+Metaphor Check!
+That’s about as much explanation of the Game of Assembly Language as I’m going to offer for now. This is still Chapter 1, and we’re still in metaphor territory. People who have had some exposure to computers will recognize and understand some of what Figure 1-2 is doing. (There’s a real, traceable program going on in there—I dare you to ﬁgure out what it does—and how!) People with no exposure to computer innards at all shouldn’t feel left behind for being utterly lost. I created the Game of Assembly Language solely to put across the following points:
+The individual steps are very simple: One single instruction rarely does more than move a single byte from one storage cubbyhole to another, perform very elementary arithmetic such as addition or subtraction, or compare the value contained in one storage cubbyhole to a value contained in another. This is good news, because it enables you to concentrate on the simple task accomplished by a single instruction without being overwhelmed by complexity. The bad news, however, is the following:
+It takes a lot of steps to do anything useful: You can often write a useful program in such languages as Pascal or BASIC in ﬁve or six lines. You can actually create useful programs in visual programming systems such as Visual Basic and Delphi without writing any code at all. (The code is still there . . . but it is ‘‘canned’’ and all you’re really doing is choosing which chunks of canned code in a collection of many such chunks will run.) A useful assembly language program cannot be implemented in fewer than about 50 lines, and anything challenging takes hundreds or thousands—or tens of thousands—of lines. The skill of assembly language programming lies in structuring these hundreds or thousands of instructions so that the program can still be read and understood.
+The key to assembly language is understanding memory addresses: In such languages as Pascal and BASIC, the compiler takes care of where something is located—you simply have to give that something a symbolic name, and call it by that name whenever you want to look at it or change it. In assembly language, you must always be cognizant of where things are in your computer’s memory. Therefore, in working through this book, pay special attention to the concept of memory addressing, which is nothing more than the art of specifying where something is. The Game of Assembly Language is peppered with addresses and instructions that work with addresses (such as MOVE data at B
+
+Chapter 1 ■ Another Pleasant Valley Saturday 13
+to C, which means move the data stored at the address speciﬁed by register B to register C). Addressing is by far the trickiest part of assembly language, but master it and you’ve got the whole thing in your hip pocket.
+Everything I’ve said so far has been orientation. I’ve tried to give you a taste of the big picture of assembly language and how its fundamental principles relate to the life you’ve been living all along. Life is a sequence of steps and tests, and so are board games—and so is assembly language. Keep those metaphors in mind as we proceed to get real by confronting the nature of computer numbers.
+
+CHAPTER
+2
+Alien Bases
+Getting Your Arms around Binary and Hexadecimal
+The Return of the New Math Monster
+The year was 1966. Perhaps you were there. New Math burst upon the grade school curricula of the nation, and homework became a turmoil of number lines, sets, and alternate bases. Middle-class parents scratched their heads with their children over questions like, ‘‘What is 17 in Base Five?’’ and ‘‘Which sets does the null set belong to?’’ In very short order (I recall a period of about two months), the whole thing was tossed in the trash as quickly as it had been concocted by addle-brained educrats with too little to do.
+This was a pity, actually. What nobody seemed to realize at the time was that, granted, we were learning New Math—except that Old Math had never been taught at the grade-school level either. We kept wondering of what possible use it was to know the intersection of the set of squirrels and the set of mammals. The truth, of course, was that it was no use at all. Mathematics in America has always been taught as applied mathematics—arithmetic—heavy on the word problems. If it won’t help you balance your checkbook or proportion a recipe, it ain’t real math, man. Little or nothing of the logic of mathematics has ever made it into the elementary classroom, in part because elementary school in America has historically been a sort of trade school for everyday life. Getting the little beasts fundamentally literate is difﬁcult enough. Trying to get them
+15
+
+16 Chapter 2 ■ Alien Bases
+to appreciate the beauty of alternate number systems simply went over the line for practical middle-class America.
+I was one of the few who enjoyed fussing with math in the New-Age style back in 1966, but I gladly laid it aside when the whole thing blew over. I didn’t have to pick it up again until 1976, when, after working like a maniac with a wire-wrap gun for several weeks, I fed power to my COSMAC ELF computer and was greeted by an LED display of a pair of numbers in base 16!
+Mon dieu, New Math redux . . .
+This chapter exists because at the assembly-language level, your computer does not understand numbers in our familiar base 10. Computers, in a slightly schizoid fashion, work in base 2 and base 16—all at the same time. If you’re willing to conﬁne yourself to higher-level languages such as C, Basic or Pascal, you can ignore these alien bases altogether, or perhaps treat them as an advanced topic once you get the rest of the language down pat. Not here. Everything in assembly language depends on your thorough understanding of these two number bases, so before we do anything else, we’re going to learn how to count all over again—in Martian.
+Counting in Martian
+There is intelligent life on Mars. That is, the Martians are intelligent enough to know from watching our
+TV programs these past 60 years that a thriving tourist industry would not be to their advantage. So they’ve remained in hiding, emerging only brieﬂy to carve big rocks into the shape of Elvis’s face to help the National Enquirer ensure that no one will ever take Mars seriously again. The Martians do occasionally communicate with science ﬁction writers like me, knowing full well that nobody has ever taken us seriously. Hence the information in this section, which involves the way Martians count.
+Martians have three ﬁngers on one hand, and only one ﬁnger on the other. Male Martians have their three ﬁngers on the left hand, while females have their three ﬁngers on the right hand. This makes waltzing and certain other things easier.
+Like human beings and any other intelligent race, Martians started counting by using their ﬁngers. Just as we used our 10 ﬁngers to set things off in groups and powers of 10, the Martians used their four ﬁngers to set things off in groups and powers of four. Over time, our civilization standardized on a set of 10 digits to serve our number system. The Martians, similarly, standardized on a set of four digits for their number system. The four digits follow, along with the names of the digits as the Martians pronounce them: (xip), ⌠ (foo), ∩ (bar), ≡ (bas).
+Like our zero, xip is a placeholder representing no items, and while Martians sometimes count from xip, they usually start with foo, representing a single item. So they start counting: Foo, bar, bas . . .
+
+Chapter 2 ■ Alien Bases 17
+Now what? What comes after bas? Table 2-1 demonstrates how the Martians count to what we would call 25.
+
+Table 2-1: Counting in Martian, Base Fooby
+
+MARTIAN NUMERALS
+
+MARTIAN PRONUNCIATION
+
+Xip
+
+⌠
+
+Foo
+
+∩
+
+Bar
+
+≡
+
+Bas
+
+⌠
+
+Fooby
+
+⌠⌠
+
+Fooby-foo
+
+⌠∩
+
+Fooby-bar
+
+⌠≡
+
+Fooby-bas
+
+∩
+
+Barby
+
+∩⌠
+
+Barby-foo
+
+∩∩
+
+Barby-bar
+
+∩≡
+
+Barby-bas
+
+≡
+
+Basby
+
+≡⌠
+
+Basby-foo
+
+≡∩
+
+Basby-bar
+
+≡≡
+
+Basby-bas
+
+⌠
+
+Foobity
+
+⌠⌠
+
+Foobity-foo
+
+⌠∩
+
+Foobity-bar
+
+⌠≡
+
+Foobity-bas
+
+⌠⌠
+
+Foobity-fooby
+
+⌠⌠⌠
+
+Foobity-fooby-foo
+
+⌠⌠∩
+
+Foobity-fooby-bar
+
+⌠⌠≡
+
+Foobity-fooby-bas
+
+⌠∩
+
+Foobity-barby
+
+⌠ ∩⌠
+
+Foobity-barby-foo
+
+EARTH EQUIVALENT 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25
+
+18 Chapter 2 ■ Alien Bases
+
+With only four digits (including the one representing zero) the Martians can only count to bas without running out of digits. The number after bas has a new name, fooby. Fooby is the base of the Martian number system, and probably the most important number on Mars. Fooby is the number of ﬁngers a Martian has. We would call it four.
+The most signiﬁcant thing about fooby is the way the Martians write it out in numerals: ⌠ . Instead of a single column, fooby is expressed in two columns. Just as with our decimal system, each column has a value that is a power of fooby. This means only that as you move from the rightmost column toward the left, each column represents a value fooby times the column to its right.
+The rightmost column represents units, in counts of foo. The next column over represents fooby times foo, or (given that arithmetic works the same way on Mars as here, New Math notwithstanding) simply fooby. The next column to the left of fooby represents fooby times fooby, or foobity, and so on. This relationship should become clearer through Table 2-2.
+
+Table 2-2: Powers of Fooby
+
+⌠
+
+Foo
+
+⌠
+
+Fooby
+
+⌠
+
+Foobity
+
+⌠
+
+Foobidity
+
+⌠
+
+Foobididity
+
+⌠
+
+Foobidididity
+
+x Fooby = ⌠ x Fooby = ⌠ x Fooby = ⌠ x Fooby = ⌠ x Fooby = ⌠ x Fooby = ⌠
+
+(Fooby) (Foobity) (Foobidity) (Foobididity) (Foobidididity) and so on...
+
+Dissecting a Martian Number
+Any given column may contain a digit from xip to bas, indicating how many instances of that column’s value are contained in the number as a whole. Let’s work through an example. Look at Figure 2-1, which is a dissection of the Martian number ∩≡⌠ ≡, pronounced ‘‘Barbididity-basbidity-foobity-bas.’’ (A visiting and heavily disguised Martian precipitated the doo-wop craze while standing at a Philadelphia bus stop in 1954, counting his change.)
+The rightmost column indicates how many units are contained in the number. The digit there is bas, indicating that the number contains bas units. The second column from the right carries a value of fooby times foo (fooby times one), or fooby. A xip in the fooby column indicates that there are no foobies in the number. The xip digit in ⌠ is a placeholder, just as zero is in our numbering system. Notice also that in the columnar sum shown to the right of the digit matrix, the foobies line is represented by a double xip. Not only is there a xip to indicate that there are no foobies, but also a xip holding
+
+How is the following Martian number evaluated?
+
+X Fooby X Fooby X Fooby X Fooby
+
+# of
+
+# of
+
+# of
+
+# of
+
+# of
+
+Foobididities Foobidities Foobities
+
+Foobies
+
+Foos
+
+Chapter 2 ■ Alien Bases 19
+
+Figure 2-1: The anatomy of ∩≡⌠ ≡
+
+the foos place as well. This pattern continues in the columnar sum as we move
+
+toward the more signiﬁcant columns to the left.
+
+Fooby times fooby is foobity, and the ⌠ digit tells us that there is foo foobity
+
+(a single foobity) in the number. The next column, in keeping with the pattern,
+
+is foobity times fooby, or foobidity. In the columnar notation, foobidity is
+
+written as ⌠ . The ≡ digit tells us that there are bas foobidities in the
+
+number. Bas foobidities is a number with its own name, basbidity, which may
+
+be written as ≡ . Note the presence of basbidity in the columnar sum.
+
+The next column to the left has a value of fooby times foobidity, or foobidid-
+
+ity. The ∩ digit tells us that there are bar foobididities in the number. Bar
+
+foobididities (written ∩
+
+) is also a number with its own name, barbidid-
+
+ity. Note also the presence of barbididity in the columnar sum, and the four
+
+xip digits that hold places for the empty columns.
+
+The columnar sum expresses the sense of the way a number is assembled: the
+
+number contains barbididity, basbidity, foobity, and bas. Roll all that together
+
+by simple addition and you get ∩≡⌠ ≡. The name is pronounced simply by
+
+hyphenating the component values: barbididity-basbidity-foobity-bas. Note
+
+that no part in the name represents the empty fooby column. In our own
+
+20 Chapter 2 ■ Alien Bases
+familiar base 10 we don’t, for example, pronounce the number 401 as ‘‘four hundred, zero tens, one.’’ We simply say, ‘‘four hundred one.’’ In the same manner, rather than say ‘‘xip foobies,’’ the Martians just leave it out.
+As an exercise, given what I’ve told you so far about Martian numbers, ﬁgure out the Earthly value equivalent to ∩≡⌠ ≡.
+The Essence of a Number Base
+Because tourist trips to Mars are unlikely to begin any time soon, of what Earthly use is knowing the Martian numbering system? Just this: it’s an excellent way to see the sense in a number base without getting distracted by familiar digits and our universal base 10.
+In a columnar system of numeric notation like both ours and the Martians’, the base of the number system is the magnitude by which each column of a number exceeds the magnitude of the column to its right. In our base 10 system, each column represents a value 10 times the column to its right. In a base fooby system like the one used on Mars, each column represents a value fooby times that of the column to its right. (In case you haven’t already caught on, the Martians are actually using base 4—but I wanted you to see it from the Martians’ own perspective.) Each has a set of digit symbols, the number of which is equal to the base. In our base 10, we have 10 symbols, from 0 to 9. In base 4, there are four digits from 0 to 3. In any given number base, the base itself can never be expressed in a single digit!
+Octal: How the Grinch Stole Eight and Nine
+Farewell to Mars. Aside from lots of iron oxide and some terriﬁc a capella groups, they haven’t much to offer us 10-ﬁngered folk. There are some similarly odd number bases in use here, and I’d like to take a quick detour through one that occupies a separate world right here on Earth: the world of Digital Equipment Corporation, better known as DEC.
+Back in the Sixties, DEC invented the minicomputer as a challenger to the massive and expensive mainframes pioneered by IBM. (The age of minicomputers is long past, and DEC itself is history.) To ensure that no software could possibly be moved from an IBM mainframe to a DEC minicomputer, DEC designed its machines to understand only numbers expressed in base 8.
+Let’s think about that for a moment, given our experience with the Martians. In base 8, there must be eight digits. DEC was considerate enough not to invent its own digit symbols, so what it used were the traditional Earthly digits from 0 to 7. There is no digit 8 in base 8! That always takes a little getting used to,
+
+Chapter 2 ■ Alien Bases 21
+but it’s part of the deﬁnition of a number base. DEC gave a name to its base 8 system: octal.
+A columnar number in octal follows the rule we encountered in thinking about the Martian system: each column has a value base times that of the column to its right. (The rightmost column is units.) In the case of octal, each column has a value eight times that of the next column to the right.
+Who Stole Eight and Nine?
+This shows better than it tells. Counting in octal starts out in a very familiar fashion: 1, 2, 3, 4, 5, 6, 7 . . . 10.
+This is where the trouble starts. In octal, 10 comes after seven. What happened to eight and nine? Did the Grinch steal them? (Or the Martians?) Hardly. They’re still there—but they have different names. In octal, when you say ‘‘10’’ you mean ‘‘8.’’ Worse, when you say ‘‘11’’ you mean ‘‘9.’’
+Unfortunately, what DEC did not do was invent clever names for the column values. The ﬁrst column is, of course, the units column. The next column to the left of the units column is the tens column, just as it is in our own decimal system—but there’s the rub, and the reason I dragged Mars into this: Octal’s ‘‘tens’’ column actually has a value of 8.
+A counting table will help. Table 2-3 counts up to 30 octal, which has a value of 24 decimal. I dislike the use of the terms eleven, twelve, and so on in bases other than 10, but the convention in octal has always been to pronounce the numbers as we would in decimal, only with the word octal after them. Don’t forget to say octal—otherwise, people get really confused!
+Remember, each column in a given number base has a value base times the column to its right, so the ‘‘tens’’ column in octal is actually the eights column. (They call it the tens column because it is written 10, and pronounced ‘‘ten.’’) Similarly, the column to the left of the tens column is the hundreds column (because it is written 100 and pronounced ‘‘hundreds’’), but the hundreds column actually has a value of 8 times 8, or 64. The next column to the left has a value of 64 times 8, or 512, and the column left of that has a value of 512 times 8, or 4,096.
+This is why when someone talks about a value of ‘‘ten octal,’’ they mean 8; ‘‘one hundred octal,’’ means 64; and so on. Table 2-4 summarizes the octal column values and their decimal equivalents.
+A digit in the ﬁrst column (the units, or ones column) indicates how many units are contained in the octal number. A digit in the next column to the left, the tens column, indicates how many eights are contained in the octal number. A digit in the third column, the hundreds column, indicates how many 64s are in the number, and so on. For example, 400 octal means that the number contains four 64s, which is 256 in decimal.
+
+22 Chapter 2 ■ Alien Bases
+
+Table 2-3: Counting in Octal, Base 8
+
+OCTAL NUMERALS
+
+OCTAL PRONUNCIATION
+
+0
+
+Zero
+
+1
+
+One
+
+2
+
+Two
+
+3
+
+Three
+
+4
+
+Four
+
+5
+
+Five
+
+6
+
+Six
+
+7
+
+Seven
+
+10
+
+Ten
+
+11
+
+Eleven
+
+12
+
+Twelve
+
+13
+
+Thirteen
+
+14
+
+Fourteen
+
+15
+
+Fifteen
+
+16
+
+Sixteen
+
+17
+
+Seventeen
+
+20
+
+Twenty
+
+21
+
+Twenty-one
+
+22
+
+Twenty-two
+
+23
+
+Twenty-three
+
+24
+
+Twenty-four
+
+25
+
+Twenty-ﬁve
+
+26
+
+Twenty-six
+
+27
+
+Twenty-seven
+
+30
+
+Thirty
+
+DECIMAL EQUIVALENT 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24
+
+Yes, it’s confusing, in spades. The best way to make it all gel is to dissect a middling octal number, just as we did with a middling Martian number. This is what’s happening in Figure 2-2: the octal number 76225 is pulled apart into columns and added up again.
+
+Table 2-4: Octal Columns As Powers of Eight
+
+OCTAL POWER OF 8
+
+1 = 80
+
+=
+
+10 = 81
+
+=
+
+100 = 82
+
+=
+
+1000 = 83
+
+=
+
+10000 = 84
+
+=
+
+100000 = 85
+
+=
+
+1000000 = 86
+
+=
+
+Chapter 2 ■ Alien Bases 23
+DECIMAL OCTAL 1 × 8 = 10 8 × 8 = 100
+64 × 8 = 1000 512 × 8 = 10000 4096 × 8 = 100000 32768 × 8 = 1000000 262144 × 8 = 10000000
+
+How is the following octal number evaluated?
+
+X 8
+
+X 8
+
+X 8
+
+X 8
+
+# of
+
+# of
+
+# of
+
+# of
+
+# of
+
+4096s 512s
+
+64s
+
+8s
+
+1s
+
+5
+
+2
+
+2
+
+6
+
+7
+
+7
+
+6
+
+2
+
+2
+
+5
+
+4096s 512s
+
+64s
+
+8s
+
+1s
+
+7 6 2 2 5
+5 2 0 2 0 0 6 0 0 0 7 0 0 0 0 7 6 2 2 58
+
+28672 3072 128 16 5
+Figure 2-2: The anatomy of 76225 octal
+
+31893 10
+
+It works here the same way it does in Martian, or in decimal, or in any other number base you could devise. In general (and somewhat formal) terms: each column has a value consisting of the number base raised to the power represented by the ordinal position of the column minus one. For example, the value of the ﬁrst column is the number base raised to the 1 minus 1, or zero, power. Because any number raised to the zero power is one, the ﬁrst column in any number base always has the value of one and is called the units column.
+
+24 Chapter 2 ■ Alien Bases
+The second column has the value of the number base raised to the 2 minus 1, or ﬁrst, power, which is the value of the number base itself. In octal this is 8; in decimal, 10; in Martian base fooby, fooby. The third column has a value consisting of the number base raised to the 3 minus 1, or second, power, and so on.
+Within each column, the digit holding that column tells how many instances of that column’s value is contained in the number as a whole. Here, the 6 in 76225 octal tells us that there are six instances of its column’s value in the total value 76225 octal. The six occupies the fourth column, which has a value of 84 − 1,which is 83, or 512. This tells us that there are six 512s in the number as a whole.
+You can convert the value of a number in any base to decimal (our base 10) by determining the value of each column in the alien (non-decimal) base, multiplying the value of each column by the digit contained in that column (to create the decimal equivalent of each digit), and then ﬁnally taking the sum of the decimal equivalent of each column. This is done in Figure 2-2, and the octal number and its decimal equivalent are shown side by side. Note in Figure 2-2 the small subscript numerals on the right-hand side of the columnar sums. These subscripts are used in many technical publications to indicate a number base. The subscript in the value 762258, for example, indicates that the value 76225 is here denoting a quantity in octal, which is base 8. Unlike the obvious difference between Martian digits and our traditional decimal digits, there’s really nothing about an octal number itself that sets it off as octal. (We encounter something of this same problem a little later when we confront hexadecimal.) The value 3189310, by contrast, is shown by its subscript to be a base 10, or decimal, quantity. This is mostly done in scientiﬁc and research writing. In most computer publications (including this one) other indications are used, more on which later.
+Now that we’ve looked at columnar notation from both a Martian and an octal perspective, make sure you understand how columnar notation works in any arbitrary base before continuing.
+Hexadecimal: Solving the Digit Shortage
+Octal is unlikely to be of use to you unless you do what a friend of mine did and restore an ancient DEC PDP8 computer that he had purchased as surplus from his university, by the pound. (He said it was considerably cheaper than potatoes, if not quite as easy to fry. Not quite.) As I mentioned earlier, the real numbering system to reckon with in the microcomputer world is base 16, which we call hexadecimal, or (more affectionately) simply ‘‘hex.’’
+Hexadecimal shares the essential characteristics of any number base, including both Martian and octal: it is a columnar notation, in which each column has
+
+Chapter 2 ■ Alien Bases 25
+
+a value 16 times the value of the column to its right. It has 16 digits, running from 0 to . . . what?
+We have a shortage of digits here. From zero through nine we’re in ﬁne shape. However, 10, 11, 12, 13, 14, and 15 need to be expressed with single symbols of some kind. Without any additional numeric digits, the people who developed hexadecimal notation in the early 1950s borrowed the ﬁrst six letters of the alphabet to act as the needed digits.
+Counting in hexadecimal, then, goes like this: 1, 2, 3, 4, 5, 6, 7, 8, 9, A, B, C, D, E, F, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 1A, 1B, 1C, and so on. Table 2-5 restates this in a more organized fashion, with the decimal equivalents up to 32.
+
+Table 2-5: Counting in Hexadecimal, Base 16
+
+HEXADECIMAL NUMERALS
+
+PRONUNCIATION (FOLLOW WITH ‘‘HEX’’)
+
+0
+
+Zero
+
+1
+
+One
+
+2
+
+Two
+
+3
+
+Three
+
+4
+
+Four
+
+5
+
+Five
+
+6
+
+Six
+
+7
+
+Seven
+
+8
+
+Eight
+
+9
+
+Nine
+
+A
+
+A
+
+B
+
+B
+
+C
+
+C
+
+D
+
+D
+
+E
+
+E
+
+F
+
+F
+
+10
+
+Ten (or, One-oh)
+
+11
+
+One-one
+
+12
+
+One-two
+
+DECIMAL EQUIVALENT 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18
+Continued
+
+26 Chapter 2 ■ Alien Bases
+
+Table 2-5 (continued) HEXADECIMAL NUMERALS 13 14 15 16 17 18 19 1A 1B 1C 1D 1E 1F 20
+
+PRONUNCIATION (FOLLOW WITH ‘‘HEX’’) One-three One-four One-ﬁve One-six One-seven One-eight One-nine One-A One-B One-C One-D One-E One-F Twenty (or, Two-oh)
+
+DECIMAL EQUIVALENT 19 20 21 22 23 24 25 26 27 28 29 30 31 32
+
+One of the conventions in hexadecimal that I favor is the dropping of words such as eleven and twelve that are a little too tightly bound to our decimal system and only promote gross confusion. Confronted by the number 11 in hexadecimal (usually written 11H to indicate what base we’re speaking), we would say, ‘‘one-one hex.’’ Don’t forget to say ‘‘hex’’ after a hexadecimal number—again, to avoid gross confusion. This is unnecessary with the digits 0 through 9, which represent the exact same values in both decimal and hexadecimal.
+Some people still say things like ‘‘twelve hex,’’ which is valid, and means 18 decimal; but I don’t care for it, and advise against it. This business of alien bases is confusing enough without giving the aliens Charlie Chaplin masks.
+Each column in the hexadecimal system has a value 16 times that of the column to its right. (The rightmost column, as in any number base, is the units column and has a value of 1.) As you might guess, the values of the individual columns increase frighteningly fast as you move from right to left. Table 2-6 shows the values of the ﬁrst seven columns in hexadecimal. For comparison’s sake, note that the seventh column in decimal notation has a value of 1 million, whereas the seventh column in hexadecimal has a value of 16,777,216.
+To help you understand how hexadecimal numbers are constructed, I’ve dissected a middling hex number in Figure 2-3, in the same fashion that
+
+Table 2-6: Hexadecimal Columns As Powers of 16
+
+HEXADECIMAL
+
+POWER OF 16
+
+1H
+
+= 160=
+
+10H
+
+= 161=
+
+100H
+
+= 162=
+
+1000H
+
+= 163=
+
+10000H
+
+= 164=
+
+100000H
+
+= 165=
+
+1000000H
+
+= 166=
+
+Chapter 2 ■ Alien Bases 27
+
+DECIMAL
+
+1 x 16 =
+
+10H
+
+16 x 16 = 100H
+
+256 x 16 = 1000H
+
+4096 x 16 = 10000H
+
+65536 x 16 = 100000H
+
+1048576 x 16 =1000000H
+
+16777216 etc. . . .
+
+3 C 0 A 9 How is the following hexadecimal number evaluated?
+
+X 16
+
+X 16 X 16
+
+X 16
+
+# of
+
+# of
+
+# of
+
+# of
+
+# of
+
+65536s 4096s 256s
+
+16s
+
+1s
+
+9
+
+A
+
+0
+
+C
+
+3
+
+3
+
+12
+
+0
+
+10
+
+9
+
+65536s 4096s
+
+256s
+
+16s
+
+1s
+
+9 A 0 0 0 0 C 0 0 0 3 0 0 0 0
+3 C 0 A 9 16
+
+196608 49152 0 160 9
+Figure 2-3: The anatomy of 3C0A9H
+
+245929 10
+
+I dissected numbers earlier in both Martian base fooby, and in octal, base 8. Just as in octal, zero holds a place in a column without adding any value to the number as a whole. Note in Figure 2-3 that there are 0, that is, no, 256s present in the number 3C0A9H.
+As in Figure 2-2, the decimal values of each column are shown beneath the column, and the sum of all columns is shown in both decimal and hex. (Note the subscripts!)
+
+28 Chapter 2 ■ Alien Bases
+From Hex to Decimal and from Decimal to Hex
+Most of the manipulation of hex numbers you’ll be performing are simple conversions between hex and decimal, in both directions. The easiest way to perform such conversions is by way of a hex calculator, either a ‘‘real’’ calculator like the venerable TI Programmer (which I still have, wretched battery-eater that it is) or a software calculator with hexadecimal capabilities. The default Ubuntu Linux calculator will do math in decimal, hex, and binary if you select View → Scientiﬁc. The Windows calculator works exactly the same way: The default view is basic, and you have to select the Scientiﬁc view to get into any alien bases. The SpeedCrunch calculator installed by default with Kubuntu/KDE 4 works hex and binary from the get-go.
+Using a calculator demands nothing of your gray matter, of course, and won’t help you understand the hexadecimal number system any better. So while you’re a relatively green student of alien bases, lay off anything that understands hex, be it hardware, software, or human associates.
+In fact, the best tool while you’re learning is a simple four-function memory calculator. The conversion methods I describe here all make use of such a calculator, as what I’m trying to teach you is number base conversion, not decimal addition or long division.
+From Hex to Decimal
+As you’ll come to understand, converting hex numbers to decimal is a good deal easier than going the other way. The general method is to do what we’ve been doing all along in the number-dissection Figures 2-1, 2-2, and 2-3: derive the value represented by each individual column in the hex number, and then add all the column values in decimal.
+Let’s try an easy one. The hex number is 7A2. Start at the right column. This is the units column in any number system. You have 2 units, so enter 2 into your calculator. Now store that 2 into memory (or press the SUM button, if you have a SUM button).
+So much for units. Keep in mind that what you’re really doing is keeping a running tally of the values of the columns in the hex number. Move to the next column to the left. Remember that in hex, each column represents a value 16 times the value of the column to its right, so the second column from the right is the 16s column. (Refer to Table 2-6 if you lose track of the column values.) The 16s column has an A in it. A in hex is decimal 10. The total value of that column, therefore, is 16 × 10, or 160. Perform that multiplication on your calculator and add the product to the 2 that you stored in memory. (Again, the SUM button is a handy way to do this if your calculator has one.)
+Remember what you’re doing: evaluating each column in decimal and keeping a running total. Now move to the third column from the right. This
+
+Chapter 2 ■ Alien Bases 29
+one contains a 7. The value of the third column is 16 × 16, or 256. Multiply 256 × 7 on your calculator, and add the product to your running total.
+You’re done. Retrieve the running total from your calculator memory. The total should be 1,954, which is the decimal equivalent of 7A2H.
+OK—let’s try it again, more quickly, with a little less natter and a much larger number: C6F0DBH:
+1. Evaluate the units column. B × 1 = 11 × 1 = 11. Start your running total with 11.
+2. Evaluate the 16s column. D × 16 = 13 × 16 = 208. Add 208 to your running total.
+3. Evaluate the 256s column. 0 × 256 = 0. Move on.
+4. Evaluate the 4,096s column. F × 4,096 = 15 × 4,096 = 61,440. Add it to your running total.
+5. Evaluate the 65,536s column. 6 × 65,536 = 393,216. Add it to the running total.
+6. Evaluate the 1,048,576s column. C × ,048,576 = 12 × 1,048,576 = 12,582,912. Add it to your total.
+The running total should be 13,037,787. Finally, do it yourself without any help for the following number: 1A55BEH.
+From Decimal to Hex
+The lights should be coming on about now. This is good, because going in the other direction, from our familiar decimal base 10 to hex, is much harder and involves more math. What we have to do is ﬁnd the hex column values ‘‘within’’ a decimal number—and that involves some considerable use of that ﬁfth-grade bogeyman, long division.
+But let’s get to it, again starting with a fairly easy decimal number: 449. The calculator will be handy with a vengeance. Tap in the number 449 and store it in the calculator’s memory.
+What we need to do ﬁrst is ﬁnd the largest hex column value that is contained in 449 at least once. Remember grade-school gazintas? (12 gazinta 855 how many times?) Division is often introduced to students as a way of ﬁnding out how many times some number is present in—‘‘goes into’’—another. This is something like that. Looking back at Table 2-6, we can see that 256 is the largest power of 16, and hence the largest hex column value, that is present in 449 at least once. (The next largest power of 16—512—is obviously too large to be present in 449.)
+Therefore, we start with 256, and determine how many times 256 ‘‘gazinta’’ 449: 449 / 256 = 1.7539. At least once, but not quite twice, so 449 contains
+
+30 Chapter 2 ■ Alien Bases
+only one 256. Write down a 1 on paper. Don’t enter it into your calculator. We’re not keeping a running total here; if anything, you could say we’re keeping a running remainder. The ‘‘1’’ is the leftmost hex digit of the hex value that is equivalent to decimal 449.
+We know that only one 256 is contained in 449. What we must do now is remove that 256 from the original number, now that we’ve ‘‘counted’’ it by writing a 1 down on paper. Subtract 256 from 449. Store the difference, 193, into memory.
+The 256 column has been removed from the number we’re converting. Now we move to the next column to the right, the 16s. How many 16s are contained in 193? 193 / 16 = 12.0625. This means the 16s column in the hex equivalent of 449 contains a . . . 12? Hmm. Remember the digit shortage, and the fact that in hex, the value we call 12 is represented by the letter C. From a hex perspective, we have found that the original number contains C in the 16s column. Write a C down to the right of your 1: 1C. So far, so good.
+We’ve got the 16s column, so just as with the 256s, we have to remove the 16s from what’s left of the original number. The total value of the 16s column is C × 16 = 12 × 16 = 192. Bring the 193 value out of your calculator’s memory, and subtract 192 from it. A lonely little 1 is all that’s left.
+So we’re down to the units column. There is one unit in one, obviously. Write that 1 down to the right of the C in our hexadecimal number: 1C1. Decimal 449 is equivalent to hex 1C1.
+Now perhaps you can appreciate why programmers like hexadecimal calculators so much.
+Glance back at the big picture of the decimal-to-hex conversion. We’re looking for the hexadecimal columns hidden in the decimal value. We ﬁnd the largest column contained in the decimal number, ﬁnd that column’s value, and subtract that value from the decimal number. Then we look for the next smallest hex column, and the next smallest, and so on, removing the value of each column from the decimal number as we go. In a sense, we’re dividing the number by consecutively smaller powers of 16 and keeping a running remainder by removing each column as we tally it.
+Let’s try it again. The secret number is 988,664:
+1. Find the largest column contained in 988,664 from Table 2-6: 65,536. 988,664 / 65,536 = 15 and change. Ignore the change. 15 = F in hex. Write down the F.
+2. Remove F × 65,536 from 988,664. Store the remainder: 5,624.
+3. Move to the next smallest column. 5,624 / 4,096 = 1 and change. Write down the 1.
+4. Remove 1 × 4,096 from the remainder: 5,624 − 4096 = 1528. Store the new remainder: 1,528.
+
+Chapter 2 ■ Alien Bases 31
+5. Move to the next smallest column. 1,528 / 256 = 5 and change. Write down the 5.
+6. Remove 5 × 256 from the stored remainder, 1,528. Store 248 as the new remainder.
+7. Move to the next smallest column. 248 / 16 = 15 and change. 15 = F in hex. Write down the F.
+8. Remove F × 16 from stored remainder, 248. The remainder, 8, is the number of units in the ﬁnal column. Write down the 8.
+There you have it: 988,664 decimal = F15F8H. Note the presence of the H at the end of the hex number. From now on, every hex number in this book will have that H afﬁxed to its hindparts. It’s important because not every hex number contains letter digits to scream out the fact that the number is in base 16. There is a 157H as surely as a 157 decimal, and the two are not the same number. (Quick, now: by how much are they different?) Don’t forget that H in writing your assembly programs, as I’ll be reminding you later.
+Practice. Practice! PRACTICE!
+The best (actually, the only) way to get a gut feel for hex notation is to use it a lot. Convert each of the following hex numbers to decimal. Lay each number out on the dissection table and identify how many 1s, how many 16s, how many 256s, how many 4,096s, and so on, are present in the number, and then add them up in decimal:
+CCH 157H D8H BB29H 7AH 8177H A011H 99H 2B36H FACEH 8DB3H 9H
+
+32 Chapter 2 ■ Alien Bases
+That done, now turn it inside out, and convert each of the following decimal numbers to hex. Remember the general method: from Table 2-6, choose the largest power of 16 that is less than the decimal number to be converted. Find out how many times that power of 16 is present in the decimal number, and write it down as the leftmost hex digit of the converted number. Then subtract the total value represented by that hex digit from the decimal number. Repeat the process, using the next smallest power of 16, until you’ve subtracted the decimal number down to nothing.
+39 413 22 67,349 6,992 41 1,117 44,919 12,331 124,217 91,198 307 112,374,777
+(Extra credit for that last one.) If you need more practice, choose some decimal numbers and convert them to hex, and then convert them back. When you’re done, check your work with whatever hex-capable calculator that you prefer.
+Arithmetic in Hex
+As you become more and more skilled in assembly language, you’ll be doing more and more arithmetic in base 16. You may even (good grief) begin to do it in your head. Still, it takes some practice.
+Addition and subtraction are basically the same as what we know in decimal, with a few extra digits tossed in for ﬂavor. The trick is nothing more than knowing your addition tables up to 0FH. This is best done not by thinking to yourself, ‘‘Now, if C is 12 and F is 15, then C + F is 12 + 15, which is 27 decimal but 1BH.’’ Instead, you should simply think, ‘‘C + F is 1BH.’’
+
+Chapter 2 ■ Alien Bases 33
+
+Yes, that’s asking a lot; but I ask you now, as I will ask you again on this journey, do you wanna hack assembly . . . or do you just wanna fool around? It takes practice to learn the piano, and it takes practice to drive the core skills of assembly language programming down into your synapses where they belong.
+So let me sound like an old schoolmarm and tell you to memorize the following. Make ﬂash cards if you must:
+
+9
+
+8
+
+7
+
+6
+
+5
+
++1
+
++2
+
++3
+
++4
+
++5
+
+0AH
+
+0AH
+
+0AH
+
+0AH
+
+0AH
+
+A
+
+9
+
+8
+
+7
+
+6
+
++1
+
++2
+
++3
+
++4
+
++5
+
+0BH
+
+0BH
+
+0BH
+
+0BH
+
+0BH
+
+B
+
+A
+
+9
+
+8
+
+7
+
+6
+
++1
+
++2
+
++3
+
++4
+
++5
+
++6
+
+0CH
+
+0CH
+
+0CH
+
+0CH
+
+0CH
+
+0CH
+
+C +1
+0DH
+
+B +2
+0DH
+
+A +3
+0DH
+
+9 +4
+0DH
+
+8 +5
+0DH
+
+7 +6
+0DH
+
+D
+
+C
+
+B
+
+A
+
+9
+
+8
+
+7
+
++1
+
++2
+
++3
+
++4
+
++5
+
++6
+
++7
+
+0EH
+
+0EH
+
+0EH
+
+0EH
+
+0EH
+
+0EH
+
+0EH
+
+E
+
+D
+
+C
+
+B
+
+A
+
+9
+
+8
+
++1
+
++2
+
++3
+
++4
+
++5
+
++6
+
++7
+
+0FH
+
+0FH
+
+0FH
+
+0FH
+
+0FH
+
+0FH
+
+0FH
+
+F
+
+E
+
+D
+
+C
+
+B
+
+A
+
+9
+
+8
+
++1
+
++2
+
++3
+
++4
+
++5
+
++6
+
++7
+
++8
+
+10H
+
+10H
+
+10H
+
+10H
+
+10H
+
+10H
+
+10H
+
+10H
+
+F
+
+E
+
+D
+
+C
+
+B
+
+A
+
+9
+
++2
+
++3
+
++4
+
++5
+
++6
+
++7
+
++8
+
+11H
+
+11H
+
+11H
+
+11H
+
+11H
+
+11H
+
+11H
+
+F
+
+E
+
+D
+
+C
+
+B
+
+A
+
+9
+
++3
+
++4
+
++5
+
++6
+
++7
+
++8
+
++9
+
+12H
+
+12H
+
+12H
+
+12H
+
+12H
+
+12H
+
+12H
+
+F
+
+E
+
+D
+
+C
+
+B
+
+A
+
++4
+
++5
+
++6
+
++7
+
++8
+
++9
+
+13H
+
+13H
+
+13H
+
+13H
+
+13H
+
+13H
+
+34 Chapter 2 ■ Alien Bases
+
+F
+
+E
+
+D
+
+C
+
+B
+
+A
+
++5
+
++6
+
++7
+
++8
+
++9
+
++A
+
+14H
+
+14H
+
+14H
+
+14H
+
+14H
+
+14H
+
+F
+
+E
+
+D
+
+C
+
+B
+
++6
+
++7
+
++8
+
++9
+
++A
+
+15H
+
+15H
+
+15H
+
+15H
+
+15H
+
+F
+
+E
+
+D
+
+C
+
+B
+
++7
+
++8
+
++9
+
++A
+
++B
+
+16H
+
+16H
+
+16H
+
+16H
+
+16H
+
+F
+
+E
+
++8
+
++9
+
+D
+
+C
+
++A
+
++B
+
+17H
+
+17H
+
+17H
+
+17H
+
+F
+
+E
+
++9
+
++A
+
+D
+
+C
+
++B
+
++C
+
+18H
+
+18H
+
+18H
+
+18H
+
+F
+
+E
+
+D
+
++A
+
++B
+
++C
+
+19H
+
+19H
+
+19H
+
+F
+
+E
+
+D
+
++B
+
++C
+
++D
+
+1AH
+
+1AH
+
+1AH
+
+F
+
+E
+
++C
+
++D
+
+1BH
+
+1BH
+
+F
+
+E
+
++D
+
++E
+
+1CH
+
+1CH
+
+F +E
+1DH
+
+F +F
+1EH
+
+If nothing else, this exercise should make you glad that computers don’t work in base 64.
+
+Chapter 2 ■ Alien Bases 35
+
+Columns and Carries
+
+With all of these single-column additions committed (more or less) to memory, you can tackle multicolumn addition. It works pretty much the same way it does with decimal. Add each column starting from the right, and carry into the next column anytime a single column’s sum exceeds 0FH.
+For example:
+
+1
+
+1
+
+2 F 3 1 A DH
+
++ 9 6 B A 0 7H
+
+C 5 E B B 4H
+
+Carefully work this one through, column by column. The sum of the ﬁrst column (that is, the rightmost) is 14H, which cannot ﬁt in a single column, so we must carry the one into the next column to the left. Even with the additional 1, however, the sum of the second column is 0BH, which ﬁts in a single column and no carry is required.
+Keep adding toward the left. The second-to-last column will again overﬂow, and you need to carry the one into the last column. As long as you have your single-digit sums memorized, it’s a snap.
+Well, more or less. Here’s something you should take note of:
+
+The most you can ever carry out of a single-column addition of two numbers is 1.
+
+It doesn’t matter what base you’re in: 16, 10, fooby, or 2. You will either carry a 1 (in Martian, a foo) out of a column, or carry nothing at all. This fact surprises people for some reason, so ask yourself: what two single digits in old familiar base 10 can you add that will force you to carry a 2? The largest digit is 9, and 9 + 9 = 18. Put down the 8 and carry the 1. Even if you have to add in a carry from a previous column, that will bring you up (at most) to 19. Again, you carry a 1 and no more. This is important when you add numbers on paper, or within the silicon of your CPU, as you’ll learn in a few chapters.
+
+Subtraction and Borrows
+If you have your single-column sums memorized, you can usually grind your way through subtraction with a shift into a sort of mental reverse: ‘‘If E + 6 equals 14H, then 14H - E must equal 6.’’ The alternative is memorizing an even larger number of tables, and since I haven’t memorized them, I won’t ask you to.
+But over time, that’s what tends to happen. In hex subtraction, you should be able to dope out any given single-column subtraction by turning a familiar
+
+36 Chapter 2 ■ Alien Bases
+hexadecimal sum inside-out; and just as with base 10, multicolumn subtractions are done column by column, one column at a time:
+F76CH -A05BH
+5711H
+During your inspection of each column, you should be asking yourself: ‘‘What number added to the bottom number yields the top number?’’ Here, you should know from your tables that B + 1 = C, so the difference between B and C is 1. The leftmost column is actually more challenging: What number added to A gives you F? Chin up; even I have to think about it on an off day.
+The problems show up, of course, when the top number in a column is smaller than its corresponding bottom number. Then you have no recourse but to borrow.
+Borrowing is one of those grade-school rote-learned processes that very few people really understand. (To understand it is tacit admittance that something of New Math actually stuck, horrors.) From a height, what happens in a borrow is that one count is taken from a column and applied to the column on its right. I say applied rather than added to because in moving from one column to the column on its right, that single count is multiplied by 10, where 10 represents the number base. (Remember that 10 in octal has a value of 8, while 10 in hexadecimal has a value of 16.)
+It sounds worse than it is. Let’s look at a borrow in action, and you’ll get the idea:
+9 2H -4 FH
+Here, the subtraction in the rightmost column can’t happen as-is because F is larger than 2, so we borrow from the next column to the left.
+Nearly 50 years later, I can still hear old Sister Marie Bernard toughing it out on the blackboard, albeit in base 10: ‘‘Cross out the 9; make it an 8. Make the 2 a 12. And 12 minus F is what, class?’’ It’s 3, Sister. And that’s how a borrow works. (I hope the poor dear will forgive me for putting hex bytes in her mouth.)
+Think about what happened there, functionally. We subtracted 1 from the 9 and added 10H to the 2. One obvious mistake is to subtract 1 from the 9 and add 1 to the 2, which (need I say it?) won’t work. Think of it this way: we’re moving part of one column’s surplus value over to its right, where some extra value is needed. The overall value of the upper number doesn’t change (which is why we call it a borrow and not a steal), but the recipient of the loan is increased by 10, not 1.
+After the borrow, what we have looks something like this:
+812H - 4 FH
+
+Chapter 2 ■ Alien Bases 37
+(On Sister Marie Bernard’s blackboard, we crossed out the 9 and made it an 8. I just made it an 8. Silicon has advantages over chalk—except that the 8’s earlier life as a 9 is not so obvious.)
+Of course, once we’re here, the columnar subtractions all work out, and we discover that the difference is 43H.
+People sometimes ask if you ever have to borrow more than 1. The answer, plainly, is no. If you borrow 2, for example, you would add 20 to the recipient column, and 20 minus any single digit remains a two-digit number. That is, the difference won’t ﬁt into a single column. Subtraction contains an important symmetry with addition:
+The most you ever need to borrow in any single-column subtraction of two numbers is 1.
+Borrows across Multiple Columns
+Understanding that much about borrows gets you most of the way there; but, as life is wont, you will frequently come across a subtraction similar to this:
+F 0 0 0H - 3 B 6 CH
+Column 1 needs to borrow, but neither column 2 nor column 3 has anything at all to lend. Back in grade school, Sister Marie Bernard would have rattled out with machine-gun efﬁciency: ‘‘Cross out the F, make it an E. Make the 0 a 10. Then cross it out, make it an F. Make the next 0 a 10; cross it out, make it an F. Then make the last 0 a 10. Got that?’’ (I got it. In Catholic school, the consequences of not getting it are too terrible to consider.)
+What happens is that the middle two 0s act as loan brokers between the F and the rightmost 0, keeping their commission in the form of enough value to allow their own columns’ subtractions to take place. Each column to the right of the last column borrows 10 from its neighbor to the left, and loans 1 to the neighbor on its right. After all the borrows trickle through the upper number, what we have looks like this (minus all of Sister’s cross-outs):
+E F F10H - 3 B 6 CH
+At this point, each columnar subtraction can take place, and the difference is B494H.
+In remembering your grade-school machinations, don’t fall into the old decimal rut of thinking, ‘‘cross out the 10, make it a 9.’’ In the world of hexadecimal, 10H - 1 = F. Cross out the 10, make it an F.
+
+38 Chapter 2 ■ Alien Bases
+What’s the Point?
+. . . if you have a hex calculator, or a hex-capable screen calculator? The point is practice. Hexadecimal is the lingua franca of assemblers, to multiply mangle a metaphor. The more you burn a gut-level understanding of hex into your reﬂexes, the easier assembly language will be. Furthermore, understanding the internal structure of the machine itself will be much easier if you have that intuitive grasp of hex values. We’re laying important groundwork here. Take it seriously now and you’ll lose less hair later on.
+Binary
+Hexadecimal is excellent practice for taking on the strangest number base of all: binary. Binary is base 2. Given what you’ve learned about number bases so far, what can you surmise about base 2?
+Each column has a value two times the column to its right. There are only two digits (0 and 1) in the base.
+Counting is a little strange in binary, as you might imagine. It goes like this: 0, 1, 10, 11, 100, 101, 110, 111, 1,000, and so on. Because it sounds absurd to say, ‘‘Zero, one, 10, 11, 100,’’ and so on, it makes more sense to simply enunciate the individual digits, followed by the word binary. For example, most people say ‘‘one zero one one one zero one binary’’ instead of ‘‘one million, eleven thousand, one hundred one binary’’ when pronouncing the number 1011101—which sounds enormous until you consider that its value in decimal is only 93.
+Odd as it may seem, binary follows all of the same rules we’ve discussed in this chapter regarding number bases. Converting between binary and decimal is done using the same methods described for hexadecimal earlier in this chapter.
+Because counting in binary is as much a matter of counting columns as counting digits (as there are only two digits), it makes sense to take a long, close look at Table 2-7, which shows the values of the binary number columns out to 32 places.
+One look at that imposing pyramid of zeroes implies that it’s hopeless to think of pronouncing the larger columns as strings of digits: ‘‘One zero zero zero zero zero zero zero . . . ’’ and so on. There’s a crying need for a shorthand notation here, so I’ll provide you with one in a little while—and its identity will surprise you.
+
+Table 2-7: Binary Columns As Powers of 2 BINARY 1 10 100 1000 10000 100000 1000000
+10000000 100000000 1000000000 10000000000 100000000000 1000000000000 10000000000000 100000000000000 1000000000000000 10000000000000000 100000000000000000 1000000000000000000 10000000000000000000 100000000000000000000 1000000000000000000000 10000000000000000000000 100000000000000000000000 1000000000000000000000000 10000000000000000000000000 100000000000000000000000000 1000000000000000000000000000
+
+Chapter 2 ■ Alien Bases 39
+
+POWER OF 2 =20= =21= =22= =23= =24= =25= =26= =27= =28= =29= =210= =211= =212= =213= =214= =215= =216= =217= =218= =219= =220= =221= =222= =223= =224= =225= =226= =227=
+
+DECIMAL 1 2 4 8 16 32 64
+128 256 512 1024 2048 4096 8192 16384 32768 65536 131072 262144 524288 1048576 2097152 4194304 8388608 16777216 33554432 67108864 134217728
+Continued
+
+40 Chapter 2 ■ Alien Bases
+Table 2-7 (continued) BINARY
+10000000000000000000000000000 100000000000000000000000000000 1000000000000000000000000000000 10000000000000000000000000000000 100000000000000000000000000000000
+
+POWER OF 2 =228= =229= =230= =231= =232=
+
+DECIMAL 268435456 536870912 1073741824 2147483648 4294967296
+
+You might object that such large numbers as the bottommost in the table aren’t likely to be encountered in ordinary programming. Sorry, but a 32-bit microprocessor such as the Pentium (and even its antiquated forbears like the 386 and 496) can swallow numbers like that in one electrical gulp, and eat billions of them for lunch. You must become accustomed to thinking in terms of such numbers as 232, which, after all, is only a triﬂing 4 billion in decimal. Think for a moment of the capacity of the hard drive on your own desktop computer. New midrange desktop PCs are routinely shipped with 500 gigabytes or more of hard disk storage. A gigabyte is a billion bytes, so that monster 32-bit number can’t even count all the bytes on your hard drive! This little problem has actually bitten some vendors of old (no, sorry, the word is legacy) software. Twenty years ago, a 500-gigabyte hard drive seemed more like fantasy than science ﬁction. Now you can buy that fantasy for $99.95. More than one ﬁle utility from the DOS and early Windows eras threw up its hands in despair anytime it had to confront a disk drive with more than 2 gigabytes of free space.
+Now, just as with octal and hexadecimal, there can be identity problems when using binary. The number 101 in binary is not the same as 101 in hex, or 101 in decimal. For this reason, always append the sufﬁx ‘‘B’’ to your binary values to ensure that people reading your programs (including you, six weeks after the fact) know what number base you’re working from.
+Values in Binary
+Converting a value in binary to one in decimal is done the same way it’s done in hex—more simply, in fact, for the simple reason that you no longer have to count how many times a column’s value is present in any given column. In hex, you have to see how many 16s are present in the 16s column, and so on. In binary, a column’s value is either present (1 time) or not present (0 times).
+Running through a simple example should make this clear. The binary number 11011010B is a relatively typical binary value in relatively simple computer work. (On the small side, actually—many common binary numbers
+
+Chapter 2 ■ Alien Bases 41
+are twice that size or more.) Converting 11011010B to decimal comes down to scanning it from right to left with the help of Table 2-7, and tallying any column’s value where that column contains a 1, while ignoring any column containing a 0.
+Clear your calculator and let’s get started:
+1. Column 0 contains a 0; skip it.
+2. Column 1 contains a 1. That means its value, 2, is present in the value of the number. So we punch 2 into the calculator.
+3. Column 2 is 0. Skip it. 4. Column 3 contains a 1. The column’s value is 23, or 8; add 8 to the tally. 5. Column 4 also contains a 1; 24 is 16, which we add to our tally.
+6. Column 5 is 0. Skip it. 7. Column 6 contains a 1; 26 is 64, so add 64 to the tally. 8. Column 7 also contains a 1. Column 7’s value is 27, or 128. Add 128 to the
+tally, and what do we have? 218. That’s the decimal value of 11011010B. It’s as easy as that.
+Converting from decimal to binary, while more difﬁcult, is done exactly the same way as converting from decimal to hex. Go back and read that section again, searching for the general method used. In other words, see what was done and separate the essential principles from any references to a speciﬁc base such as hex.
+I’ll bet by now you can ﬁgure it out without much trouble. As a brief aside, perhaps you noticed that I started counting columns from 0, rather than 1. A peculiarity of the computer ﬁeld is that we always begin counting things from 0. Actually, to call it a peculiarity is unfair; the computer’s method is the reasonable one, because 0 is a perfectly good number and should not be discriminated against. The rift occurred because in our real, physical world, counting things tells us how many things are there, whereas in the computer world counting things is more generally done to name them. That is, we need to deal with bit number 0, and then bit number 1, and so on, far more than we need to know how many bits there are. This is not a quibble, by the way. The issue will come up again and again in connection with memory addresses, which, as I have said and will say again, are the key to understanding assembly language.
+In programming circles, always begin counting from 0!
+A practical example of the conﬂicts this principle can cause grows out of the following question: what year began our new millennium? Most people would intuitively say the year 2000—and back during the run-up to 2000 many
+
+42 Chapter 2 ■ Alien Bases
+people did—but technically the twentieth century continued its plodding pace until January 1, 2001. Why? Because there was no year 0. When historians count the years moving from bc to ad, they go right from 1 bc to 1 ad. Therefore, the ﬁrst century began with year 1 and ended with year 100. The second century began with year 101 and ended with year 200. By extending the sequence, you can see that the twentieth century began in 1901 and ended in 2000. Conversely, if we had had the sense to begin counting years in the current era computer style, from year 0, the twentieth century would have ended at the end of 1999.
+This is a good point to get some practice in converting numbers from binary to decimal and back. Sharpen your teeth on these:
+110 10001 11111 11 101 1100010111010010 11000 1011
+When that’s done, convert these decimal values to binary:
+77 42 106 255 18 6309 121 58 18,446
+Why Binary?
+If it takes eight whole digits (11011010) to represent an ordinary three-digit number such as 218, binary as a number base would seem to be a bad intellectual investment. Certainly for us it would be a waste of mental bandwidth, and even aliens with only two ﬁngers would probably have come up with a better system.
+The problem is, lights are either on or off. This is just another way of saying (as I will discuss in detail in Chapter 3) that at the bottom of it, computers are electrical devices. In an electrical device, voltage is either present or it isn’t; current either ﬂows or it doesn’t. Very early in the game, computer scientists decided that the presence of a voltage in a
+
+Chapter 2 ■ Alien Bases 43
+computer circuit would indicate a 1 digit, while lack of a voltage at that same point in the circuit would indicate a 0 digit. This isn’t many digits, but it’s enough for the binary number system. This is the only reason we use binary, but it’s a rather compelling one, and we’re stuck with it. However, you will not necessarily drown in ones and zeroes, because I’ve already taught you a form of shorthand.
+
+Hexadecimal As Shorthand for Binary
+
+The number 218 expressed in binary is 11011010B. Expressed in hex, however, the same value is quite compact: DAH. The two hex digits comprising DAH merit a closer look. AH (or 0AH as your assembler will require it, for reasons explained later) represents 10 decimal. Converting any number to binary simply involves detecting the powers of two within it. The largest power of 2 within 10 decimal is 8. Jot down a 1 digit and subtract 8 from 10. What’s left is 2. Now, 4 is a power of 2, but there is no 4 hiding within 2, so we put a 0 to the right of the 1. The next smallest power of 2 is 2, and there is a 2 in 2. Jot down another 1 to the right of the 0. Two from 2 is 0, so there are no 1s left in the number. Jot down a ﬁnal 0 to the right of the rest to represent the 1s column. What you have is this:
+
+1010
+
+Look back at the binary equivalent of 218: 11011010. The last four digits are 1010—the binary equivalent of 0AH.
+The same will work for the upper half of DAH. If you work out the binary equivalence for 0DH as we just did (and it would be good mental exercise), it is 1101. Look at the binary equivalent of 218 this way:
+
+218 1101 1010
+DA
+
+decimal binary hex
+
+It should be dawning on you that you can convert long strings of binary ones and zeroes into more compact hex format by converting every four binary digits (starting from the right, not from the left!) into a single hex digit.
+As an example, here is a 32-bit binary number that is not the least bit remarkable:
+
+11110000000000001111101001101110
+
+This is a pretty obnoxious collection of bits to remember or manipulate, so let’s split it up into groups of four from the right:
+
+1111 0000 0000 0000 1111 1010 0110 1110
+
+44 Chapter 2 ■ Alien Bases
+
+Each of these groups of four binary digits can be represented by a single hexadecimal digit. Do the conversion now. You should get the following:
+
+1111 0000 0000 0000 1111 1010 0110 1110
+
+F
+
+000FA6E
+
+In other words, the hex equivalent of that mouthful is
+
+F000FA6E
+
+In use, of course, you would append the H on the end, and also put a 0 at the beginning, so in any kind of assembly language work the number would actually be written 0F000FA6EH.
+This is still a good-sized number, but unless you’re doing things like counting hard drive space or other high-value things, such 32-bit numbers are the largest quantities you would typically encounter in journeyman-level assembly language programming.
+Suddenly, this business starts looking a little more graspable.
+Hexadecimal is the programmer’s shorthand for the computer’s binary numbers.
+This is why I said earlier that computers use base 2 (binary) and base 16 (hexadecimal) both at the same time in a rather schizoid fashion. What I didn’t say is that the computer isn’t really the schizoid one; you are. At their very hearts (as I explain in Chapter 3) computers use only binary. Hex is a means by which you and I make dealing with the computer easier. Fortunately, every four binary digits may be represented by a hex digit, so the correspondence is clean and comprehensible.
+
+Prepare to Compute
+Everything up to this point has been necessary groundwork. I’ve explained conceptually what computers do and have given you the tools to understand the slightly alien numbers that they use; but I’ve said nothing so far about what computers actually are, and it’s well past time. We will return to hexadecimal numbers repeatedly in this book; I’ve said nothing thus far about hex multiplication or bit-banging. The reason is plain: before you can bang a bit, you must know where the bits live. So, let’s lift the hood and see if we can catch a few of them in action.
+
+CHAPTER
+3
+Lifting the Hood
+Discovering What Computers Actually Are
+RAXie, We Hardly Knew Ye . . .
+In January 1970 I was on the downwind leg of my senior year in high school, and the Chicago Public Schools had installed a computer somewhere. A truck full of these fancy IBM typewriter gadgets was delivered to Lane Tech, and a bewildered math teacher was drafted into teaching computer science (as they had the nerve to call it) to a high school full of rowdy males.
+I ﬁgured it out fairly quickly. You pounded out a deck of these goofy computer cards on the card-punch machine, dropped them into the card hopper of one of the typewriter gadgets, and watched in awe as the typewriter danced its little golf ball over the green bar paper, printing out your inevitable list of error messages. It was fun. I got straight A’s. I even kept the ﬁrst program I ever wrote that did something useful: a little deck of cards that generated a table of parabolic correction factors for hand-ﬁguring telescope mirrors, astronomy being my passion at the time. (I still have the card deck, though the gummy mess left behind by disintegrating rubber bands would not be healthy for a card reader, assuming that one still exists.)
+The question that kept gnawing at me was exactly what sort of beast RAX (the computer’s wonderfully appropriate name) actually was. What we had were ram-charged typewriters that RAX controlled over phone lines—that much I understood—but what was RAX itself?
+45
+
+46 Chapter 3 ■ Lifting the Hood
+I asked the instructor. In brief, the conversation went something like this:
+Me: ‘‘Umm, sir, what exactly is RAX?’’
+He: ‘‘Eh? Um, a computer. An electronic computer.’’
+Me: ‘‘That’s what it says on the course notes; but I want to know what RAX is made of and how it works.’’
+He: ‘‘Well, I’m sure RAX is all solid-state.’’
+Me: ‘‘You mean, there’s no levers and gears inside.’’
+He: ‘‘Oh, there may be a few, but no vacuum tubes.’’
+Me: ‘‘I wasn’t worried about tubes. I suppose it has a calculator in it somewhere; but what makes it remember that A comes before B? How does it know what ‘format’ means? How does it tell time? What does it have to do to answer the phone?’’
+He: ‘‘Now, come on, that’s why computers are so great! They put it all together so that we don’t have to worry about that sort of thing! Who cares what RAX is? RAX knows FORTRAN and will execute any correct FORTRAN program. That’s what matters, isn’t it?’’
+He was starting to sweat. So was I. End of conversation. That June I graduated with three inches of debugged and working FORTRAN punch cards in my book bag, and still had absolutely no clue as to what RAX was. It has bothered me to this day.
+Gus to the Rescue
+I was thinking about RAX six years later, while on the Devon Avenue bus heading for work, with the latest copy of Popular Electronics in my lap. The lead story described a do-it-yourself project called the COSMAC ELF, which consisted of a piece of perfboard full of integrated circuit chips, all wired together, plus some toggle switches and a pair of LED numeric displays.
+It was a computer. (Said so right on the label, heh.) The article described how to put it together, and that was about all. What did those chips do? What did the whole thing do? There was no fancy robotic typewriter anywhere in sight. It was driving me nuts.
+As usual, my friend Gus Flassig got on the bus at Ashland Avenue and sat down beside me. I asked him what the COSMAC ELF did. He was the ﬁrst human being to make the concept of a physical computer hang together for me:
+These are memory chips. You load numbers into the memory chips by ﬂipping these toggle switches in different binary code patterns, where ‘‘up’’ means a 1-bit, and ‘‘down’’ means a 0-bit. Each number in memory means something
+
+Chapter 3 ■ Lifting the Hood 47
+to the CPU chip. One number makes it add; another number makes it subtract; another makes it write different numbers into memory, and lots of other things. A program consists of a bunch of these instruction-numbers in a row in memory. The computer reads the ﬁrst number, does what the number tells it to do, and then reads the second one, does what that number says to do, and so on until it runs out of numbers.
+If you don’t ﬁnd that utterly clear, don’t worry. I had the advantage of being an electronics hobbyist (so I knew what some of the chips did) and had already written some programs in RAX’s FORTRAN. For me, my God, everything suddenly hit critical mass and exploded in my head until the steam started pouring out of my ears. I got it!
+No matter what RAX was, I knew that it had to be something like the COSMAC ELF, only on a larger scale. I built an ELF. It was quite an education, and enabled me to understand the nature of computers at a very deep level. I don’t recommend that anybody but total crazies wire-wrap their own computers out of loose chips anymore, although it was a common enough thing to do in the mid to late 1970s.
+As a side note, someone has written a Windows-based simulation of the COSMAC ELF that looks just like the one I built, and it will actually accept and execute COSMAC programs. It’s a lot of fun and might give you some perspective on what passed for hobby computing in early 1976. The URL is as follows:
+http://incolor.inetnebr.com/bill_r/computer_simulators.htm
+The site’s author, Bill Richman, has also reprinted the Popular Electronics article from which I built the device. All fascinating reading—and a very good education in the deepest silicon concepts underlying computing as it was then and remains to this day.
+In this chapter I will provide you with some of the insights that I obtained while assembling my own computer the hard way. (You wonder where the ‘‘hard’’ in ‘‘hardware’’ comes from? Not from the sound it makes when you bang it on the table, promise.)
+Switches, Transistors, and Memory
+Switches remember. Think about it: you ﬂip the wall switch by the door, and the light in the
+middle of the ceiling comes on. It stays on. When you leave the room, you ﬂip the switch down again, and the light goes out. It stays out. Poltergeists notwithstanding, the switch will remain in the position you last left it until you or someone else comes back and ﬂips it to its other position. Even if the bulb burns out, you can look at the position of the switch handle and know whether the light is on or off.
+
+48 Chapter 3 ■ Lifting the Hood
+In a sense, the switch remembers what its last command was until you change it, and ‘‘overwrites’’ that command with a new one. In this sense, a light switch represents a sort of rudimentary memory element.
+Light switches are more mechanical than electrical. This does not prevent them from acting as memory; indeed, the very ﬁrst computer (Babbage’s nineteenth-century Difference Engine) was entirely mechanical. In fact, the far larger version he designed but never ﬁnished was to have been steam-powered. Babbage’s machine had a lot of little cams that could be ﬂipped by other cams from one position to another. Numbers were encoded and remembered as patterns of cam positions.
+One If by Land . . .
+Whether a switch is mechanical, or electrical, or hydraulic, or something else is irrelevant. What counts is that a switch contains a pattern: on or off; up or down; ﬂow or no ﬂow. To that pattern can be assigned a meaning. Paul Revere told his buddy to set up a code in the Old North Church: ‘‘One if by land, two if by sea.’’ Once lit, the lamps in the steeple remained lit (and thus remembered that very important code) long enough for Paul to call out the militia and whup the British.
+In general, then, what we call memory is an aggregate of switches that retain a pattern long enough for that pattern to be read and understood by a person or a mechanism. For our purposes, those switches will be electrical, but keep in mind that both mechanical and hydraulic computers have been proposed and built with varying degrees of success.
+Memory consists of containers for alterable patterns that retain an entered pattern until someone or something alters the pattern.
+Transistor Switches
+One problem with building a computer memory system of light switches is that light switches are pretty specialized: they require ﬁngers to set them, and their output is a current path for electricity. Ideally, a computer memory switch should be operated by the same force it controls. This enables the patterns stored in memory to be passed on to other memory storage locations. In the gross electromechanical world, such a switch is called a relay.
+A relay is a mechanical switch that is operated by electricity, for the purpose of controlling electricity. You ‘‘ﬂip’’ a relay by feeding it a pulse of electricity, which powers a little hammer that whaps a lever to one side or another. This lever then opens or closes a set of electrical contacts, just as your garden-variety light switch does. Computers have been made out of relays, although as you might imagine, it was a long time ago, and (with a typical relay being about the size of an ice cube) they weren’t especially powerful computers.
+
+Chapter 3 ■ Lifting the Hood 49
+Fully electronic computers are made out of transistor switches. (Very early computers were also made with vacuum tube switches.) Transistors are tiny crystals of silicon that use the peculiar electrical properties of silicon to act as switches. I won’t try to explain what those peculiar properties are, as that would take an entire book unto itself. Let’s consider a transistor switch a sort of electrical black box, and describe it in terms of inputs and outputs.
+Figure 3-1 shows a transistor switch. (It is a ﬁeld-effect transistor, which in truth is only one type of transistor, but it is the type that our current computers are made of.) When an electrical voltage is applied to pin 1, current ﬂows between pins 2 and 3. When the voltage is removed from pin 1, current ceases to ﬂow between pins 2 and 3.
+
+2 1
+
+Select
+
+3 Common Transistor Switch
+
+Input Output
+
+Memory Cell
+Figure 3-1: Transistor switches and memory cells
+In real life, a tiny handful of other components (typically diodes and capacitors) are necessary to make things work smoothly in a computer memory context. These are not necessarily little gizmos connected by wires to the outside of the transistor (although in early transistorized computers they were), but are now cut from the same silicon crystal the transistor itself is cut from, and occupy almost no space at all. Taken together, the transistor switch and its support components are called a memory cell. I’ve hidden the electrical complexity of the memory cell within an appropriate black-box symbol in Figure 3-1.
+
+50 Chapter 3 ■ Lifting the Hood
+A memory cell keeps the current ﬂow through it to a minimum, because electrical current ﬂow produces heat, and heat is the enemy of electrical components. The memory cell’s circuit is arranged so that if you put a tiny voltage on its input pin and a similar voltage on its select pin, a voltage will appear and remain on its output pin. That output voltage remains in its set state until remove the voltage from the cell as a whole, or remove the voltage from the input pin while putting a voltage on the select pin.
+The ‘‘on’’ voltage being applied to all of these pins is kept at a consistent level (except, of course, when it is removed entirely). In other words, you don’t put 12 volts on the input pin and then change that to 6 volts or 17 volts. The computer designers pick a voltage and stick with it. The pattern is binary in nature: you either put a voltage on the input pin or you take the voltage away entirely. The output pin echoes that: it either holds a ﬁxed voltage or no voltage at all.
+We apply a code to that state of affairs: The presence of voltage indicates a binary 1, and the lack of voltage indicates a binary 0. This code is arbitrary. We could as well have said that the lack of voltage indicates a binary 1 and vice versa (and computers have been built this way for obscure reasons), but the choice is up to us. Having the presence of something indicate a binary 1 is more natural, and that is the way things have evolved in the computing mainstream.
+A single computer memory cell, such as the transistor-based one we’re speaking of here, holds one binary digit, either a 1 or a 0. This is called a bit. A bit is the indivisible atom of information. There is no half-a-bit, and no bit-and-a-half.
+A bit is a single binary digit, either 1 or 0.
+The Incredible Shrinking Bit
+One bit doesn’t tell us much. To be useful, we need to bring a lot of memory cells together. Transistors started out fairly small (the originals from the 1950s looked a lot like stovepipe hats for tin soldiers) and went down from there. The ﬁrst transistors were created from little chips of germanium or silicon crystal about one-eighth of an inch square. The size of the crystal chip hasn’t changed outrageously since then, but the transistors themselves have shrunk almost incredibly.
+Whereas in the beginning one chip held one transistor, in time semiconductor designers crisscrossed the chip into four equal areas and made each area an independent transistor. From there it was an easy jump to add the other minuscule components needed to turn a transistor into a computer memory cell.
+The chip of silicon was a tiny and fragile thing, and was encased in an oblong, molded-plastic housing, like a small stick of gum with metal legs for the electrical connections.
+
+Chapter 3 ■ Lifting the Hood 51
+What we had now was a sort of electrical egg carton: four little cubbyholes, each of which could contain a single binary bit. Then the shrinking process began. First 8 bits, then 16, then multiples of 8 and 16, all on the same tiny silicon chip. By the late 1960s, 256 memory cells could occupy one chip of silicon, usually in an array of 8 cells by 32. In 1976, my COSMAC ELF computer contained two memory chips. On each chip was an array of memory cells 4 wide and 256 long. (Picture a really long egg carton.) Each chip could thus hold 1,024 bits.
+This was a pretty typical memory chip capacity at that time. We called them ‘‘1K RAM chips’’ because they held roughly 1,000 bits of random-access memory (RAM). The K comes from kilobit— that is, one thousand bits. We’ll get back to the notion of what random access means shortly.
+Toward the mid-1970s, the great memory-shrinking act was kicking into high gear. One-kilobyte chips were crisscross divided into 4K chips containing 4,096 bits of memory. The 4K chips were almost immediately divided into 16K chips (16,384 bits of memory). These 16K chips were the standard when the IBM PC ﬁrst appeared in 1981. By 1982, the chips had been divided once again, and 16K became 64K, with 65,536 bits inside that same little gum stick. Keep in mind that we’re talking more than 65,000 transistors (plus other odd components) formed on a square of silicon about a quarter-inch on a side.
+Come 1985 and the 64K chip had been pushed aside by its drawnand-quartered child, the 256K chip (262,144 bits). Chips almost always increase in capacity by a factor of 4 simply because the current-generation chip is divided into 4 equal areas, onto each of which is then placed the same number of transistors that the previous generation of chip had held over the whole silicon chip.
+By 1990, the 256K chip was history, and the 1-megabit chip was state of the art (mega is Greek for million). By 1992, the 4-megabit chip had taken over. The critter had a grand total of 4,194,304 bits inside it, still no larger than that stick of cinnamon gum. About that time, the chips themselves grew small and fragile enough so that four or eight of them were soldered to tiny printed circuit boards so that they would survive handling by clumsy human beings.
+The game has continued apace, and currently you can purchase these little plug-in circuit board memory modules with as much as two gigabytes in them—which is over sixteen billion bits.
+Will it stop here? Unlikely. More is better, and we’re bringing some staggeringly powerful technology to bear on the creation of ever-denser memory systems. Some physicists warn that the laws of physics may soon call a time-out in the game, as the transistors are now so small that it gets hard pushing more than one electron at a time through them. At that point, some truly ugly limitations of life called quantum mechanics begin to get in the way. We’ll ﬁnd a way around these limitations (we always do), but in the process the whole nature of computer memory may change.
+
+52 Chapter 3 ■ Lifting the Hood
+Random Access
+Newcomers sometimes ﬁnd ‘‘random’’ a perplexing and disturbing word with respect to memory, as random often connotes chaos or unpredictability. What the word really means here is ‘‘at random,’’ indicating that you can reach into a random-access memory chip and pick out any of the bits it contains without disturbing any of the others, just as you might select one book at random from your public library’s many shelves of thousands of books without sifting through them in order or disturbing the places of other books on the shelves.
+Memory didn’t always work this way. Before memory was placed on silicon chips, it was stored on electromagnetic machines of some kind, usually rotating magnetic drums or disks distantly related to the hard drives we use today. Rotating magnetic memory sends a circular collection of bits beneath a magnetic sensor. The bits pass beneath the sensor one at a time, and if you miss the one you want, like a Chicago bus in January, you simply have to wait for it to come by again. These are serial-access devices. They present their bits to you serially, in a ﬁxed order, one at a time, and you have to wait for the one you want to come up in its order.
+There’s no need to remember that; we’ve long since abandoned serial-access devices for main computer memory. We still use such systems for mass storage, as I describe a bit later. Your hard drive is at its heart a serial-access device.
+Random access works like this: inside the chip, each bit is stored in its own memory cell, identical to the memory cell diagrammed in Figure 3-1. Each of the however-many memory cells has a unique number. This number is a cell’s (and hence a bit’s) address. It’s like the addresses on a street: the bit on the corner is number 0 Silicon Alley, and the bit next door is number 1, and so on. You don’t have to knock on the door of bit 0 and ask which bit it is, and then go to the next door and ask there too, until you ﬁnd the bit you want. If you have the address, you can zip right down the street and park square in front of the bit you intend to visit.
+Each chip has a number of pins coming out of it. The bulk of these pins are called address pins. One pin is called a data pin (see Figure 3-2). The address pins are electrical leads that carry a binary address code. This address is a binary number, expressed in 1s and 0s only. You apply this address to the address pins by encoding a binary 1 as (let’s say) 5 volts, and a binary 0 as 0 volts. Many other voltages have been used and are still used in computer hardware. What matters is that we all agree that a certain voltage on a pin represents a binary 1. Special circuits inside the RAM chip decode this address to one of the select inputs of the numerous memory cells inside the chip. For any given address applied to the address pins, only one select input will be raised to ﬁve volts, thereby selecting that memory cell.
+Depending on whether you intend to read a bit or write a bit, the data pin is switched between the memory cells’ inputs or outputs, as shown in Figure 3-2.
+
+Address Decoder Circuitry
+
+Chapter 3 ■ Lifting the Hood 53
+Read/Write Data Pin Pin
+0FFFFF
+0FFFFE
+3 Address
+Pins 2
+1
+0
+Figure 3-2: A RAM chip
+That’s all done internally to the chip. As far as you, on the outside, are concerned, once you’ve applied the address to the address pins, voila! The data pin will contain a voltage representing the value of the bit you requested. If that bit contained a binary 1, the data pin will contain a 5-volt signal; otherwise, the binary 0 bit will be represented by 0 volts.
+Memory Access Time
+Chips are graded by how long it takes for the data to appear on the data pin after you’ve applied the address to the address pins. Obviously, the faster the better, but some chips (for electrical reasons that again are difﬁcult to explain) are faster than others.
+The time values are so small as to seem almost insigniﬁcant: 30 nanoseconds is a typical memory chip access time. A nanosecond is a billionth of a second, so 30 nanoseconds is signiﬁcantly less than one 10-millionth of a second. Great stuff—but to accomplish anything useful, a computer needs to access memory hundreds of thousands, millions, or (in most cases) billions of times. Those nanoseconds add up. If you become an expert assembly language programmer,
+
+54 Chapter 3 ■ Lifting the Hood
+you will jump through hoops to shave the number of memory accesses your program needs to perform, because memory access is the ultimate limiting factor in a computer’s performance. Assembly language expert Michael Abrash, in fact, has published several books on doing exactly that, mostly in the realm of high-speed graphics programming. The gist of his advice can be (badly) summarized in just a few words: Stay out of memory whenever you can! (You’ll soon discover just how difﬁcult this is.)
+Bytes, Words, Double Words, and Quad Words
+The days are long gone (decades gone, in fact) when a serious computer could be made with only one memory chip. My poor 1976 COSMAC ELF needed at least two. Today’s computers need many, irrespective of the fact that today’s memory chips can hold a billion bits or more, rather than the ELF’s meager 2,048 bits. Understanding how a computer gathers its memory chips together into a coherent memory system is critical when you wish to write efﬁcient assembly language programs. Although there are inﬁnite ways to hook memory chips together, the system I describe here is that of the Intel-based PC-compatible computer, which has ruled the world of desktop computing since 1982.
+Our memory system must store our information. How we organize a memory system out of a hatful of memory chips will be dictated largely by how we organize our information.
+The answer begins with this thing called a byte. The fact that the granddaddy of all computer magazines took this word for its title indicates its importance in the computer scheme of things. (Alas, Byte magazine ceased publishing late in 1998.) From a functional perspective, memory is measured in bytes. A byte is eight bits. Two bytes side by side are called a word, and two words side by side are called a double word. A quad word, as you might imagine, consists of two double words, for four words or eight bytes in all. Going in the other direction, some people refer to a group of four bits as a nybble—a nybble being somewhat smaller than a byte. (This term is now rare and becoming rarer.)
+Here’s the quick tour:
+A bit is a single binary digit, 0 or 1.
+A byte is 8 bits side by side.
+A word is 2 bytes side by side.
+A double word is 2 words side by side.
+A quad word is 2 double words side by side.
+Computers were designed to store and manipulate human information. The basic elements of human discourse are built from a set of symbols consisting
+
+Chapter 3 ■ Lifting the Hood 55
+of letters of the alphabet (two of each, for uppercase and lowercase), numbers, and symbols, including commas, colons, periods, and exclamation marks. Add to these the various international variations on letters such as a¨ and o` plus the more arcane mathematical symbols, and you’ll ﬁnd that human information requires a symbol set of well over 200 symbols. (The symbol set used in all PC-style computers is provided in Appendix B.)
+Bytes are central to the scheme because one symbol out of that symbol set can be neatly expressed in one byte. A byte is 8 bits, and 28 is 256. This means that a binary number 8 bits in size can be one of 256 different values, numbered from 0 to 255. Because we use these symbols so much, most of what we do in computer programs is done in byte-size chunks. In fact, except for the very odd and specialized kind of computers we are now building into intelligent food processors, no computer processes information in chunks smaller than 1 byte. Most computers today, in fact, process information one double word (four bytes, or 32 bits) at a time. Since 2003, PC-compatible computers have been available that process information one quad word (64 bits) at a time.
+Pretty Chips All in a Row
+One of the more perplexing things for beginners to understand is that a single RAM chip does not even contain 1 byte, though it might contain half a billion bits. The bulk of the individual RAM chips that we use today have no more than four data pins, and some only one data pin. Whole memory systems are created by combining individual memory chips in clever ways.
+A simple example will help illustrate this. Consider Figure 3-3. I’ve drawn a memory system that distributes a single stored byte across eight separate RAM chips. Each of the black rectangles represents a RAM chip like the one shown in Figure 3-2. There is one bit from the byte stored within each of the eight chips, at the same address across all eight chips. The 20 address pins for all eight chips are connected together, ‘‘in parallel’’ as an electrician might say. When the computer applies a memory address to the 20 address lines, the address appears simultaneously on the address pins of all eight memory chips in the memory system. This way, a single address is applied simultaneously to the address pins of all eight chips, which deliver all eight bits simultaneously on the eight data lines, with one bit from each chip.
+In the real world, such simple memory systems no longer exist, and there are many different ways of distributing chips (and their stored bits) across a memory system. Most memory chips today do in fact store more than one bit at each address. Chips storing 1, 2, 3, 4, or 8 bits per address are relatively common. How to design a fast and efﬁcient computer memory system is an entire subdiscipline within electrical engineering, and as our memory chips are improved to contain more and more memory cells, the ‘‘best’’ way to design a physical memory system changes.
+
+56 Chapter 3 ■ Lifting the Hood
+8 Data Lines
+20 Address Lines Figure 3-3: A 1-megabyte memory system
+It’s been a long time, after all, since we’ve had to plug individual memory chips into our computers. Today, memory chips are nearly always gathered together into plug-in Dual Inline Memory Modules (DIMMs) of various capacities. These modules are little green-colored circuit boards about 5 inches long and 1 inch high. In 2009, all desktop PC-compatible computers use such modules, generally in pairs. Each module typically stores 32 bits at each memory address (often, but not always, in eight individual memory chips, each chip storing four bits at each memory address) and a pair of modules acting together stores 64 bits at each memory address. The number of memory locations within each module varies, but the capacity is commonly 512 megabytes (MB), or 1 or 2 gigabytes (GB). (I will use the abbreviations MB and GB from now on.)
+It’s important to note that the way memory chips are combined into a memory system does not affect the way your programs operate. When a program that you’ve written accesses a byte of memory at a particular address, the computer takes care of fetching it from the appropriate place in that jungle of chips and circuit boards. One memory system arranged a certain way might bring the data back from memory faster than another memory system arranged a different way, but the addresses are the same, and the data is the same. From the point of view of your program, there is no functional difference.
+
+Chapter 3 ■ Lifting the Hood 57
+To summarize: electrically, your computer’s memory consists of one or more rows of memory chips, with each chip containing a large number of memory cells made out of transistors and other minuscule electrical components. Most of the time, to avoid confusion it’s just as useful to forget about the transistors and even the rows of physical chips. (My high school computer science teacher was not entirely wrong but he was right for the wrong reasons.)
+Over the years, memory systems have been accessed in different ways. Eight-bit computers (now ancient and almost extinct) accessed memory 8 bits (one byte) at a time. Sixteen-bit computers access memory 16 bits (one word) at a time. Today’s mainstream 32-bit computers access memory 32 bits (one double word) at a time. Upscale computers based on newer 64-bit processors access memory 64 bits (one quad word) at a time. This can be confusing, so it’s better in most cases to envision a very long row of byte-size containers, each with its own unique address. Don’t assume that in computers which process information one word at a time that only words have addresses. It’s a convention within the PC architecture that every byte has its own unique numeric address, irrespective of how many bytes are pulled from memory in one operation.
+Every byte of memory in the computer has its own unique address, even in computers that process 2, 4, or 8 bytes of information at a time.
+If this seems counterintuitive, yet another metaphor will help: when you go to the library to take out the three volumes of Tolkien’s massive fantasy The Lord of the Rings, each of the three volumes has its own catalog number (essentially that volume’s address in the library) but you take all three down at once and process them as a single entity. If you really want to, you can check only one of the books out of the library at a time, but doing so will require two more trips to the library later to get the other two volumes, which is a waste of your time and effort.
+So it is with 32-bit or 64-bit computers. Every byte has its own address, but when a 32-bit computer accesses a byte, it actually reads 4 bytes starting at the address of the requested byte. You can use the remaining 3 bytes or ignore them if you don’t need them—but if you later decide that you do need the other three bytes, you’ll have to access memory again to get them. Best to save time and get it all at one swoop.
+The Shop Foreman and the Assembly Line
+All of this talk about reading things from memory and writing things to memory has thus far carefully skirted the question of who is doing the reading and writing. The who is almost always a single chip, and a remarkable chip it is, too: the central processing unit, or CPU. If you are the president and CEO of your personal computer, the CPU is your shop foreman, who sees that your orders are carried out down among the chips, where the work gets done.
+
+58 Chapter 3 ■ Lifting the Hood
+Some would say that the CPU is what actually does the work, but while largely true, it’s an oversimpliﬁcation. Plenty of real work is done in the memory system, and in what are called peripherals, such as video display boards, USB and network ports, and so on. So, while the CPU does do a good deal of the work, it also parcels out quite a bit to other components within the computer, largely to enable itself to do a lot more quickly what it does best. Like any good manager, the foreman delegates to other computer subsystems whatever it can.
+Most of the CPU chips used in the machines we lump together as a group and call PCs were designed by a company called Intel, which pretty much invented the single-chip CPU way back in the early 1970s. Intel CPUs have evolved briskly since then, as I’ll describe a little later in this chapter. There have been many changes in the details over the years, but from a height, what any Intel or Intel-compatible CPU does is largely the same.
+Talking to Memory
+The CPU chip’s most important job is to communicate with the computer’s memory system. Like a memory chip, a CPU chip is a small square of silicon onto which a great many transistors—today, hundreds of millions of them!—have been placed. The fragile silicon chip is encased in a plastic or ceramic housing with a large number of electrical connection pins protruding from it. Like the pins of memory chips, the CPU’s pins transfer information encoded as voltage levels, typically 3 to 5 volts. Five volts on a pin indicate a binary 1, and 0 volts on a pin indicate a binary 0.
+Like memory chips, the CPU chip has a number of pins devoted to memory addresses, and these pins are connected to the computer’s system of memory chips. I’ve drawn this in Figure 3-4, and the memory system to the left of the CPU chip is the same one that appears in Figure 3-3, just tipped on its side. When the CPU needs to read a byte (or a word, double word, or quad word) from memory, it places the memory address of the byte to be read on its address pins, encoded as a binary number. Some few nanoseconds later, the requested byte appears (also as a binary number) on the data pins of the memory chips. The CPU chip also has data pins, and it slurps up the byte presented by the memory chips through its own data pins.
+The process, of course, also works in reverse: to write a byte into memory, the CPU ﬁrst places the memory address where it wants to write onto its address pins. Some number of nanoseconds later (which varies from system to system depending on general system speed and how memory is arranged) the CPU places the byte it wants to write into memory on its data pins. The memory system obediently stores the byte inside itself at the requested address.
+
+Chapter 3 ■ Lifting the Hood 59
+CPU Chip
+Data Lines
+Address Lines
+Figure 3-4: The CPU and memory
+Figure 3-4 is, of course, purely conceptual. Modern memory systems are a great deal more complex than what is shown, but in essence they all work the same way: the CPU passes an address to the memory system, and the memory system either accepts data from the CPU for storage at that address or places the data found at that address on the computer’s data bus for the CPU to process.
+Riding the Data Bus
+This give-and-take between the CPU and the memory system represents the bulk of what happens inside your computer. Information ﬂows from memory into the CPU and back again. Information ﬂows in other paths as well. Your computer contains additional devices called peripherals that are either sources or destinations (or both) for information.
+Video display boards, disk drives, USB ports, and network ports are the most common peripherals in PC-type computers. Like the CPU and memory, they are all ultimately electrical devices. Most modern peripherals consist of one or two large chips and perhaps a couple of smaller chips that support the larger chips. Like both the CPU chip and memory chips, these peripheral devices have both address pins and data pins. Some peripherals, graphics boards in particular, have their own memory chips, and these days their own dedicated CPUs. (Your modern high-performance graphics board is a high-powered computer in its own right, albeit one with a very speciﬁc and limited mission.)
+Peripherals ‘‘talk’’ to the CPU (that is, they pass the CPU data or take data from the CPU) and sometimes to one another. These conversations take place across the electrical connections linking the address pins and data pins that all devices in the computer have in common. These electrical lines are called a data bus and they form a sort of party line linking the CPU with all other parts of the computer. An elaborate system of electrical arbitration determines when
+
+60 Chapter 3 ■ Lifting the Hood
+and in what order the different devices can use this party line to talk with one another, but it happens in generally the same way: an address is placed on the bus, followed by some data. (How much data moves at once depends on the peripherals involved.) Special signals go out on the bus with the address to indicate whether the address represents a location in memory or one of the peripherals attached to the data bus. The address of a peripheral is called an I/O address to differentiate between it and a memory address such as those we’ve been discussing all along.
+The data bus is the major element in the expansion slots present in most PC-type computers, and many peripherals (especially graphics adapters) are printed circuit boards that plug into these slots. The peripherals talk to the CPU and to memory through the data bus connections implemented as electrical pins in the expansion slots.
+As convenient as expansion slots are, they introduce delays into a computer system. Increasingly, as time passes, peripherals are simply a couple of chips on one corner of the main circuit board (the motherboard) inside the computer.
+The Foreman’s Pockets
+Every CPU contains a very few data storage cubbyholes called registers. These registers are at once the foreman’s pockets and the foreman’s workbench. When the CPU needs a place to tuck something away for a short while, an empty register is just the place. The CPU could always store the data out in memory, but that takes considerably more time than tucking the data in a register. Because the registers are actually inside the CPU, placing data in a register or reading it back again from a register is fast.
+More important, registers are the foreman’s workbench. When the CPU needs to add two numbers, the easiest and fastest way is to place the numbers in two registers and add the two registers together. The sum (in usual CPU practice) replaces one of the two original numbers that were added, but after that the sum could then be placed in yet another register, or added to still another number in another register, or stored out in memory, or take part in any of a multitude of other operations.
+The CPU’s immediate work-in-progress is held in temporary storage containers called registers.
+Work involving registers is always fast, because the registers are within the CPU and are specially connected to one another and to the CPU’s internal machinery. Very little movement of data is necessary—and what data does move doesn’t have to move very far.
+Like memory cells and, indeed, like the entire CPU, registers are made out of transistors; but rather than having numeric addresses, registers have individual names such as EAX or EDI. To make matters even more complicated, while all CPU registers have certain common properties, some registers have unique
+
+Chapter 3 ■ Lifting the Hood 61
+special powers not shared by other registers. Understanding the behaviors and the limitations of CPU registers is something like following the Middle East peace process: There are partnerships, alliances, and always a bewildering array of secret agendas that each register follows. There’s no general system describing such things; like irregular verbs in Spanish, you simply have to memorize them.
+Most peripherals also have registers, and peripheral registers are even more limited in scope than CPU registers. Their agendas are quite explicit and in no wise secret. This does not prevent them from being confusing, as anyone who has tried programming a graphics board at the register level will attest. Fortunately, these days nearly all communication with peripheral devices is handled by the operating system, as I’ll explain in the next chapter.
+The Assembly Line
+If the CPU is the shop foreman, then the peripherals are the assembly-line workers, and the data bus is the assembly line itself. (Unlike most assembly lines, however, the foreman works the line much harder than the rest of his crew!)
+As an example: information enters the computer through a network port peripheral, which assembles bits received from a computer network cable into bytes of data representing characters and numbers. The network port then places the assembled byte onto the data bus, from which the CPU picks it up, tallies it or processes it in other ways, and then places it back on the data bus. The display board then retrieves the byte from the data bus and writes it into video memory so that you can see it on your screen.
+This is a severely simpliﬁed description, but obviously a lot is going on inside the box. Continuous furious communication along the data bus between CPU, memory, and peripherals is what accomplishes the work that the computer does. The question then arises: who tells the foreman and crew what to do? You do. How do you do that? You write a program. Where is the program? It’s in memory, along with all the rest of the data stored in memory. In fact, the program is data, and that is the heart of the whole idea of programming as we know it.
+The Box That Follows a Plan
+Finally, we come to the essence of computing: the nature of programs and how they direct the CPU to control the computer and get your work done.
+We’ve seen how memory can be used to store bytes of information. These bytes are all binary codes, patterns of 1 and 0 bits stored as minute electrical voltage levels and collectively making up binary numbers. We’ve also spoken
+
+62 Chapter 3 ■ Lifting the Hood
+of symbols, and how certain binary codes may be interpreted as meaning something to us human beings, things such as letters, digits, punctuation, and so on.
+Just as the alphabet and the numeric digits represent a set of codes and symbols that mean something to us humans, there is a set of codes that mean something to the CPU. These codes are called machine instructions, and their name is evocative of what they actually are: instructions to the CPU. When the CPU is executing a program, it picks a sequence of numbers off the data bus, one at a time. Each number tells the CPU to do something. The CPU knows how. When it completes executing one instruction, it picks the next one up and executes that. It continues doing so until something (a command in the program, or electrical signals such as a reset button) tells it to stop.
+Let’s take an example or two that are common to all modern IA-32 CPU chips from Intel. The 8-bit binary code 01000000 (40H) means something to the CPU. It is an order: Add 1 to register AX and put the sum back in AX. That’s about as simple as they get. Most machine instructions occupy more than a single byte. Many are 2 bytes in length, and very many more are 4 bytes in length. The binary codes 11010110 01110011 (0B6H 073H) comprise another order: Load the value 73H into register DH. On the other end of the spectrum, the binary codes 11110011 10100100 (0F3H 0A4H) direct the CPU to do the following (take a deep breath): Begin moving the number of bytes speciﬁed in register CX from the 32-bit address stored in registers DS and SI to the 32-bit address stored in registers ES and DI, updating the address in both SI and DI after moving each byte, and decreasing CX by one each time, and ﬁnally stopping when CX becomes zero.
+You don’t have to remember all the details of those particular instructions right now; I’ll come back to machine instructions in later chapters. The rest of the several hundred instructions understood by the Intel IA-32 CPUs fall somewhere in between these extremes in terms of complication and power. There are instructions that perform arithmetic operations (addition, subtraction, multiplication, and division) and logical operations (AND, OR, XOR, and so on), and instructions that move information around memory. Some instructions serve to ‘‘steer’’ the path that program execution takes within the logic of the program being executed. Some instructions have highly arcane functions and don’t turn up very often outside of operating system internals. The important thing to remember right now is that each instruction tells the CPU to perform one generally small and limited task. Many instructions handed to the CPU in sequence direct the CPU to perform far more complicated tasks. Writing that sequence of instructions is what assembly language programming actually is.
+Let’s talk more about that.
+
+Chapter 3 ■ Lifting the Hood 63
+Fetch and Execute
+A computer program is nothing more than a table of these machine instructions stored in memory. There’s nothing special about the table, nor about where it is positioned in memory. It could be almost anywhere, and the bytes in the table are nothing more than binary numbers.
+The binary numbers comprising a computer program are special only in the way that the CPU treats them. When a modern 32-bit CPU begins running, it fetches a double word from an agreed-upon address in memory. (How this starting address is agreed upon doesn’t matter right now.) This double word, consisting of 4 bytes in a row, is read from memory and loaded into the CPU. The CPU examines the pattern of binary bits contained in the double word, and then begins performing the task that the fetched machine instruction directs it to do.
+Ancient 8088-based 8-bit machines such as the original IBM PC only fetched one byte at a time, rather than the four bytes that 32-bit Pentium-class machines fetch. Because most machine instructions are more than a single byte in size, the 8088 CPU had to return to memory to fetch a second (or a third or a fourth) byte to complete the machine instruction before it could actually begin to obey the instruction and begin performing the task it represented.
+As soon as it ﬁnishes executing an instruction, the CPU goes out to memory and fetches the next machine instruction in sequence. Inside the CPU is a special register called the instruction pointer that quite literally contains the address of the next instruction to be fetched from memory and executed. Each time an instruction is completed, the instruction pointer is updated to point to the next instruction in memory. (There is some silicon magic afoot inside modern CPUs that ‘‘guesses’’ what’s to be fetched next and keeps it on a side shelf so it will be there when fetched, only much more quickly—but the process as I’ve described it is true in terms of the outcome.)
+All of this is done literally like clockwork. The computer has an electrical subsystem called a system clock, which is actually an oscillator that emits square-wave pulses at very precisely intervals. The immense number of microscopic transistor switches inside the CPU coordinate their actions according to the pulses generated by the system clock. In years past, it often took several clock cycles (basically, pulses from the clock) to execute a single instruction. As computers became faster, the majority of machine instructions executed in a single clock cycle. Modern CPUs can execute instructions in parallel, so multiple instructions can often execute in a single clock cycle.
+So the process goes: fetch and execute; fetch and execute. The CPU works its way through memory, with the instruction pointer register leading the way. As it goes, it works: moving data around in memory, moving values around in registers, passing data to peripherals, crunching data in arithmetic or logical operations.
+
+64 Chapter 3 ■ Lifting the Hood
+Computer programs are lists of binary machine instructions stored in memory. They are no different from any other list of data bytes stored in memory except in how they are interpreted when fetched by the CPU.
+The Foreman’s Innards
+I made the point earlier that machine instructions are binary codes. This is something we often gloss over, yet to understand the true nature of the CPU, we have to step away from the persistent image of machine instructions as numbers. They are not numbers. They are binary patterns designed to throw electrical switches.
+Inside the CPU are a very large number of transistors. (The Intel Core 2 Quad that I have on my desk contains 582 million transistors, and CPU chips with over a billion transistors are now in limited use.) Some small number of those transistors go into making up the foreman’s pockets: machine registers for holding information. A signiﬁcant number of transistors go into making up short-term storage called cache that I’ll describe later. (For now, think of cache as a small set of storage shelves always right there at the foreman’s elbow, making it unnecessary for the foreman to cross the room to get more materials.) The vast majority of those transistors, however, are switches connected to other switches, which are connected to still more switches in a mind-numbingly complex network.
+The extremely simple machine instruction 01000000 (40H) directs the CPU to add 1 to the value stored in register AX, with the sum placed back in AX. When considering the true nature of computers, it’s very instructive to think about the execution of machine instruction 01000000 in this way.
+The CPU fetches a byte from memory. This byte contains the binary code 01000000. Once the byte is fully within the CPU, the CPU in essence lets the machine instruction byte push eight transistor switches. The lone 1 digit pushes its switch ‘‘up’’ electrically; the rest of the digits, all 0s, push their switches ‘‘down.’’
+In a chain reaction, those eight switches ﬂip the states of ﬁrst dozens, then hundreds, then thousands, and in some cases tens of thousands of tiny transistor switches within the CPU. It isn’t random—this furious nanomoment of electrical activity within the CPU operates utterly according to patterns etched into the silicon of the CPU by Intel’s teams of engineers. Ultimately—perhaps after many thousands of individual switch throws—the value contained in register AX is suddenly one greater than it was before.
+How this happens is difﬁcult to explain, but you must remember that any number within the CPU can also be looked upon as a binary code, including values stored in registers. Also, most switches within the CPU contain more than one handle. These switches, called gates, work according to the rules of logic. Perhaps two, or three, or even more ‘‘up’’ switch throws have to arrive
+

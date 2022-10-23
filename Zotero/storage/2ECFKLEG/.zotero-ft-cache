@@ -1,0 +1,4205 @@
+i i
+
+i i
+
+Advanced Global Illumination
+
+i i
+
+i i
+
+i i
+
+i i
+
+Advanced Global Illumination
+Second Edition
+Philip Dutre´ Kavita Bala Philippe Bekaert
+
+i i
+
+A K Peters, Ltd. Wellesley, Massachusetts
+i i
+
+i i
+
+i i
+
+Editorial, Sales, and Customer Service Oﬃce
+A K Peters, Ltd. 888 Worcester Street, Suite 230 Wellesley, MA 02482 www.akpeters.com
+
+Copyright c 2006 by A K Peters, Ltd.
+All rights reserved. No part of the material protected by this copyright notice may be reproduced or utilized in any form, electronic or mechanical, including photocopying, recording, or by any information storage and retrieval system, without written permission from the copyright owner.
+
+Library of Congress Cataloging-in-Publication Data
+
+Dutr´e, Philip Advanced global illumination / Philip Dutr´e, Kavita Bala, Philippe Bekaert. p. cm. Includes bibliographical references and index. ISBN 13: 978-1-56881-307-3 (alk. paper) ISBN 10: 1-56881-307-4 (alk. paper) 1. Computer graphics. I. Bala, Kavita II. Bekaert, Philippe III. Title.
+
+T385.D89 2006 006.6’93–dc22
+
+2006044831
+
+Printed in India 10 09 08 07 06
+i i
+
+10 9 8 7 6 5 4 3 2 1
+i i
+
+i i
+
+i i
+
+To my family. —Phil To Andrew, Vivek, and Ravi. —KB To Annelies, Lotte, and Fien. —Philippe
+
+i i
+
+i i
+
+i i
+
+i i
+
+Foreword
+
+i i
+
+There have been tremendous advances in the realism of computer-generated images over the last twenty years. This is the result of a great deal of research and is documented in thousands of technical papers. While this eﬀort has resulted in many algorithmic and mathematical tools, it has also resulted in a vast and somewhat impenetrable literature. This literature has conﬂicting terms, symbols, and often advocates approaches that are simply not practical. As a result, it is very diﬃcult for new people to “get up to speed” and begin developing software to generate realistic images. The most technical part of realistic image generation is dealing with “global illumination.” The word “global” refers to the fact that the appearance of an object depends on the light it receives from all other objects. So in this sense, computing lighting even at a single point requires computation using the entire model of the scene. While this might seem like overkill, the visual richness of an image created using a global illumination program is simply not possible with simpler local illumination programs.
+This book breaks down the barrier to entry and describes global illumination concepts and algorithms from a modern viewpoint using consistent terms and symbols. While there are good books on speciﬁc global illumination topics, this is the ﬁrst book to address global illumination techniques as a whole. The authors are ideal for such an ambitious project; they have a broad background in rendering and have done signiﬁcant research in all of the major global illumination topics.
+Most of the major theoretical advances in global illumination took place in the 1980s. These included the development of both radiosity and Monte Carlo ray tracing. In the 1990s, it became apparent that none of these algorithms were practical when applied in a straightforward manner. In that time, a more quiet revolution took place as techniques were developed
+vii
+
+i i
+
+i i
+
+viii
+
+Foreword
+
+to make global illumination practical for real-world models. The authors were key players in that revolution, and this book stresses techniques that have been shown to work in the ﬁeld. The approach of the book has been ﬁne-tuned in a course on global illumination taught by the authors at the annual SIGGRAPH conference, and this has resulted in a clean progression of ideas.
+Since Advanced Global Illumination was published, it has become my default reference for points related to advanced rendering. I also recommend it to new students at my university who need to absorb twenty years of rendering research without wading through hundreds of dense papers that often have conﬂicting terminology or, worse, advance concepts that have since been discredited. Rendering images with realistic illumination eﬀects is very rewarding, and it is not hard once the basic concepts are clearly understood. This book describes all of those concepts, and it is a passport to making beautiful and realistic images. Enjoy!
+Peter Shirley May 2006
+
+i i
+
+i i
+
+i i
+
+i i
+
+i i
+
+Table of Contents
+
+i i
+
+Preface
+
+xiii
+
+Preface to the Second Edition
+
+xv
+
+1 Introduction
+
+1
+
+1.1 What Is Realistic Image Synthesis? . . . . . . . . . . . . . . 1
+
+1.2 Structure of this Book . . . . . . . . . . . . . . . . . . . . . . 10
+
+1.3 How to Use this Book . . . . . . . . . . . . . . . . . . . . . . 12
+
+2 The Physics of Light Transport
+
+15
+
+2.1 Brief History . . . . . . . . . . . . . . . . . . . . . . . . . . . 15
+
+2.2 Models of Light . . . . . . . . . . . . . . . . . . . . . . . . . 17
+
+2.3 Radiometry . . . . . . . . . . . . . . . . . . . . . . . . . . . 19
+
+2.4 Light Emission . . . . . . . . . . . . . . . . . . . . . . . . . . 31
+
+2.5 Interaction of Light with Surfaces . . . . . . . . . . . . . . . 31
+
+2.6 Rendering Equation . . . . . . . . . . . . . . . . . . . . . . . 41
+
+2.7 Importance . . . . . . . . . . . . . . . . . . . . . . . . . . . 44
+
+2.8 The Measurement Equation . . . . . . . . . . . . . . . . . . 45
+
+2.9 Summary . . . . . . . . . . . . . . . . . . . . . . . . . . . . 45
+
+2.10 Exercises . . . . . . . . . . . . . . . . . . . . . . . . . . . . 45
+
+3 Monte Carlo Methods
+
+47
+
+3.1 Brief History . . . . . . . . . . . . . . . . . . . . . . . . . . . 47
+
+3.2 Why Are Monte Carlo Techniques Useful? . . . . . . . . . . . 48
+
+3.3 Review of Probability Theory . . . . . . . . . . . . . . . . . . 48
+
+3.4 Monte Carlo Integration . . . . . . . . . . . . . . . . . . . . . 54
+
+3.5 Sampling Random Variables . . . . . . . . . . . . . . . . . . 63
+
+ix
+
+i i
+
+i i
+
+x
+
+Table of Contents
+
+3.6 Variance Reduction . . . . . . . . . . . . . . . . . . . . . . . 67 3.7 Summary . . . . . . . . . . . . . . . . . . . . . . . . . . . . 78 3.8 Exercises . . . . . . . . . . . . . . . . . . . . . . . . . . . . 78
+
+4 Strategies for Computing Light Transport
+
+81
+
+4.1 Formulation of the Rendering Equation . . . . . . . . . . . . . 81
+
+4.2 The Importance Function . . . . . . . . . . . . . . . . . . . . 87
+
+4.3 Adjoint Equations . . . . . . . . . . . . . . . . . . . . . . . . 91
+
+4.4 Global Reﬂectance Distribution Function . . . . . . . . . . . . 94
+
+4.5 Classiﬁcation of Global Illumination Algorithms . . . . . . . . . 96
+
+4.6 Path Formulation . . . . . . . . . . . . . . . . . . . . . . . . 105
+
+4.7 Summary . . . . . . . . . . . . . . . . . . . . . . . . . . . . 105
+
+4.8 Exercises . . . . . . . . . . . . . . . . . . . . . . . . . . . . 106
+
+5 Stochastic Path-Tracing Algorithms
+
+107
+
+5.1 Brief History . . . . . . . . . . . . . . . . . . . . . . . . . . . 107
+
+5.2 Ray-Tracing Set-Up . . . . . . . . . . . . . . . . . . . . . . . 109
+
+5.3 Simple Stochastic Ray Tracing . . . . . . . . . . . . . . . . . 110
+
+5.4 Direct Illumination . . . . . . . . . . . . . . . . . . . . . . . . 114
+
+5.5 Environment Map Illumination . . . . . . . . . . . . . . . . . . 127
+
+5.6 Indirect Illumination . . . . . . . . . . . . . . . . . . . . . . . 134
+
+5.7 Light Tracing . . . . . . . . . . . . . . . . . . . . . . . . . . . 143
+
+5.8 Summary . . . . . . . . . . . . . . . . . . . . . . . . . . . . 148
+
+5.9 Exercises . . . . . . . . . . . . . . . . . . . . . . . . . . . . 148
+
+6 Stochastic Radiosity
+
+151
+
+6.1 Classic Radiosity . . . . . . . . . . . . . . . . . . . . . . . . . 153
+
+6.2 The Form Factors . . . . . . . . . . . . . . . . . . . . . . . . 159
+
+6.3 Stochastic Relaxation Radiosity . . . . . . . . . . . . . . . . . 164
+
+6.4 Discrete Random Walk Methods for Radiosity . . . . . . . . . 174
+
+6.5 Photon Density Estimation Methods . . . . . . . . . . . . . . 184
+
+6.6 Variance Reduction and Low-Discrepancy Sampling . . . . . . 202
+
+6.7 Hierarchical Reﬁnement and Clustering . . . . . . . . . . . . 211
+
+6.8 Exercises . . . . . . . . . . . . . . . . . . . . . . . . . . . . 214
+
+7 Hybrid Algorithms
+
+219
+
+7.1 Final Gathering . . . . . . . . . . . . . . . . . . . . . . . . . 219
+
+7.2 Multipass Methods . . . . . . . . . . . . . . . . . . . . . . . 223
+
+7.3 Bidirectional Tracing . . . . . . . . . . . . . . . . . . . . . . . 227
+
+7.4 Metropolis Light Transport . . . . . . . . . . . . . . . . . . . 231
+
+7.5 Irradiance Caching . . . . . . . . . . . . . . . . . . . . . . . 234
+
+7.6 Photon Mapping . . . . . . . . . . . . . . . . . . . . . . . . . 236
+
+i i
+
+i i
+
+i i
+
+i i
+
+i i
+
+Table of Contents
+
+xi
+
+7.7 Instant Radiosity . . . . . . . . . . . . . . . . . . . . . . . . . 240 7.8 Lightcuts and Multidimensional Lightcuts . . . . . . . . . . . 242 7.9 Exercises . . . . . . . . . . . . . . . . . . . . . . . . . . . . 249
+
+8 The Quest for Ultimate Realism and Speed
+
+253
+
+8.1 Beyond the Rendering Equation . . . . . . . . . . . . . . . . . 254
+
+8.2 Image Display and Human Perception . . . . . . . . . . . . . 277
+
+8.3 Fast Global Illumination . . . . . . . . . . . . . . . . . . . . . 287
+
+9 Conclusion
+
+301
+
+9.1 Achievements of Photorealistic Rendering . . . . . . . . . . . 301
+
+9.2 Unresolved Issues in Photorealistic Rendering . . . . . . . . . 302
+
+9.3 Concluding Remarks . . . . . . . . . . . . . . . . . . . . . . 304
+
+A A Class Library for Global Illumination
+
+305
+
+A.1 Path Node Classes . . . . . . . . . . . . . . . . . . . . . . . 306
+
+A.2 Light Source Sampling Classes . . . . . . . . . . . . . . . . . 311
+
+A.3 Support Classes . . . . . . . . . . . . . . . . . . . . . . . . . 313
+
+A.4 Example Code Fragments . . . . . . . . . . . . . . . . . . . . 316
+
+B Hemispherical Coordinates
+
+333
+
+B.1 Hemispherical Coordinates . . . . . . . . . . . . . . . . . . . 333
+
+B.2 Solid Angle . . . . . . . . . . . . . . . . . . . . . . . . . . . . 334
+
+B.3 Integrating over the Hemisphere . . . . . . . . . . . . . . . . 336
+
+B.4 Hemisphere-Area Transformation . . . . . . . . . . . . . . . 337
+
+C Theoretical Analysis of Stochastic Relaxation Radiosity
+
+339
+
+Bibliography
+
+343
+
+Index
+
+363
+
+i i
+
+i i
+
+i i
+
+i i
+
+Preface
+
+i i
+
+This book is the result of our experience while teaching a course of the same name at the annual ACM SIGGRAPH conference during 2001 and 2002, as well as teaching various graduate-level courses and seminars covering advanced photorealistic rendering topics. When setting up these courses, we always felt that covering the fundamentals gives a much broader insight into how to design a global illumination algorithm, instead of presenting the student with a number of recipes and ready-to-compile code. By explaining the basic building blocks and underlying theory, the reader should be more able to design and implement his own photorealistic rendering algorithms.
+We chose Advanced Global Illumination as the title because we present topics which are of a more fundamental nature than those which are usually understood by the term global illumination or photorealistic rendering by the computer graphics enthusiast. Too often, classic ray tracing with some extensions for handling area light sources, or with some heuristics added for indirect illumination, are categorized as global illumination algorithms. In order to know why such approaches fail to cover all possible illumination eﬀects, and exactly why this is the case, it is necessary to understand the fundamental and advanced concepts of the most advanced global illumination algorithms available. The adjective “advanced” is to be read in this way. The professional researcher or Ph.D. student who spends several years of research studying global illumination algorithms may not judge the topics in this book to be “advanced” in this sense, but we think that the majority of computer graphics practitioners will discover many topics here not covered by other books.
+However, this does not imply that this book only covers theoretical concepts. Various sections deal with practical issues on how to implement the diﬀerent building blocks needed to build your own global illumination
+xiii
+
+i i
+
+i i
+
+xiv
+
+Preface
+
+algorithm. We hope that the researcher, the graduate and undergraduate student, and the computer graphics enthusiast will ﬁnd this book interesting to read.
+We would like to thank the people from A K Peters, who have been more than helpful during the process of publishing this book, and who have been very patient and encouraging. Especially, we would like to thank Alice Peters, Heather Holcombe, and Jonathan Peters for their understanding in us taking more time to ﬁnish this manuscript than originally intended.
+We would also like to thank the various research groups and institutions, at which we found the time to work on this book and who gave us the opportunity to teach computer graphics and photorealistic rendering: The Program of Computer Graphics at Cornell University, USA; the Max Planck Institut fu¨r Informatik in Saarbru¨cken, Germany; the Department of Computer Science at the University of Leuven, Belgium; and the Expertise Centre for Digital Media at the University of Limburg, also in Belgium.
+The students in our various computer graphics courses over the past years provided us with valuable additional insight on how to adequately explain various topics related to photorealistic rendering. Student feedback in an educational setting is very worthwhile, and we wish to thank them all. We also wish to thank the attendees of our global illumination courses at the ACM SIGGRAPH conferences for the criticism and encouragement they provided.
+Last but not least, we would like to thank our families and close friends, who supported us throughout the huge task of writing this book.
+
+Philip Dutr´e Philippe Bekaert
+Kavita Bala
+Leuven, Hasselt, and Ithaca, January 2003
+
+i i
+
+i i
+
+i i
+
+i i
+
+i i
+
+i i
+
+Preface to the Second Edition
+
+Since the ﬁrst edition of this book was published almost three years ago, we have received quite some feedback. We were very happy to hear that Advanced Global Illumination has been used as a textbook in various universities and are grateful for the constructive comments from our readers.
+During the last years, the ﬁeld of global illumination has expanded, and as a result, some new sections have been added. Chapter 5 contains a small section about environment maps. Moreover, we extended Chapters 7 and 8 to include some of the newest developments in scalable rendering and precomputed radiance transfer.
+The most signiﬁcant change probably is the inclusion of exercises at the end of each chapter. We often received requests about homeworks for courses using this book, and so we included a selection of homeworks we have used ourselves during the past years.
+Speciﬁcally for this second edition of the book, we would like to thank all readers who have provided us with valuable feedback and criticism. Partly due to their comments, various sections in this book have been amended and improved. We especially thank the following persons: Tomas Akenine-M¨oller, Andreas Baerentzen, Dave Beveridge, Bryan Cool, Jeppe Revall Frisvad, Michael Goesele, Vlastimil Havran, Magnus Jonneryd, Jaroslav Kˇriva´nek, Nelson Max, Rick Speer, Derek Young, Koen Yskout. Our apologies to anyone who has contributed but is not mentioned in this list. We would like to thank Bruce Walter for providing us with the images for the book cover.
+We would like to thank all the staﬀ at A K Peters, and in particular Alice Peters, who has provided us with the opportunity to publish a second edition of this book. Also, we especially thank our editor Kevin JacksonMead, who has assisted us greatly in preparing the ﬁnal manuscript and managed us skillfully throughout the whole process.
+xv
+
+i i
+
+i i
+
+xvi
+
+Preface to the Second Edition
+
+All three of us would also like to thank our families and close friends for making this a rewarding and fun experience; without their support this book would not have been possible.
+
+Philip Dutr´e Kavita Bala Philippe Bekaert
+Leuven, Ithaca, and Hasselt, March 2006
+
+i i
+
+i i
+
+i i
+
+i i
+
+i i
+
+i i
+
+1
+
+Introduction
+1.1 What Is Realistic Image Synthesis?
+Realistic image synthesis is a domain in the ﬁeld of computer graphics that generates new images from other data. Typically, one starts from a complete description of a three-dimensional scene, specifying the size and location of objects, the material properties of all surfaces of solid objects in the scene, and the position and emission characteristics of light sources. From this data, a new picture is generated, as seen from a virtual camera placed in the scene. The aim is to make these pictures as photorealistic as possible, such that the diﬀerence with a real photograph (if the virtual scene would be constructed in reality) is not noticeable. This requires the underlying physical processes regarding materials and the behavior of light to be precisely modeled and simulated. Only by knowing exactly what one is trying to simulate does it become possible to know where simpliﬁcations can be introduced in the simulation and how this will aﬀect the resulting pictures.
+Generating photorealistic pictures is a very ambitious goal, and it has been one of the major driving forces in computer graphics over the last decades. Visual realism has always been a strong motivation for research in this ﬁeld, and it is a selling point for many graphics-related, commercially available products. It is expected that this trend will continue in the coming years and that photorealism will remain one of the core ﬁelds in rendering.
+Photorealistic rendering is not the only rendering paradigm that is used in computer graphics, nor is it the best solution for all rendering applications. Especially in the last couple of years, non-photorealistic rendering has become a ﬁeld in itself, providing viable alternatives for the photorealistic rendering style. Non-photorealistic rendering (or NPR, as it is commonly called) uses a wide variety of drawing styles that are suited for a more artistic, technical, or educational approach. Drawing styles covered by NPR include pen-and-ink drawings, cartoon-style drawings, technical
+1
+
+i i
+
+i i
+
+2
+
+1. Introduction
+
+illustrations, watercolor painting, and various artistic styles such as impressionism, pointillism, etc. The possibilities are virtually limitless, and the algorithms are driven by trying to recreate a certain style rather than by trying to simulate a physical process found in nature. While there is clearly room for NPR, a variety of applications are interested in the physical simulation of reality.
+
+1.1.1 The Importance of Realistic Image Synthesis
+Photorealistic rendering is a rendering style that has many applications in various ﬁelds. Early applications were limited by the amount of time it took to compute a single image (usually measured in hours), but recently, interactive techniques have broadened the scope of photorealistic image synthesis considerably.
+Film and Visual Effects
+Visual eﬀects in the ﬁlm industry have always been a driving force for the development of new computer graphics techniques. Depending on the rendering style used, feature animations can beneﬁt from global illumination rendering, although this might be limited to a few scenes where more complex lighting conﬁgurations are used. Movies with live footage can beneﬁt too, especially when virtual elements are added. In this case, a consistent lighting between the real and virtual elements in the same shot needs to be achieved, in order to avoid implausible lighting eﬀects. Global illumination is necessary to compute the light interaction between those diﬀerent elements.
+Architecture
+Architectural design is often quoted as one of the most beneﬁcial applications of photorealistic rendering. It is possible to make visualizations, whether they be still images or interactive walk-throughs, of buildings yet to be constructed. Not only can indoor illumination due to interior lighting be simulated, but outdoor lighting can be considered as well, e.g., the building can be illuminated using various atmospheric conditions at diﬀerent times of the year, or even various times during the day.
+Ergonomic Design of Buildings and Ofﬁces
+Although not strictly a computer graphics application, the ergonomic design of oﬃce rooms or factory halls is very much related to global illumination. Given the design of a building, it is possible to compute the various illumination levels in diﬀerent parts of the building (e.g., desks, workstations, etc.), and the necessary adjustments can be made to reach
+
+i i
+
+i i
+i i
+
+i i
+
+i i
+
+1.1. What Is Realistic Image Synthesis?
+
+3
+
+the minimum legal or comfortable requirements by changing the color of paint on the walls, the repositioning of windows, or even the replacement of walls.
+Computer Games
+Most computer games revolve around fast and interactive action, coupled with a suspension of disbelief in a virtual world. As such, photorealistic rendered imagery probably is a strong cue to draw players into the environments in which their virtual characters are acting. Since interactivity is more important in a gaming context than realistic images, the use of global illumination in games is still somewhat limited but will undoubtedly become more important in the near future.
+Lighting Engineering
+The design of lights and light ﬁxtures can also beneﬁt from global illumination algorithms. Speciﬁc designs can be simulated in virtual environments, such that the eﬀect of the emission patterns of light bulbs can be studied. This requires an accurate measurement and modeling of the characteristics of the emission of the light sources, which is a whole ﬁeld of study by itself.
+Predictive Simulations
+Predictive simulations encompass much more than just simulating the look of buildings as described above. Other areas of design are important as well: car design, appliances, consumer electronics, furniture, etc. This all involves designing an object and then simulating how it will look in a real or virtual environment.
+Flight and Car Simulators
+Simulators used for training, such as ﬂight and car simulators, beneﬁt from having an as accurate as possible visual simulation, e.g., aspects of street lighting are important in car simulators, accurate atmospheric visual simulation is important when designing a ﬂight simulator, etc. Other types of training simulators also use or might use realistic imagery in the future; armed combat, ship navigation, and sports are a few examples.
+Advertising
+Producing accurate imagery of yet-to-be-produced products is probably a good tool for the advertising world. Not only does the customer have the ability to see what the product looks like when generated using photorealistic rendering, but he would beneﬁt if he could place the product in a known environment, e.g., furniture could be placed, with consistent illumination, in a picture of your own living room.
+
+i i
+
+i i
+
+i i
+
+4
+
+1. Introduction
+
+1.1.2 History of Photorealistic Rendering
+This section provides a brief history of photorealistic rendering algorithms and the quest for visual realism. Some more extensive background and history on speciﬁc algorithms can also be found in the relevant chapters.
+Photorealism in the Precomputer Age
+The history of photorealistic rendering, or the quest for visual realism, can be traced throughout the history of art. Although we are mainly interested here in the computer-driven photorealistic rendering programs, it might be useful to look at how the understanding of realistic rendering evolved in the course of history. Medieval and premedieval art is very much iconic in nature: persons and objects are displayed in simpliﬁed, often two-dimensional forms, and sizes and shapes are used to reﬂect the importance of the person displayed, relative positioning in a scene, or other properties.
+The real beginning of realistic rendering probably starts with the ﬁrst use and study of perspective drawings. Especially in Italy during the Renaissance period, various artists were involved in discovering the laws of perspective. Brunelleschi (1377–1446), da Vinci (1452–1519), and Du¨rer (1471–1528) (to name a few) are well known for their contributions. Later, painters also started to pay attention to the shading aspects. By carefully studying shadows and light reﬂections, very accurate renderings of real scenes could be produced using classic artistic materials.
+Much of the knowledge of photorealistic painting was collected by British landscape artist Joseph Turner (1775–1851), appointed Professor of Perspective at the Royal Academy of Arts in London. He designed a course of six lectures, covering principles such as accurate drawing of light, reﬂections, and refractions. Some of his sketches show reﬂections in mirrored and transparent spheres, a true precursor of ray tracing almost 300 years later. In his book, Secret Knowledge, British artist David Hockney [73] develops an interesting thesis: Starting in the 15th century, artists began using optical tools to display reality very accurately. Mostly using a camera lucida, they projected imagery onto the canvas and traced the silhouettes and outlines very carefully. Afterwards, several such drawings were composed in a bigger painting, which explains the diﬀerent perspectives found in various well-known paintings of the era.
+It is certainly no coincidence that the trend and developments towards more photorealism in art were somewhat halted with the invention of photography at the beginning of the 19th century (Nic´ephore Ni´epce, 1765– 1833). Capturing an image accurately is suddenly not a diﬃcult process anymore. After the invention of photography, art evolved into modern art,
+
+i i
+
+i i
+
+i i
+
+i i
+
+i i
+
+1.1. What Is Realistic Image Synthesis?
+
+5
+
+with its various novel ways, not necessarily photorealism, of looking at reality (pointillism, impressionism, cubism, etc.).
+Primitive Shading Algorithms
+The birth of computer graphics is usually accredited to SketchPad [188], the Ph.D. thesis of Ivan Sutherland at the Massachusetts Institute of Technology (M.I.T.) in 1963. Early computer graphics were mostly line drawings, but with the advent of raster graphics, shading algorithms became widely available. Primitive shading algorithms usually attributed a single color to a single polygon, the color being determined by the incident angle of light on the surface. This type of shading gives some cues about shape and orientation but is far away from realistically illuminated objects.
+A breakthrough was achieved by Henri Gouraud and Bui Tui Phong, who realized that by interpolation schemes, additional realism in shading can be easily achieved. Gouraud shading [58] computes illumination values at vertices and interpolates these values over the area of a polygon. Phong shading [147] interpolates the normal vectors over the area of a polygon and computes illumination values afterwards, thus better preserving highlights caused by nondiﬀuse reﬂection functions. Both techniques are longstanding shading algorithms in computer graphics and are still widely used.
+Another major breakthrough for more realism in computer-generated imagery was the use of texture mapping. Using a local two-dimensional coordinate system on an object, it is possible to index a texture map and attribute a color to the local coordinate. Integration in the rendering process involves a two-dimensional coordinate transform from the local coordinate system on the object to the local coordinate system of the texture map. Once texture mapping was able to change the color of points on a surface, it was fairly straightforward to change other attributes as well. Thus, the techniques of bumpmapping, displacement mapping, environment mapping, etc., were added. Texturing remains one of the building blocks for rendering in general.
+Additional research was also performed in the area of light-source modeling. Originally only point light sources or directional light sources were used in the earliest rendering algorithms, but fairly soon spotlights, directional lights, and other types of light sources, sometimes emulating those found in lighting design, were introduced. Together with the modeling of light sources, the accurate portrayal of shadows has received much attention. When using point light sources, the computation of shadows can be reduced to a simple visibility problem from a single point of view, but the shadows are sharp and hard. The use of shadow volumes and shadow maps are among the best-known algorithms and still receive attention for improvement.
+
+i i
+
+i i
+
+i i
+
+6
+
+1. Introduction
+
+Ray Tracing
+In 1980, ray tracing, probably the most popular algorithm in rendering, was introduced by Turner Whitted [194]. Although the principle of tracing rays was used before to generate correct perspective and shadows in the conventional arts, the tracing of rays in computer graphics was a major idea for generating all sorts of photorealistic eﬀects. The original paper used rays for determining visibility through a single pixel (also known as ray casting) but also used rays to compute direct illumination and perfect specular and refractive illumination eﬀects. As such, this seminal paper described a major new tool in generating images.
+The ray-tracing algorithm has been researched and implemented extensively during the last two decades. Initially, much attention was on eﬃciency, using well-known techniques such as spatial subdivision and bounding volumes. More and more, the focus was also on lighting eﬀects themselves. By treating ray tracing as a tool for computing integrals, eﬀects such as diﬀuse reﬂections and refractions, motion blur, lens eﬀects, etc. could be computed within a single framework. For a nice overview, the reader is referred to [52].
+The original paper did not solve the entire global illumination problem but was very inﬂuential for later developments. To make a distinction with more modern ray-tracing algorithms, the ﬁrst algorithm is sometimes referred to as Whitted-style ray tracing or classic ray tracing. Many presentday global illumination algorithms at the core are ray tracers, in the sense that the basic tool still is a procedure that traces a ray through a threedimensional scene.
+Since a basic ray tracer is rather easy to implement, it is a very popular algorithm to serve as the ﬁrst step into photorealistic rendering. It is traditional to have undergraduate students implement a ray tracer in many graphics courses. Many computer graphics enthusiasts post their ray tracers on the internet, and many of the more popular rendering packages have ray-tracing roots.
+Radiosity
+With ray tracing being well underway in the ﬁrst half of the eighties as the algorithm of choice for realistic rendering, it became clear that ray tracing also had severe limitations. Indirect illumination eﬀects such as color bleeding and diﬀuse reﬂections were very diﬃcult to simulate. It was clear that a solution needed to be found if one wanted to produce photorealistic pictures. The answer came in the form of a ﬁnite-element method called radiosity, named after the radiometric quantity that was computed. The algorithm was developed originally at Cornell University
+
+i i
+
+i i
+i i
+
+i i
+
+i i
+
+1.1. What Is Realistic Image Synthesis?
+
+7
+
+[56] but, as was the case with ray tracing, spawned many research papers and received lots of attention.
+One of the early advantages of radiosity was that it was a scene-based method, as opposed to ray tracing, which is an image-based method. In radiosity, the distribution of light is computed by subdividing the scene into surface elements and computing for each element the correct radiometric value. Once the radiosity value for each surface element was known, the solution could be displayed with existing graphics hardware, using Gouraud shading for smoothing out the radiosity values computed at each vertex or polygon. This made radiosity an algorithm of choice for interactive applications such as scene walk-throughs.
+Early radiosity research was centered around computing a faster solution for the linear system of equations that expressed the equilibrium of the light distribution in the scene. Several relaxation techniques were introduced and more or less subdivided the radiosity solvers into “gathering” and “shooting” algorithms.
+Early on, radiosity was limited to diﬀuse surfaces, and the accuracy of the method was set by the choice of surface elements. Finer details in the shading at a frequency higher than the initial mesh could not be displayed. Hierarchical radiosity proved to be a major step forwards, since the algorithm was now able to adapt its underlying solution mesh to the actual shading values found on those surfaces. Discontinuity meshing was similarly used to precompute accurate meshes that followed the discontinuity lines between umbra and penumbra regions caused by area light sources. The algorithm was also extended by subdividing the hemisphere around surfaces in a mesh as well, such that glossy surfaces could also be handled. On the other side of hierarchical radiosity, clustering algorithms were introduced to compute the illumination for disjunct objects in single clusters. Overall, radiosity has received wide attention comparable to ray tracing but, due to the somewhat more complex underlying mathematics, has not been as popular.
+
+The Rendering Equation
+One of the most important concepts for global illumination algorithms, the rendering equation, was introduced by Kajiya in 1986 [85], although in a diﬀerent form than is used today. In this seminal paper, for the ﬁrst time, the complete transport equation describing the distribution of light in a scene was described in a computer graphics context. The importance of the rendering equation is that all light transport mechanisms are described using a recursive integral equation, whose kernel contains the various material properties and the visibility function.
+
+i i
+
+i i
+
+i i
+
+8
+
+1. Introduction
+
+Formulating the global illumination problem as the rendering equation allows for a uniﬁed approach when computing images. It now became possible to apply any sort of integration mechanism to numerically evaluate the rendering equation. Also, because the recursive nature of the rendering equation required recursive algorithms, and thus stopping conditions, it was more obvious which successive light reﬂections were ignored, approximated only up to a certain depth, etc. Also, ray-tracing and radiosity algorithms could now be considered as diﬀerent integration procedures trying to solve the rendering equation. Ray tracing basically could be written down as a succession of recursive quadrature rules, and radiosity algorithms expressed a ﬁnite element solution to the same equation.
+One of the most inﬂuential consequences of the rendering equation was the development of stochastic ray tracing or Monte Carlo ray tracing. Monte Carlo integration schemes use random numbers to evaluate integrals, but they have the nice property that the expected value of the result equals the exact value of the integral. Thus, it became possible, in theory, to compute correct photorealistic images, assuming the algorithm ran long enough.
+Multipass Methods
+At the end of the eighties, there were two big families of global illumination algorithms: those that used a ray-tracing approach, computing a single color for every pixel on the screen, and those that were based on the radiosity approach, computing a scene-based solution, only generating an image as a post-process. The ﬁrst class of algorithms is good for mostly specular and refractive indirect illumination, while the second class is better suited for computing diﬀuse interreﬂections and allows interactive manipulation.
+It was therefore inevitable that a “best-of-both-worlds” approach would be developed, using ray tracing and radiosity characteristics in the same algorithm. These algorithms usually consist of multiple passes, hence the name multipass methods. Many diﬀerent variants have been published (e.g., [24], [209], [171]). A multipass method usually consists of a radiosity pass computing the indirect diﬀuse illumination, followed by a ray-tracing pass computing the specular light transport, while picking up radiosity values from the ﬁrst pass. Care has to be taken that some light transport modes are not computed twice, otherwise the image would be too bright in some areas. More than two passes are possible, each pass dedicated to computing a speciﬁc aspect of the total light transport.
+Algorithms that store partial solutions of the light distribution in the scene, such as the RADIANCE algorithm [219] or photon mapping, can be considered multipass algorithms as well. The photon mapping algorithm has especially received a lot of attention in research literature and is widely
+
+i i
+
+i i
+i i
+
+i i
+
+i i
+
+1.1. What Is Realistic Image Synthesis?
+
+9
+
+considered to be an eﬃcient and accurate algorithm to solve the global illumination problem.
+Current Developments
+Currently, lots of attention is given to interactive applications using global illumination algorithms. These usually involve a clever combination of storage and reuse of partial solutions, multipass algorithms, etc.
+Also, more and more use is made of photographs of real objects or scenes, which are integrated into virtual environments. The problem is that one wants to keep a consistent illumination, and image-based lighting techniques have proposed some elegant solutions.
+As far as the authors can see, global illumination and photorealistic rendering will likely remain a major inﬂuence in computer graphics developments of the future.
+
+1.1.3 A Framework for Global Illumination Algorithms
+When looking at the development of global illumination algorithms over the past 20 years, one sees a collection of widely diﬀerent approaches, as well as variants of the same approach. Especially for the light transport simulation, one can make a distinction between diﬀerent paradigms: pixel-oriented versus scene-oriented, diﬀuse versus specular surfaces, deterministic versus Monte Carlo integration, shooting versus gathering, etc. These diﬀerences are important because they aﬀect the accuracy of the ﬁnal image, but a wider framework for a complete global illumination pipeline also involves other aspects such as data acquisition and image display.
+A framework for realistic image synthesis that combines these diﬀerent aspects was described in a paper by the same name by Greenberg et al. [59]. The framework presented in this paper encompasses diﬀerent aspects of a full photorealistic rendering system and provides a general overview of how photorealistic rendering algorithms have evolved over time.
+A photorealistic rendering system can be thought of as consisting of three main stages: measurement and acquisition of scene data, the light transport simulation, and the visual display.
+Measurement and Acquisition
+This part of the framework includes measuring and modeling the BRDF of materials to be used in the virtual scene, as well as emission characteristics of light sources. By comparing the goniometric data, one is able to verify the accuracy of the models and measurements.
+
+i i
+
+i i
+
+i i
+
+10
+
+1. Introduction
+
+Light Transport
+The light transport phase takes the data describing the geometry of the scene, materials, and light sources and computes the distribution of light in the scene. This is the main bulk of what is usually called a global illumination algorithm. The result is radiometric values in the image plane, which can be veriﬁed by, for example, comparing real photographs with computed pictures.
+Visual Display
+The matrix of radiometric values needs to be displayed on a screen or printer. A tone-mapping operator is necessary to transform the raw radiometric data into pixel colors. This transformation uses a model of the human visual system, such that the same visual sensation is caused by looking at the displayed picture as by looking at the real scene.
+If it is known what error can be tolerated in last stage, this error can be translated into tolerances for the light transport phase, and eventually to the measurement phase. The critical notion of this framework is that perceptual accuracy on the part of the human observer, not radiometric accuracy, should be the driving force when designing algorithms.
+
+1.2 Structure of this Book
+As mentioned before, the content of this book is geared towards understanding the fundamental principles of global illumination algorithms. The division of the content into several chapters reﬂects this. We strongly believe that only by treating the fundamental and basic building blocks in a thorough way can a full understanding of photorealistic rendering be achieved.
+The chapters are organized as follows:
+• Chapter 1 provides a general introduction to global illumination, outlines the importance of global illumination in the ﬁeld of computer graphics, and provides a short history of global illumination algorithms.
+• Radiometry and the rendering equation are covered in Chapter 2. A good understanding of radiometry is necessary for understanding global illumination algorithms. We only cover those aspects that we need to design global illumination software. The characteristics and nature of the bidirectional reﬂectance distribution function (BRDF)
+
+i i
+
+i i
+i i
+
+i i
+
+i i
+
+1.2. Structure of this Book
+
+11
+
+are covered in detail, as well as how the deﬁnition of the BRDF gives rise to the rendering equation.
+• Chapter 3 explains the principle of Monte Carlo integration, a versatile technique that is used in almost all recent global illumination algorithms. The key concepts are explained, but again, only to the level that we need to understand and adequately explain the chapters that follow.
+• Chapter 4 puts the rendering equation in a somewhat broader context and gives some general insights into several strategies on how a global illumination algorithm can be designed.
+• Chapter 5 gives all the details about stochastic ray tracing. Starting from the rendering equation and using Monte Carlo integration as a tool, several algorithms are deduced for computing various lighting eﬀects. Special attention is given to the computation of direct illumination.
+• Stochastic radiosity is covered in Chapter 6 and complements the previous chapter. It oﬀers a very profound overview on the various Monte Carlo radiosity approaches that matured only recently.
+• Chapter 7 provides an overview of hybrid methods, which builds on the principles of stochastic ray tracing and radiosity. Various algorithms are explained in detail, with references for further study.
+• Chapter 8 covers a number of topics that receive attention in current research, including participating media, subsurface scattering, tone mapping, human visual perception, and strategies for computing global illumination very rapidly.
+• Appendix A describes an API for global illumination, a set of object classes that encapsulates and hides the technical details of material and geometry representation and ray casting. This API allows concise and eﬃcient implementations of the algorithms discussed in this book. An example implementation of a light tracer, a path tracer, and a bidirectional path tracer are given.
+• Appendix B gives a review of solid angles and hemispherical geometry.
+• Appendix C contains technical details omitted from Chapter 6.
+
+i i
+
+i i
+
+i i
+
+12
+
+1. Introduction
+
+1.3 How to Use this Book
+
+This book is the result of teaching various classes about advanced rendering algorithms, and we think that if this book is used as a textbook, it should be a course at the graduate level.
+Students that wish to take a class that uses this book should have taken at least one other computer graphics course. One course might be a general introduction to computer graphics, while another course might be project-oriented and focus on some aspects of animation, ray tracing, or modeling. Also, familiarity with probability theory and calculus is required, since otherwise the concepts of the rendering equation and Monte Carlo integration will be hard to explain. Some knowledge about physics might help, although we usually found it was not strictly necessary.
+We have added exercises to each chapter in this edition. These exercises are based on assignments we have used ourselves when teaching this course at the graduate level and so have gone through some scrutiny as to whether they have the appropriate diﬃculty level.
+In all of our assignments for our own courses, we provided the students with a basic ray-tracing framework. This skeleton ray tracer is kept very simple, such that the focus can be put entirely on implementing physically correct algorithms. Having the students themselves implement a (basic) ray tracer from scratch is, in our opinion, not a good assignment, since students will be mostly bothered by the nuts and bolts of ray-object intersections, parsing an input ﬁle, image viewing, etc.
+In case the instructor wants to put together his or her own assignments, here are some suggestions based on our experience:
+• Homework 1 might include some problems on radiometry to make students familiar with the concepts of radiometry and make them think about the deﬁnition of radiance. A typical exercise could be to compute the radiance reaching earth from the sun, or the radiosity value incident on a square surface under various conditions.
+• Homework 2 could be a programming exercise in which students are provided with a basic ray-tracing program. The students would then have to add a speciﬁc BRDF model and render a few pictures.
+• Homework 3 would extend on the ray tracer from Homework 2. Students could be allowed to add speciﬁc lighting eﬀects, such as various ways of computing direct illumination. Also, they could be asked to experiment with diﬀerent sampling techniques and see what the eﬀect is on the resulting images.
+
+i i
+
+i i
+i i
+
+i i
+
+i i
+
+1.3. How to Use this Book
+
+13
+
+• A number of problems about which global illumination algorithm to use in speciﬁc situations could be the subject of Homework 4. For example, scenes could be given with a high number of light sources, a signiﬁcant amount of specular materials, some unusual geometric conﬁguration, etc. This could be a written exercise, in which the student does not necessarily have to implement his or her ideas, but merely sketch them on paper. Thus, students can design any algorithm they wish without the burden of actually implementing it.
+• Studying and presenting a recent research paper would be a good topic for Homework 5 and would also be a good conclusion of the entire course.
+Additionally, various problems discussed in the diﬀerent chapters can be used as homework assignments or can serve as a problem to start a class discussion.
+
+i i
+
+i i
+
+i i
+
+i i
+
+i i
+
+2
+
+The Physics of Light Transport
+The goal of rendering algorithms is to create images that accurately represent the appearance of objects in scenes. For every pixel in an image, these algorithms must ﬁnd the objects that are visible at that pixel and then display their “appearance” to the user. What does the term “appearance” mean? What quantity of light energy must be measured to capture “appearance”? How is this energy computed? These are the questions that this chapter will address.
+In this chapter, we present key concepts and deﬁnitions required to formulate the problem that global illumination algorithms must solve. In Section 2.1, we present a brief history of optics to motivate the basic assumptions that rendering algorithms make about the behavior of light (Section 2.2). In Section 2.3, we deﬁne radiometric terms and their relations to each other. Section 2.4 describes the sources of lights in scenes; in Section 2.5, we present the bidirectional distribution function, which captures the interaction of light with surfaces. Using these deﬁnitions, we present the rendering equation in Section 2.6, a mathematical formulation of the equilibrium distribution of light energy in a scene. We also formulate the notion of importance in Section 2.7. Finally, in Section 2.8, we present the measurement equation, which is the equation that global illumination algorithms must solve to compute images. In the rest of this book, we will discuss how global illumination algorithms solve the measurement equation.
+2.1 Brief History
+The history of the science of optics spans about three thousand years of human history. We brieﬂy summarize relevant events based mostly on the history included by Hecht and Zajac in their book Optics [68]. The Greek philosophers (around 350 B.C.), including Pythagoras, Democritus, Empedocles, Plato, and Aristotle among others, evolved theories of the nature
+15
+
+i i
+
+i i
+
+16
+
+2. The Physics of Light Transport
+
+of light. In fact, Aristotle’s theories were quite similar to the ether theory of the nineteenth century. However, the Greeks incorrectly believed that vision involved emanations from the eye to the object perceived. By 300 B.C. the rectilinear propagation of light was known, and Euclid described the law of reﬂection. Cleomedes (50 A.D.) and Ptolemy (130 A.D.) did early work on studying the phenomenon of refraction.
+The ﬁeld of optics stayed mostly dormant during the Dark Ages with the exception of the contribution of Ibn-al-Haitham (also known as Alhazen); Al-hazen reﬁned the law of reﬂection specifying that the angles of incidence and reﬂection lie in the same plane, normal to the interface. In fact, except for the contributions of Robert Grosseteste (1175–1253) and Roger Bacon (1215–1294) the ﬁeld of optics did not see major activity until the seventeenth century.
+Optics became an exciting area of research again with the invention of telescopes and microscopes early in the seventeenth century. In 1611, Johannes Kepler discovered total internal reﬂection and described the small angle approximation to the law of refraction. In 1621, Willebrord Snell made a major discovery: the law of refraction; the formulation of this law in terms of sines was later published by Ren´e Descartes. In 1657, Pierre de Fermat rederived the law of refraction from his own principle of least time, which states that a ray of light follows the path that takes it to its destination in the shortest time.
+Diﬀraction, the phenomenon where light “bends” around obstructing objects, was observed by Grimaldi (1618–1683) and Hooke (1635–1703). Hooke ﬁrst proposed the wave theory of light to explain this behavior. Christian Huygens (1629–1695) considerably extended on the wave theory of light. He was able to derive the laws of reﬂection and refraction using this theory; he also discovered the phenomenon of polarization during his experiments.
+Contemporaneously, Isaac Newton (1642–1727) observed dispersion, where white light splits into its component colors when it passes through a prism. He concluded that sunlight is composed of light of diﬀerent colors, which are refracted by glass to diﬀerent extents. Newton, over the course of his research, increasingly embraced the emission (corpuscular) theory of light over the wave theory.
+Thus, in the beginning of the nineteenth century, there were two conﬂicting theories of the behavior of light: the particle (emission/corpuscular) theory and the wave theory. In 1801, Thomas Young described his principle of interference based on his famous double-slit experiment, thus providing experimental support for the wave theory of light. However, due to the weight of Newton’s inﬂuence, his theory was not well-received. Independently, in 1816, Augustin Jean Fresnel presented a rigorous treatment of
+
+i i
+
+i i
+i i
+
+i i
+
+i i
+
+2.2. Models of Light
+
+17
+
+diﬀraction and interference phenomena showing that these phenomena can be explained in terms of the wave theory of light. In 1821, Fresnel presented the laws that enable the intensity and polarization of reﬂected and refracted light to be calculated.
+Independently, in the ﬁeld of electricity and magnetism, Maxwell (1831– 1879) summarized and extended the empirical knowledge on these subjects into a single set of mathematical equations. Maxwell concluded that light is a form of electromagnetic wave. However, in 1887, Hertz accidentally discovered the photoelectric eﬀect: the process whereby electrons are liberated from materials under the action of radiant energy. This eﬀect could not be explained by the wave model of light. Other properties of light also remained inexplicable in the wave model: black body radiation (the spectrum of light emitted by a heated body), the wavelength dependency of the absorption of light by various materials, ﬂuorescence1, and phosphorescence2, among others. Thus, despite all the supporting evidence for the wave nature of light, the particle behavior of light had to be explained.
+In 1900, Max Karl Planck introduced a universal constant called Planck’s constant to explain the spectrum of radiation emitted from a hot black body: black body radiation. His work inspired Albert Einstein, who, in 1905, explained the photoelectric eﬀect based on the notion that light consists of a stream of quantized energy packets. Each quantum was later called a photon. Each photon has a frequency ν associated with it. The energy associated with a photon is E = ν, where is Planck’s constant.
+The seemingly conﬂicting behavior of light as a stream of particles and waves was only reconciled by the establishment of the ﬁeld of quantum mechanics. By considering submicroscopic phenomena, researchers such as Bohr, Born, Heisenberg, Schro¨dinger, Pauli, de Broglie, Dirac, and others were able to explain the dual nature of light. Quantum ﬁeld theory and quantum electrodynamics further explained high-energy phenomena; Richard Feynman’s book on quantum electrodynamics (QED) [49] gives an intuitive description of the ﬁeld.
+
+2.2 Models of Light
+The models of light used in simulations try to capture the diﬀerent behaviors of light that arise from its dual nature: certain phenomena, for example, diﬀraction and interference, can be explained by assuming that
+1Fluorescence is the phenomenon by which light absorbed at one frequency is emitted at a diﬀerent frequency.
+2Phosphorescence is the phenomenon by which light absorbed at one frequency at some time is emitted at a diﬀerent frequency and time.
+
+i i
+
+i i
+
+i i
+
+18
+
+2. The Physics of Light Transport
+
+light is a wave; other behavior, such as the photoelectric eﬀect, can be better explained by assuming that light consists of a stream of particles.
+2.2.1 Quantum Optics Quantum optics is the fundamental model of light that explains its dual wave-particle nature. The quantum optics model can explain the behavior of light at the submicroscopic level, for example, at the level of electrons. However, this model is generally considered to be too detailed for the purposes of image generation for typical computer graphics scenes and is not commonly used.
+2.2.2 Wave Model The wave model, a simpliﬁcation of the quantum model, is described by Maxwell’s equations. This model captures eﬀects, such as diﬀraction, interference, and polarization, that arise when light interacts with objects of size comparable to the wavelength of light. These eﬀects can be observed in everyday scenes, for example, in the bright colors seen in oil slicks or birds’ feathers. However, for the purposes of image generation in computer graphics, the wave nature of light is also typically ignored.
+2.2.3 Geometric Optics The geometric optics model is the simplest and most commonly used model of light in computer graphics. In this model, the wavelength of light is assumed to be much smaller than the scale of the objects that the light interacts with. The geometric optics model assumes that light is emitted, reﬂected, and transmitted. In this model, several assumptions are made about the behavior of light:
+• Light travels in straight lines, i.e., eﬀects such as diﬀraction where light “bends around” objects are not considered.
+• Light travels instantaneously through a medium; this assumption essentially requires light to unrealistically travel at inﬁnite speed. However, it is a practical assumption because it requires global illumination algorithms to compute the steady-state distribution of light energy in scenes.
+• Light is not inﬂuenced by external factors, such as gravity or magnetic ﬁelds.
+In most of this book, we ignore eﬀects that arise due to the transmission of light through participating media (for example, fog). We also do not
+
+i i
+
+i i
+i i
+
+i i
+
+i i
+
+2.3. Radiometry
+
+19
+
+consider media with varying indices of refraction. For example, mirage-like eﬀects that arise due to varying indices of refraction caused by temperature diﬀerentials in the air are not considered. How to deal with these phenomena is discussed in Section 8.1.
+
+2.3 Radiometry
+The goal of a global illumination algorithm is to compute the steady-state distribution of light energy in a scene. To compute this distribution, we need an understanding of the physical quantities that represent light energy. Radiometry is the area of study involved in the physical measurement of light. This section gives a brief overview of the radiometric units used in global illumination algorithms.
+It is useful to consider the relation between radiometry and photometry. Photometry is the area of study that deals with the quantiﬁcation of the perception of light energy. The human visual system is sensitive to light in the frequency range of 380 nanometers to 780 nanometers. The sensitivity of the human eye across this visible spectrum has been standardized; photometric terms take this standardized response into account. Since photometric quantities can be derived from the corresponding radiometric terms, global illumination algorithms operate on radiometric terms. However, Section 8.2 will talk about how the radiometric quantities computed by global illumination algorithms are displayed to an observer.
+
+2.3.1 Radiometric Quantities
+
+Radiant Power or Flux
+The fundamental radiometric quantity is radiant power, also called ﬂux. Radiant power, often denoted as Φ, is expressed in watts (W) (joules/sec). This quantity expresses how much total energy ﬂows from/to/through a surface per unit time. For example, we can say that a light source emits 50 watts of radiant power, or that 20 watts of radiant power is incident on a table. Note that ﬂux does not specify the size of the light source or the receiver (table), nor does it include a speciﬁcation of the distance between the light source and the receiver.
+
+Irradiance
+Irradiance (E ) is the incident radiant power on a surface, per unit surface area. It is expressed in watts/m2:
+
+dΦ E= .
+dA
+
+(2.1)
+
+i i
+
+i i
+
+i i
+
+20
+
+2. The Physics of Light Transport
+
+For example, if 50 watts of radiant power is incident on a surface that has an area of 1.25 m2, the irradiance at each surface point is 40 watts/m2
+(assuming the incident power is uniformly distributed over the surface).
+
+Radiant Exitance or Radiosity
+Radiant exitance (M ), also called radiosity (B ), is the exitant radiant power per unit surface area and is also expressed in watts/m2:
+
+dΦ M =B= .
+dA
+
+(2.2)
+
+For example, consider a light source, of area 0.1 m2, that emits 100
+watts. Assuming that the power is emitted uniformly over the area of the light source, the radiant exitance of the light is 1000 W/m2 at each point
+of its surface.
+
+Radiance
+Radiance is ﬂux per unit projected area per unit solid angle (watts/(steradian · m2)). Intuitively, radiance expresses how much power arrives at (or leaves from) a certain point on a surface, per unit solid angle, and per unit projected area. Appendix B gives a review of solid angles and hemispherical geometry.
+Radiance is a ﬁve-dimensional quantity that varies with position x and direction vector Θ, and is expressed as L(x, Θ) (see Figure 2.1):
+
+d2Φ
+
+d2Φ
+
+L
+
+=
+
+dωdA⊥
+
+=
+
+. dωdA cos θ
+
+(2.3)
+
+dω
+
+Θ
+
+θ
+
+dA x
+Figure 2.1. Deﬁnition of radiance L(x, Θ): ﬂux per unit projected area dA⊥ per unit solid angle dω.
+
+i i
+
+i i
+
+i i
+
+i i
+
+i i
+
+2.3. Radiometry
+
+21
+
+Radiance is probably the most important quantity in global illumination algorithms because it is the quantity that captures the “appearance” of objects in the scene. Section 2.3.3 explains the properties of radiance that are relevant to image generation. Intuition for cosine term. The projected area A⊥ is the area of the surface projected perpendicular to the direction we are interested in. This stems from the fact that power arriving at a grazing angle is “smeared out” over a larger surface. Since we explicitly want to express power per (unit) projected area and per (unit) direction, we have to take the larger area into account, and that is where the cosine term comes from. Another intuition for this term is obtained by drawing insights from transport theory.
+Transport Theory
+This section uses concepts from transport theory to intuitively explain the relations between diﬀerent radiometric terms (see Chapter 2, [29]). Transport theory deals with the transport or ﬂow of physical quantities such as energy, charge, and mass. In this section, we use transport theory to formulate radiometric quantities in terms of the ﬂow of “light particles” or “photons.”
+Let us assume we are given the density of light particles, p(x), which deﬁnes the number of particles per unit volume at some position x. The number of particles in a small volume dV is p(x)dV . Let us consider the ﬂow of these light particles in some time dt across some diﬀerential surface area dA. Assume that the velocity of the light particles is c, where |c| is the speed of light and the direction of c is the direction along which the particles are ﬂowing. Initially, we assume that the diﬀerential surface area dA is perpendicular to the ﬂow of particles. Given these assumptions, in time dt, the particles that ﬂow across the area dA are all the particles included in a volume cdtdA. The number of particles ﬂowing across the surface is p(x)cdtdA.
+
+i i
+
+Figure 2.2. Flow of particles across a surface.
+
+i i
+
+i i
+
+22
+
+2. The Physics of Light Transport
+
+We now relax the assumption that the particle ﬂow is perpendicular to the surface area dA (as shown in Figure 2.2). If the angle between the ﬂow of the particles and dA is θ, the perpendicular area across which the particles ﬂow is dA cos θ. Now, the number of particles ﬂowing across the surface is p(x)cdtdA cos θ.
+The derivation above assumed a ﬁxed direction of ﬂow. Including all possible directions (and all possible wavelengths) along which the particles can ﬂow gives the following number of particles N that ﬂow across an area dA,
+N = p(x, ω, λ)cdtdA cos θdωdλ,
+where dω is a diﬀerential direction (or solid angle) along which particles ﬂow and the density function p varies with both position and direction.
+Flux is deﬁned as the energy of the particles per unit time. In this treatment, ﬂux is computed by dividing the number of particles by dt and computing the limit as dt goes to zero:
+
+Φ ∝ p(x, ω, λ)dA cos θdωdλ,
+
+Φ
+
+∝ p(x, ω, λ)dλ.
+
+dA cos θdω
+
+Let us assume these particles are photons. Each photon has energy E =
+
+ν. The wavelength of light λ is related to its frequency by the following
+
+relation: λ = c/ν, where c is the speed of light in vacuum. Therefore,
+
+E=
+
+c λ
+
+.
+
+Nicodemus [131] deﬁned radiance as the radiant energy per unit
+
+volume, as follows:
+
+c L(x, ω) = p(x, ω, λ) dλ.
+λ
+
+Relating this equation with the deﬁnition of Φ above, we get a more intuitive notion of how ﬂux relates to radiance, and why the cosine term arises in the deﬁnition of radiance.
+
+2.3.2 Relationships between Radiometric Quantities
+Given the deﬁnitions of the radiometric quantities above, the following relationships between these diﬀerent terms can be derived:
+
+Φ= E(x) = B(x) =
+
+L(x → Θ) cos θdωΘdAx,
+AΩ
+L(x ← Θ) cos θdωΘ,
+Ω
+L(x → Θ) cos θdωΘ,
+Ω
+
+(2.4) (2.5) (2.6)
+
+i i
+
+i i
+i i
+
+i i
+
+i i
+
+2.3. Radiometry
+
+23
+
+where A is the total surface area and Ω is the total solid angle at each point on the surface.
+We use the following notation in this book: L(x → Θ) represents radiance leaving point x in direction Θ. L(x ← Θ) represents radiance arriving at point x from direction Θ.
+Wavelength Dependency
+The radiometric measures and quantities described above are not only dependent on position and direction but are also dependent on the wavelength of light energy. When wavelength is explicitly speciﬁed, for example, for radiance, the corresponding radiometric quantity is called spectral radiance. The units of spectral radiance are the units of radiance divided by meters (the unit of wavelength). Radiance is computed by integrating spectral radiance over the wavelength domain covering visible light. For example,
+
+L(x → Θ) =
+
+L(x → Θ, λ)dλ.
+
+spectrum
+
+The wavelength dependency of radiometric terms is often implicitly assumed to be part of the global illumination equations and is not mentioned explicitly.
+
+2.3.3 Properties of Radiance Radiance is a fundamental radiometric quantity for the purposes of image generation. As seen in Equations 2.4–2.6, other radiometric terms, such as ﬂux, irradiance, and radiosity, can be derived from radiance. The following properties of radiance explain why radiance is important for image generation.
+Property 1: Radiance is invariant along straight paths. Mathematically, the property of the invariance of radiance is expressed as
+L(x → y) = L(y ← x),
+which states that the radiance leaving point x directed towards point y is equal to the radiance arriving at point y from the point x. This property assumes that light is traveling through a vacuum, i.e., there is no participating medium.
+This important property follows from the conservation of light energy in a small pencil of rays between two diﬀerential surfaces at x and y, respectively. Figure 2.3 shows the geometry of the surfaces. From the deﬁnition of radiance, the total (diﬀerential) power leaving a diﬀerential surface area dAx, and arriving at a diﬀerential surface area dAy, can be written as
+
+i i
+
+i i
+
+i i
+
+24
+
+2. The Physics of Light Transport
+
+Ny
+
+y
+
+θy
+
+Nx θx
+r
+xy
+x
+
+Figure 2.3. Invariance of radiance.
+
+d2Φ
+
+L(x → y) =
+
+;
+
+(cos θxdAx)dωx←dAy
+
+d2Φ = L(x → y) cos θxdωx←dAy dAx,
+
+(2.7) (2.8)
+
+where we use the notation that dωx←dAy is the solid angle subtended by dAy as seen from x.
+The power that arrives at area dAy from area dAx can be expressed in a similar way:
+
+L(y ← x) =
+
+d2Φ ;
+
+(cos θydAy)dωy←dAx
+
+d2Φ = L(y ← x) cos θydωy←dAx dAy.
+
+(2.9) (2.10)
+
+The diﬀerential solid angles are:
+
+dωx←dAy
+
+=
+
+cos
+
+θy dAy rx2y
+
+;
+
+dωy←dAx
+
+=
+
+cos
+
+θxdAx rx2y
+
+.
+
+We assume that there are no external light sources adding to the power arriving at dAy. We also assume that the two diﬀerential surfaces are in a vacuum; therefore, there is no energy loss due to the presence of
+
+i i
+
+i i
+i i
+
+i i
+
+i i
+
+2.3. Radiometry
+
+25
+
+participating media. Then, by the law of conservation of energy, all energy leaving dAx in the direction of the surface dAy must arrive at dAy,
+L(x → y) cos θxdωx←dAy dAx = L(y ← x) cos θydωy←dAx dAy;
+
+L(x
+
+→
+
+y)
+
+cos
+
+θx
+
+cos θydAy rx2y
+
+dAx
+
+=
+
+L(y
+
+←
+
+x)
+
+cos
+
+θy
+
+cos θxdAx rx2y
+
+dAy ,
+
+and thus,
+
+L(x → y) = L(y ← x).
+
+(2.11)
+
+Therefore, radiance is invariant along straight paths of travel and does not attenuate with distance. This property of radiance is only valid in the absence of participating media, which can absorb and scatter energy between the two surfaces.
+From the above observation, it follows that once incident or exitant radiance at all surface points is known, the radiance distribution for all points in a three-dimensional scene is also known. Almost all algorithms used in global illumination limit themselves to computing the radiance values at surface points (still assuming the absence of any participating medium). Radiance at surface points is referred to as surface radiance by some authors, whereas radiance for general points in three-dimensional space is sometimes called ﬁeld radiance.
+
+Property 2: Sensors, such as cameras and the human eye, are sensitive to radiance.
+The response of sensors (for example, cameras or the human eye) is proportional to the radiance incident upon them, where the constant of proportionality depends on the geometry of the sensor.
+These two properties explain why the perceived color or brightness of an object does not change with distance. Given these properties, it is clear that radiance is the quantity that global illumination algorithms must compute and display to the observer.
+
+2.3.4 Examples
+This section gives a few practical examples of the relationship between the diﬀerent radiometric quantities that we have seen.
+
+i i
+
+i i
+
+i i
+26
+
+2. The Physics of Light Transport
+
+i i
+
+Figure 2.4. Diﬀuse emitter.
+
+Example (Diffuse Emitter) Let us consider the example of a diﬀuse emitter. By deﬁnition, a diﬀuse emitter emits equal radiance in all directions from all its surface points (as shown in Figure 2.4). Therefore,
+L(x → Θ) = L.
+The power for the diﬀuse emitter can be derived as
+
+Φ=
+
+L(x → Θ) cos θdωΘdAx
+
+AΩ
+
+=
+
+L cos θdωΘdAx
+
+AΩ
+
+= L( dAx)( cos θdωΘ)
+
+A
+
+Ω
+
+= πLA,
+
+where A is the area of the diﬀuse emitter, and integration at each point
+
+on A is over the hemisphere, i.e., Ω is the hemisphere at each point (see
+
+Appendix B).
+
+The radiance for a diﬀuse emitter equals the power divided by the area,
+
+divided by π. Using the above equations, it is straightforward to write
+
+down the following relationship between the power, radiance, and radiosity
+
+of a diﬀuse surface:
+
+Φ = LAπ = BA.
+
+(2.12)
+
+Example (Nondiffuse Emitter)
+Consider a square area light source with a surface area measuring 10 × 10 cm2. Each point on the light source emits radiance according to the
+
+i i
+
+i i
+
+i i
+
+i i
+
+2.3. Radiometry
+
+27
+
+following distribution over its hemisphere:
+L(x → Θ) = 6000 cos θ (W/sr · m2).
+Remember that the radiance function is deﬁned for all directions on the hemisphere and all points on a surface. This speciﬁc distribution is the same for all points on the light source. However, for each surface point, there is a fall-oﬀ as the direction is farther away from the normal at that surface point.
+The radiosity for each point can be computed as follows:
+
+B = L(x → Θ) cos θdωΘ
+Ω
+
+=
+
+6000 cos2 θdωΘ
+
+Ω
+
+2π π/2
+
+= 6000
+
+cos2 θ sin θdθdφ
+
+00
+
+= 6000 · 2π · − cos3 θ π/2
+
+3
+
+0
+
+= 4000π W/m2
+
+= 12566 W/m2.
+
+The power for the entire light source can then be computed as follows:
+
+Φ=
+
+L(x → Θ) cos θdωΘdAx
+
+AΩ
+
+= ( L cos θdωΘ)dAx
+AΩ
+
+= B(x)dAx
+A
+= 4000π W/m2 · 0.1 m · 0.1 m
+= 125.66 W.
+
+Example (Sun, Earth, Mars)
+Now let us consider the example of an emitter that is very important to us: the Sun. One might ask the question, if the radiance of the Sun is the same irrespective of the distance from the Sun, why is the Earth warmer than Mars?
+Consider the radiance output from the Sun arriving at the Earth and Mars (see Figure 2.5). For simplicity, let us assume that the Sun is a
+
+i i
+
+i i
+
+i i
+28
+
+2. The Physics of Light Transport
+
+i i
+
+Figure 2.5. Relationship between the Earth, Mars, and the Sun.
+
+uniform diﬀuse emitter. As before, we assume that the medium between the Earth, Sun, and Mars is a vacuum. From Equation 2.12,
+Φ = πLA.
+Given that the total power emitted by the Sun is 3.91 × 1026 watts, and the surface area of the Sun is 6.07 × 1018 m2, the Sun’s radiance equals
+
+L(Sun)
+
+=
+
+Φ Aπ
+
+=
+
+3.91 × 1026 π6.07 × 1018
+
+=
+
+2.05 × 107
+
+W/sr · m2.
+
+Now consider a 1 × 1 m2 patch on the surface of the Earth; the power arriving at that patch is
+
+P (Earth ← Sun) =
+
+L cos θdωdA.
+
+AΩ
+
+Let us also assume that the Sun is at its zenith (i.e., cos θ = 1), and that the solid angle subtended by the Sun is small enough that the radiance can be assumed to be constant over the patch:
+
+P (Earth ← Sun) = ApatchLω.
+
+i i
+
+i i
+
+i i
+
+i i
+
+2.3. Radiometry
+
+29
+
+The solid angle ω subtended by the Sun as seen from the Earth is
+
+ωEarth←Sun
+
+=
+
+A⊥
+Sundisk
+distance2
+
+= 6.7 × 10−5
+
+sr.
+
+Note that the area of the Sun considered for the computation of the radiance of the Sun is its surface area, whereas the area of the Sun in the computation of the solid angle is the area of a circular section (disc) of the Sun; this area is 1/4th the surface area of the Sun:
+
+P (Earth ← Sun) = (1 × 1 m2)(2.05 × 107 W/(sr · m2))(6.7 × 10−5 sr) = 1373.5 W.
+
+Similarly, consider a 1 × 1 m2 patch on the surface of Mars, the power arriving at that patch can be computed in the same way. The solid angle subtended by the Sun as seen from Mars is
+
+ωM ars←Sun
+
+=
+
+A⊥
+Sundisk
+distance2
+
+= 2.92 × 10−5
+
+sr.
+
+The total power incident on the patch on Mars is given by
+
+P (M ars ← Sun) = (1 × 1 m2)(2.05 × 107 W/(sr · m2))(2.92 × 10−5 sr) = 598.6 W.
+
+Thus, even though the radiance of the Sun is invariant along rays and is the same as seen from the Earth and Mars, the solid angle measure ensures that the power arriving at the planets drops oﬀ as the square of the distance (the familiar inverse square law). Therefore, though the Sun will appear equally bright on the Earth and Mars, it will look larger on the Earth than on Mars and, therefore, warm the planet more.
+Example (Plate)
+A ﬂat plate is placed on top of Mount Everest with its normal pointing up (See Figure 2.6). It is a cloudy day, and the sky has a uniform radiance of 1000 W/(sr · m2). The irradiance at the center of the plate can be computed as follows:
+
+i i
+
+i i
+
+i i
+30
+
+2. The Physics of Light Transport
+
+i i
+
+Figure 2.6. Plate with diﬀerent constraints on incoming hemisphere. Scenario (a): plate at top of peak; Scenario (b): plate in valley with 60◦ cutoﬀ.
+
+E = L(x ← Θ) cos θdω
+
+= 1000 cos θ sin θdθdφ
+
+2π
+
+π/2
+
+= 1000 dφ
+
+cos θ sin θdθ
+
+0
+
+0
+
+cos2 θ π/2 = 1000 · 2π · −
+20
+
+= 1000 · 2π · 1 2
+
+= 1000 · π W/m2.
+
+Now assume the plate is taken to an adjoining valley where the surrounding mountains are radially symmetric and block oﬀ all light below 60◦. The
+irradiance at the plate in this situation is
+
+E = L(x ← Θ) cos θdω
+
+= 1000 cos θ sin θdθdφ
+
+2π
+
+π/6
+
+= 1000 dφ
+
+cos θ sin θdθ
+
+0
+
+0
+
+= 1000 · 2π · − cos2 θ π/6 20
+
+=
+
+1000
+
+·
+
+π
+
+·
+
+(1
+
+−
+
+3 )
+4
+
+= 250 · π W/m2.
+
+i i
+
+i i
+
+i i
+
+i i
+
+2.4. Light Emission
+
+31
+
+2.4 Light Emission
+Light is electromagnetic radiation produced by accelerating a charge. Light can be produced in diﬀerent ways; for example, by thermal sources such as the sun, or by quantum eﬀects such as ﬂuorescence, where materials absorb energy at some wavelength and emit the energy at some other wavelength. As mentioned in previous sections, we do not consider a detailed quantum mechanical explanation of light for the purposes of computer graphics. In most rendering algorithms, light is assumed to be emitted from light sources at a particular wavelength and with a particular intensity.
+The computation of accurate global illumination requires the speciﬁcation of the following three distributions for each light source: spatial, directional, and spectral intensity distribution. For example, users, such as lighting design engineers, require accurate descriptions of light source distributions that match physical light bulbs available in the real world. Idealized spatial distributions of lights assume lights are point lights; more realistically, lights are modeled as area lights. The directional distributions of typical luminaires is determined by the shape of their associated light ﬁxtures. Though the spectral distribution of light could also be simulated accurately, global illumination algorithms typically simulate RGB (or a similar triple) for eﬃciency reasons. All these distributions could be speciﬁed either as functions or as tables.
+
+2.5 Interaction of Light with Surfaces
+Light energy emitted into a scene interacts with the diﬀerent objects in the scene by getting reﬂected or transmitted at surface boundaries. Some of the light energy could also be absorbed by surfaces and dissipated as heat, though this phenomenon is typically not explicitly modeled in rendering algorithms.
+2.5.1 BRDF
+Materials interact with light in diﬀerent ways, and the appearance of materials diﬀers given the same lighting conditions. Some materials appear as mirrors; others appear as diﬀuse surfaces. The reﬂectance properties of a surface aﬀect the appearance of the object. In this book, we assume that light incident at a surface exits at the same wavelength and same time. Therefore, we are ignoring eﬀects such as ﬂuorescence and phosphorescence.
+In the most general case, light can enter some surface at a point p and incident direction Ψ and can leave the surface at some other point q and exitant direction Θ. The function deﬁning this relation between the
+
+i i
+
+i i
+
+i i
+32
+
+2. The Physics of Light Transport
+N
+
+i i
+
+Figure 2.7. Bidirectional reﬂectance distribution function.
+
+incident and reﬂected radiance is called the bidirectional surface scattering reﬂectance distribution function (BSSRDF) [131]. We make the additional assumption that the light incident at some point exits at the same point; thus, we do not discuss subsurface scattering, which results in the light exiting at a diﬀerent point on the surface of the object.
+Given these assumptions, the reﬂectance properties of a surface are described by a reﬂectance function called the bidirectional reﬂectance distribution function (BRDF). The BRDF at a point x is deﬁned as the ratio of the diﬀerential radiance reﬂected in an exitant direction (Θ), and the diﬀerential irradiance incident through a diﬀerential solid angle (dωΨ). The BRDF is denoted as fr(x, Ψ → Θ):
+
+fr(x, Ψ → Θ)
+
+=
+
+dL(x → Θ) dE(x ← Ψ)
+
+dL(x → Θ)
+
+=
+
+,
+
+L(x ← Ψ) cos(Nx, Ψ)dωΨ
+
+(2.13) (2.14)
+
+where cos(Nx, Ψ) is the cosine of the angle formed by the normal vector at the point x, Nx, and the incident direction vector Ψ.
+Strictly speaking, the BRDF is deﬁned over the entire sphere of directions (4π steradians) around a surface point. This is important for transparent surfaces, since these surfaces can “reﬂect” light over the entire sphere. In most texts, the term BSDF (bidirectional scattering distribution function) is used to denote the reﬂection and transparent parts together.
+
+2.5.2 Properties of the BRDF There are several important properties of a BRDF:
+1. Range. The BRDF can take any positive value and can vary with wavelength.
+
+i i
+
+i i
+
+i i
+
+i i
+
+2.5. Interaction of Light with Surfaces
+
+33
+
+2. Dimension. The BRDF is a four-dimensional function deﬁned at each point on a surface; two dimensions correspond to the incoming direction, and two dimensions correspond to the outgoing direction.
+Generally, the BRDF is anisotropic. That is, if the surface is rotated about the surface normal, the value of fr will change. However, there are many isotropic materials for which the value of fr does not depend on the speciﬁc orientation of the underlying surface.
+
+3. Reciprocity. The value of the BRDF remains unchanged if the incident and exitant directions are interchanged. This property is also called Helmholtz reciprocity; intuitively, it means that reversing the direction of light does not change the amount of light that gets reﬂected: fr(x, Ψ → Θ) = fr(x, Θ → Ψ).
+Because of the reciprocity property, the following notation is used for the BRDF to indicate that both directions can be freely interchanged:
+
+fr(x, Θ ↔ Ψ).
+
+4. Relation between incident and reﬂected radiance. The value of the BRDF for a speciﬁc incident direction is not dependent on the possible presence of irradiance along other incident angles. Therefore, the BRDF behaves as a linear function with respect to all incident directions. The total reﬂected radiance due to some irradiance distribution over the hemisphere around an opaque, non-emissive surface point can be expressed as:
+
+dL(x → Θ) = fr(x, Ψ → Θ)dE(x ← Ψ);
+
+(2.15)
+
+L(x → Θ) = L(x → Θ) =
+
+fr(x, Ψ → Θ)dE(x ← Ψ);
+Ωx
+
+(2.16)
+
+fr(x, Ψ → Θ)L(x ← Ψ) cos(Nx, Ψ)dωΨ. (2.17)
+Ωx
+
+5. Energy conservation. The law of conservation of energy requires that the total amount of power reﬂected over all directions must be less than or equal to the total amount of power incident on the surface (excess power is transformed into heat or other forms of energy). For any distribution of incident radiance L(x ← Ψ) over the hemisphere, the total incident power per unit surface area is the total irradiance over the hemisphere:
+
+E = L(x ← Ψ) cos(Nx, Ψ)dωΨ.
+Ωx
+
+(2.18)
+
+i i
+
+i i
+
+i i
+
+34
+
+2. The Physics of Light Transport
+
+The total reﬂected power M is a double integral over the hemisphere. Suppose we have a distribution of exitant radiance L(x → Θ) at a surface. The total power per unit surface area leaving the surface, M , is
+
+M = L(x → Θ) cos(Nx, Θ)dωΘ.
+Ωx
+
+(2.19)
+
+From the deﬁnition of the BRDF, we know
+
+dL(x → Θ) = fr(x, Ψ → Θ)L(x ← Ψ) cos(Nx, Ψ)dωΨ.
+
+Integrating this equation to ﬁnd the value for L(x → Θ) and combining it with the expression for M gives us
+
+M=
+
+fr(x, Ψ → Θ)L(x ← Ψ) cos(Nx, Θ) cos(Nx, Ψ)dωΨdωΘ.
+
+Ωx Ωx
+
+(2.20)
+
+The BRDF satisﬁes the constraint of energy conservation for reﬂectance at a surface point if, for all possible incident radiance distributions L(x ← Ψ), the following inequality holds: M ≤ E, or
+
+Ωx Ωx fr(x, Ψ → Θ)L(x ← Ψ) cos(Nx, Θ) cos(Nx, Ψ)dωΨdωΘ ≤ 1. Ωx L(x ← Ψ) cos(Nx, Ψ)dωΨ (2.21)
+This inequality must be true for any incident radiance function. Suppose we take an appropriate δ-function for the incident radiance distribution, such that the integrals become simple expressions:
+
+L(x ← Ψ) = Linδ(Ψ − Θ),
+
+then, the above equation can be simpliﬁed to
+
+∀Ψ : fr(x, Ψ → Θ) cos(Nx, Θ)dωΘ ≤ 1.
+Ωx
+
+(2.22)
+
+The above equation is a necessary condition for energy conservation, since it expresses the inequality for a speciﬁc incident radiance distribution. It is also a suﬃcient condition because incident radiance from two diﬀerent directions do not inﬂuence the value of the BRDF; therefore, conservation of energy is valid for any combination of incident radiance values. If the value of the BRDF is dependent on the intensity of the incoming light, the more elaborate inequality from Equation 2.21 holds.
+
+i i
+
+i i
+i i
+
+i i
+
+i i
+
+2.5. Interaction of Light with Surfaces
+
+35
+
+Global illumination algorithms often use empirical models to characterize the BRDF. Great care must be taken to make certain that these empirical models are a good and acceptable BRDF. More speciﬁcally, energy conservation and Helmholtz reciprocity must be satisﬁed to make an empirical model physically plausible.
+Satisfying Helmholtz reciprocity is a particularly important constraint for bidirectional global illumination algorithms; these algorithms compute the distribution of light energy by considering paths starting from the light sources and paths starting from the observer at the same time. Such algorithms explicitly assume that light paths can be reversed; therefore, the model for the BRDF should satisfy Helmholtz’s reciprocity.
+
+2.5.3 BRDF Examples
+Depending on the nature of the BRDF, the material will appear as a diﬀuse surface, a mirror, or a glossy surface (see Figure 2.8). The most commonly encountered types of BRDFs are listed below.
+
+Diffuse Surfaces
+Some materials reﬂect light uniformly over the entire reﬂecting hemisphere. That is, given an irradiance distribution, the reﬂected radiance is independent of the exitant direction. Such materials are called diﬀuse reﬂectors, and the value of their BRDF is constant for all values of Θ and Ψ. To an observer, a diﬀuse surface point looks the same from all possible directions. For an ideal diﬀuse surface,
+
+fr(x, Ψ
+
+↔
+
+Θ)
+
+=
+
+ρd . π
+
+(2.23)
+
+The reﬂectance ρd represents the fraction of incident energy that is reﬂected at a surface. For physically-based materials, ρd varies from 0 to 1. The reﬂectance of diﬀuse surfaces is used in radiosity calculations as will be seen in Chapter 6.
+
+i i
+
+Figure 2.8. Diﬀerent types of BRDFs.
+
+i i
+
+i i
+
+36
+
+2. The Physics of Light Transport
+
+Specular Surfaces
+Perfect specular surfaces only reﬂect or refract light in one speciﬁc direction.
+Specular reﬂection. The direction of reﬂection can be found using the law of reﬂection, which states that the incident and exitant light direction make equal angles to the surface’s normal, and lie in the same plane as the normal. Given that light is incident to the specular surface along direction vector Ψ, and the normal to the surface is N , the incident light is reﬂected along the direction R:
+
+R = 2(N · Ψ)N − Ψ.
+
+(2.24)
+
+A perfect specular reﬂector has only one exitant direction for which the BRDF is diﬀerent from 0; the implication is that the value of the BRDF along that direction is inﬁnite. The BRDF of such a perfect specular reﬂector can be described with the proper use of δ-functions. Real materials can exhibit this behavior very closely, but are nevertheless not ideal reﬂectors as deﬁned above.
+Specular refraction. The direction of specular refraction is computed using Snell’s law. Consider the direction T along which light that is incident from a medium with refractive index η1 to a medium with refractive index η2 is refracted. Snell’s law speciﬁes the following invariant between the angle of incidence and refraction and the refractive indices of the media:
+
+η1 sin θ1 = η2 sin θ2,
+
+(2.25)
+
+where θ1 and θ2 are the angles between the incident and transmitted ray and the normal to the surface.
+The transmitted ray T is given as:
+
+T
+
+=
+
+−
+
+η1 η2
+
+Ψ
+
++
+
+N
+
+( η1 η2
+
+cos
+
+θ1
+
+−
+
+1
+
+−
+
+(
+
+η1 η2
+
+)2(1
+
+−
+
+cos
+
+θ12
+
+)),
+
+= − η1 Ψ + N ( η1 (N · Ψ) − 1 − ( η1 )2(1 − (N · Ψ)2)), (2.26)
+
+η2
+
+η2
+
+η2
+
+since cos θ1 = N · Ψ, the inner product of the normal and the incoming direction.
+When light travels from a dense medium to a rare medium, it could get refracted back into the dense medium. This process is called total internal reﬂection; it arises at a critical angle θc, also known as Brewster’s angle, which can be computed by Snell’s law:
+
+π
+
+η1 sin θc = η2 sin 2 ;
+
+sin θc
+
+=
+
+η2 . η1
+
+i i
+
+i i
+i i
+
+i i
+
+i i
+
+2.5. Interaction of Light with Surfaces
+
+37
+
+N Ψ
+R
+
+θ1
+
+θ1
+
+η1
+
+θ2
+
+η2
+
+T
+
+Figure 2.9. Perfect specular reﬂection and refraction.
+
+We can derive the same condition from Equation 2.26, where total internal
+
+reﬂection
+
+occurs
+
+when
+
+the
+
+term
+
+under
+
+the
+
+square
+
+root,
+
+1
+
+−(
+
+η1 η2
+
+)2 (1 − cos
+
+θ12),
+
+is less than zero.
+
+Figure 2.9 shows the geometry of perfect specular reﬂections and re-
+
+fractions.
+
+Reciprocity for transparent surfaces. One has to be careful when assuming properties about the transparent side of the BSDF; some characteristics, such as reciprocity, may not be true with transparent surfaces as described below. When a pencil of light enters a dense medium from a less dense (rare) medium, it gets compressed. This behavior is a direct consequence of Snell’s law of refraction (rays “bend” towards the normal direction). Therefore, the light energy per unit area perpendicular to the pencil direction becomes higher; i.e., the radiance is higher. The reverse process takes place when a pencil of light leaves a dense medium to be refracted into a less dense medium. The change in ray density is the square ratio of the refractive indices of the media [203, 204]: (η2/η1)2. When computing radiance in scenes with transparent surfaces, this weighting factor should be considered.
+
+Fresnel equations. The above equations specify the angles of reﬂection and refraction for light that arrives at a perfectly smooth surface. Fresnel derived a set of equations called the Fresnel equations that specify the amount of light energy that is reﬂected and refracted from a perfectly smooth surface.
+When light hits a perfectly smooth surface, the light energy that is reﬂected depends on the wavelength of light, the geometry at the surface, and
+
+i i
+
+i i
+
+i i
+
+38
+
+2. The Physics of Light Transport
+
+the incident direction of the light. Fresnel equations specify the fraction of light energy that is reﬂected. These equations (given below) take the polarization of light into consideration. The two components of the polarized light, rp and rs, referring to the parallel and perpendicular (senkrecht in German) components, are given as
+
+rp
+
+=
+
+η2 η2
+
+cos θ1 cos θ1
+
+− +
+
+η1 η1
+
+cos θ2 ; cos θ2
+
+rs
+
+=
+
+η1 cos θ1 η1 cos θ1
+
+− η2 cos θ2 , + η2 cos θ2
+
+(2.27) (2.28)
+
+where η1 and η2 are the refractive indices of the two surfaces at the interface.
+
+For
+
+unpolarized
+
+light,
+
+F
+
+=
+
+. |rp |2 +|rs |2
+2
+
+Note
+
+that
+
+these
+
+equations
+
+apply
+
+for both metals and nonmetals; for metals, the index of refraction of the
+
+metal is expressed as a complex variable: n + ik, while for nonmetals, the
+
+refractive index is a real number and k = 0.
+
+The Fresnel equations assume that light is either reﬂected or refracted
+
+at a purely specular surface. Since there is no absorption of light energy,
+
+the reﬂection and refraction coeﬃcients sum to 1.
+
+Glossy Surfaces
+Most surfaces are neither ideally diﬀuse nor ideally specular but exhibit a combination of both reﬂectance behaviors; these surfaces are called glossy surfaces. Their BRDF is often diﬃcult to model with analytical formulae.
+
+2.5.4 Shading Models
+
+Real materials can have fairly complex BRDFs. Various models have been suggested in computer graphics to capture the complexity of BRDFs. Note that in the following description, Ψ is the direction of the light (the input direction) and Θ is the direction of the viewer (the outgoing direction). Lambert’s model. The simplest model is Lambert’s model for idealized diﬀuse materials. In this model, the BRDF is a constant as described earlier:
+
+fr(x, Ψ
+
+↔
+
+Θ)
+
+=
+
+kd
+
+=
+
+ρd , π
+
+where ρd is the diﬀuse reﬂectance (see Section 2.5.3).
+Phong model. Historically, the Phong shading model has been extremely popular. The BRDF for the Phong model is:
+
+fr(x, Ψ
+
+↔
+
+Θ)
+
+=
+
+(R · Θ)n ks N · Ψ
+
++
+
+kd,
+
+i i
+
+i i
+i i
+
+i i
+
+2.5. Interaction of Light with Surfaces
+
+Nx
+
+H
+
+R
+
+i i
+39
+
+Figure 2.10. Shading models geometry.
+
+where the reﬂected vector R can be computed from Equation 2.24.
+Blinn-Phong model. The Blinn-Phong model uses the half-vector H, the halfway vector between Ψ and Θ, as follows:
+
+fr(x, Ψ
+
+↔
+
+Θ)
+
+=
+
+(N · H)n ks N · Ψ
+
++
+
+kd.
+
+Modiﬁed Blinn-Phong model. While the simplicity of the Phong model is appealing, it has some serious limitations: it is not energy conserving, it does not satisfy Helmholtz’s reciprocity, and it does not capture the behavior of most real materials. The modiﬁed Blinn-Phong model addresses some of these problems:
+
+fr(x, Ψ ↔ Θ) = ks(N · H)n + kd.
+
+Physically Based Shading Models
+The modiﬁed Blinn-Phong model is still not able to capture realistic BRDFs. Physically based models, such as Cook-Torrance [33] and He [67], among others, attempt to model physical reality. We provide a brief description of the Cook-Torrance model below. For details, refer to the original paper [33]. The He model [67] is, to date, the most comprehensive and expensive shading model available; however, it is beyond the scope of this book to present this model.
+Cook-Torrance model. The Cook-Torrance model includes a microfacet model that assumes that a surface is made of a random collection of small smooth planar facets. The assumption in this model is that an incoming ray randomly hits one of these smooth facets. Given a speciﬁcation of the distribution of microfacets for a material, this model captures the shadowing eﬀects of these microfacets. In addition to the facet distribution, the
+
+i i
+
+i i
+
+i i
+
+40
+
+2. The Physics of Light Transport
+
+Cook-Torrance model also includes the Fresnel reﬂection and refraction terms:
+
+fr(x, Ψ
+
+↔
+
+Θ)
+
+=
+
+F (β) π
+
+(N
+
+D(θh)G · Ψ)(N ·
+
+Θ)
+
++ kd,
+
+where the three terms in the nondiﬀuse component of the BRDF are the
+
+Fresnel reﬂectance F , the microfacet distribution D, and a geometric shad-
+
+owing term G. We now present each of these terms.
+
+The Fresnel terms, as given in Equations 2.27 and 2.28, are used in the
+
+Cook-Torrance model. This model assumes that the light is unpolarized;
+
+therefore, F
+
+=
+
+. |rp |2 +|rs |2
+2
+
+The Fresnel reﬂectance term is computed with
+
+respect to the angle β, which is the angle between the incident direction
+
+and the half-vector: cos β = Ψ · H = Θ · H. By the deﬁnition of the half-
+
+vector, this angle is the same as the angle between the outgoing direction
+
+and the half-vector.
+
+The distribution function D speciﬁes the distribution of the microfacets
+
+for the material. Various functions can be used to specify this distribution.
+
+One of the most common distributions is the distribution by Beckmann:
+
+D(θh)
+
+=
+
+m2
+
+1 cos4
+
+θh
+
+e−(
+
+tan θh m
+
+)2
+
+,
+
+where θh is the angle between the normal and the half-vector and cos θh = N · H. Also, m is the root-mean-square slope of the microfacets, and it captures surface roughness.
+The geometry term G captures masking and self-shadowing by the microfacets:
+
+G
+
+=
+
+min{1,
+
+2(N
+
+· H)(N Θ·H
+
+·
+
+Θ) ,
+
+2(N
+
+· H)(N Θ·H
+
+·
+
+Ψ) }.
+
+Empirical Models
+Models such as Ward [221] and Lafortune [105] are based on empirical data. These models aim at ease of use and an intuitive parameterization of the BRDF. For isotropic surfaces, the Ward model has the following BRDF:
+
+fr(x, Ψ
+
+↔
+
+Θ)
+
+=
+
+ρd π
+
++ ρs 4πα2
+
+−tan2 θh
+e α2 ,
+(N · Ψ)(N · Θ)
+
+where θh is the angle between the half-vector and the normal. The Ward model includes three parameters to describe the BRDF: ρd,
+the diﬀuse reﬂectance; ρs, the specular reﬂectance; and α, a measure of
+
+i i
+
+i i
+i i
+
+i i
+
+i i
+
+2.6. Rendering Equation
+
+41
+
+the surface roughness. This model is energy conserving and relatively intuitive to use because of the small set of parameters; with the appropriate parameter settings, it can be used to represent a wide range of materials.
+Lafortune et al. [105] introduced an empirically based model to represent measurements of real materials. This model ﬁts modiﬁed Phong lobes to measured BRDF data. The strength of this technique is that it exploits the simplicity of the Phong model while capturing realistic BRDFs from measured data. More detailed descriptions of several models can be found in Glassner’s books [54].
+
+2.6 Rendering Equation
+
+Now we are ready to mathematically formulate the equilibrium distribution of light energy in a scene as the rendering equation. The goal of a global illumination algorithm is to compute the steady-state distribution of light energy. As mentioned earlier, we assume the absence of participating media. We also assume that light propagates instantaneously; therefore, the steady-state distribution is achieved instantaneously. At each surface point x and in each direction Θ, the rendering equation formulates the exitant radiance L(x → Θ) at that surface point in that direction.
+
+2.6.1 Hemispherical Formulation
+
+The hemispherical formulation of the rendering equation is one of the most commonly used formulations in rendering. In this section, we derive this formulation using energy conservation at the point x. Let us assume that Le(x → Θ) represents the radiance emitted by the surface at x and in the outgoing direction Θ, and Lr(x → Θ) represents the radiance that is reﬂected by the surface at x in that direction Θ.
+By conservation of energy, the total outgoing radiance at a point and in a particular outgoing direction is the sum of the emitted radiance and the radiance reﬂected at that surface point in that direction. The outgoing radiance L(x → Θ) is expressed in terms of Le(x → Θ) and Lr(x → Θ) as follows:
+
+L(x → Θ) = Le(x → Θ) + Lr(x → Θ).
+
+From the deﬁnition of the BRDF, we have
+
+fr(x, Ψ → Θ)
+
+=
+
+dLr(x → Θ) , dE(x ← Ψ)
+
+Lr(x → Θ) =
+
+fr(x, Ψ → Θ)L(x ← Ψ) cos(Nx, Ψ)dωΨ.
+
+Ωx
+
+i i
+
+i i
+
+i i
+
+42
+
+2. The Physics of Light Transport
+
+Putting these equations together, the rendering equation is
+
+L(x → Θ) = Le(x → Θ)
+
+(2.29)
+
++ fr(x, Ψ → Θ)L(x ← Ψ) cos(Nx, Ψ)dωΨ.
+Ωx
+
+The rendering equation is an integral equation called a Fredholm equation of the second kind because of its form: the unknown quantity, radiance, appears both on the left-hand side of the equation, and on the right, integrated with a kernel.
+
+2.6.2 Area Formulation
+Alternative formulations of the rendering equation are sometimes used depending on the approach that is being used to solve for global illumination. One popular alternative formulation is arrived at by considering the surfaces of objects in the scene that contribute to the incoming radiance at the point x. This formulation replaces the integration over the hemisphere by integration over all surfaces visible at the point.
+To present this formulation, we introduce the notion of a ray-casting operation. The ray-casting operation, denoted as r(x, Ψ), ﬁnds the point on the closest visible object along a ray originating at point x and pointing in the direction Ψ. Eﬃcient ray-casting techniques are beyond the scope of this book; hierarchical bounding volumes, octrees, and BSP trees are data structures that are used to accelerate ray casting in complex scenes [52].
+r(x, Ψ) = {y : y = x + tintersectionΨ}; tintersection = min{t : t > 0, x + tΨ ∈ A},
+
+y
+
+Nx
+
+Ny
+
+dωx
+
+x
+
+Figure 2.11. Area formulation of the rendering equation.
+
+i i
+
+i i
+
+i i
+
+i i
+
+i i
+
+2.6. Rendering Equation
+
+43
+
+where all the surfaces in the scene are represented by the set A. The visibility function V (x, y) speciﬁes the visibility between two points x and y and is deﬁned as follows:
+
+∀x, y ∈ A : V (x, y) =
+
+1 if x and y are mutually visible, 0 if x and y are not mutually visible.
+
+The visibility function is computed using the ray-casting operation r(x, Ψ): x and y are mutually visible if there exists some Ψ such that r(x, Ψ) = y.
+Using these deﬁnitions, let us consider the terms of the rendering equation from Equation 2.29. Assuming nonparticipating media, the incoming radiance at x from direction Ψ is the same as the outgoing radiance from y in the direction −Ψ:
+
+L(x ← Ψ) = L(y → −Ψ).
+
+Additionally, the solid angle can be recast as follows (see Appendix B):
+
+dωΨ
+
+=
+
+dωx←dAy
+
+=
+
+cos(Ny
+
+,
+
+−Ψ)
+
+dAy rx2y
+
+.
+
+Substituting in Equation 2.29, the rendering equation can also be expressed as an integration over all surfaces in the scene as follows:
+
+L(x → Θ) = Le(x → Θ)
+
++
+
+A
+
+fr (x,
+
+Ψ
+
+→
+
+Θ)L(y
+
+→
+
+−Ψ)V
+
+(x,
+
+y) cos(Nx,
+
+Ψ) cos(Ny, rx2y
+
+−Ψ) dAy .
+
+The term G(x, y), called the geometry term, depends on the relative geometry of the surfaces at point x and y:
+
+G(x, y)
+
+=
+
+cos(Nx
+
+,
+
+Ψ) cos(Ny rx2y
+
+,
+
+−Ψ)
+
+;
+
+L(x → Θ) = Le(x → Θ)
+
++ fr(x, Ψ → Θ)L(y → −Ψ)V (x, y)G(x, y)dAy.
+A
+This formulation recasts the rendering equations in terms of an integration over all the surfaces in the scene.
+
+2.6.3 Direct and Indirect Illumination Formulation
+Another formulation of the rendering equation separates out the direct and indirect illumination terms. Direct illumination is the illumination
+
+i i
+
+i i
+
+i i
+
+44
+
+2. The Physics of Light Transport
+
+that arrives at a surface directly from the light sources in a scene; indirect illumination is the light that arrives after bouncing at least once oﬀ another surface in the scene. It is often eﬃcient to sample direct illumination using the area formulation of the rendering equation, and the indirect illumination using the hemispherical formulation.
+Splitting the integral into a direct and indirect component gives the following form of the rendering equation:
+
+L(x → Θ) = Le(x → Θ) + Lr(x → Θ);
+
+Lr(x → Θ) =
+
+fr(x, Ψ → Θ)L(x ← Ψ) cos(Nx, Ψ)dωΨ
+
+Ωx
+
+= Ldirect + Lindirect;
+
+Ldirect =
+
+fr(x, −x→y → Θ)Le(y → −y→x)V (x, y)G(x, y)dAy;
+
+A
+
+Lindirect =
+
+fr(x, Ψ → Θ)Li(x ← Ψ) cos(Nx, Ψ)dωΨ;
+
+Ωx
+
+Li(x ← Ψ) = Lr(r(x, Ψ) → −Ψ).
+
+Thus, the direct term is the emitted term from the surface y visible to the point x along direction −x→y: y = r(x, −x→y). The indirect illumination is the reﬂected radiance from all points visible over the hemisphere at point x: r(x, Ψ).
+
+2.7 Importance
+
+The problem that a global illumination algorithm must solve is to compute the light energy that is visible at every pixel in an image. Each pixel functions as a sensor with some notion of how it responds to the light energy that falls on the sensor. The response function captures this notion of the response of the sensor to the incident light energy. This response function is also called the potential function or importance by diﬀerent authors.
+The response function is similar in form to the rendering equation:
+
+W (x → Θ) = We(x → Θ)
+
+(2.30)
+
++ fr(x, Ψ ← Θ)W (x ← Ψ) cos(Nx, Ψ)dωΨ.
+Ωx
+
+Importance ﬂows in the opposite direction as radiance. An informal intuition for the form of the response function can be obtained by considering two surfaces, i and j. If surface i is visible to the eye in a particular image,
+
+i i
+
+i i
+i i
+
+i i
+
+i i
+
+2.8. The Measurement Equation
+
+45
+
+then We(i) will capture the extent to which the surface is important to the image (some measure of the projected area of the surface on the image). If surface j is also visible in an image and surface i reﬂects light to surface j, then, due to the importance of j, i will indirectly be even more important. Thus, while energy ﬂows from i to j, importance ﬂows from j to i.
+
+2.8 The Measurement Equation
+The rendering equation formulates the steady-state distribution of light energy in the scene. The importance equation formulates the relative importance of surfaces to the image. The measurement equation formulates the problem that a global illumination algorithm must solve. This equation brings the two fundamental quantities, importance and radiance, together as follows.
+For each pixel j in an image, Mj represents the measurement of radiance through that pixel j. The measurement function M is
+
+Mj = W (x ← Ψ)L(x ← Ψ) cos(Nx, Ψ)dAxdωΨ.
+
+(2.31)
+
+We assume here that the sensors are part of the scene so that we can integrate over their surface.
+
+2.9 Summary
+This chapter presented the formulation of the fundamental problems that global illumination must solve: the rendering equation and the measurement equation. We discussed a model of the behavior of light, deﬁnitions from radiometry, and a description of how light interacts with materials in a scene. For more details on the behavior of light, refer to standard physics textbooks in the ﬁeld of optics [68]. References for radiative transport theory are Chandrasekhar’s Radiative Transfer [22] and Ishimaru’s Wave Propagation and Scattering in Random Media [75]. Glassner’s books [54] present a range of diﬀerent shading models used in computer graphics.
+
+2.10 Exercises
+1. A ﬂat plate (measuring 0.5 meter by 0.5 meter) is placed on the highest mountain in the landscape, exactly horizontal. It is a cloudy
+
+i i
+
+i i
+
+i i
+
+46
+
+2. The Physics of Light Transport
+
+day, such that the sky has a uniform radiance of 1000 W/m2sr. What is the irradiance at the center point of the plate?
+2. The plate has a uniform Lambertian reﬂectance ρ = 0.4. What is the exitant radiance leaving the center point of the plate in a direction 45 degrees from the normal? In a direction normal to the surface?
+3. Consider the sun being a diﬀuse light source with a diameter of 1.39 · 109 meters at a distance of 1.5 · 1011 meters and emitting a radiance of 8 · 106 W/m2sr. What is the radiance at the center point of the plate, expressed as a function of the angle between the position of the sun and the normal to the plate (the zenith)?
+4. Using the Web, look up information on the following: the irradiance spectrum of the sun (irradiance as a function of wavelength) reaching the Earth; and the reﬂectivity of a chosen material, also as a function of wavelength. Sketch the approximate spectrum of the reﬂected light from the plate as a function of wavelength.
+5. Implement the specular term of the Cook-Torrance BRDF model. For nickel at 689 nm wavelength, use the following parameters: microfacet distribution m = 0.3; refractive index n = 2.14 and k = 4.00. Plot graphs of the following terms: the Fresnel reﬂectance; the geometry term G; the full BRDF in the plane of incidence. Look up parameters for some additional materials and make similar plots.
+
+i i
+
+i i
+
+i i
+
+i i
+
+i i
+
+i i
+
+3
+
+Monte Carlo Methods
+This chapter introduces the concept of Monte Carlo integration and reviews some basic concepts in probability theory. We also present techniques to create better distributions of samples. More details on Monte Carlo methods can be found in Kalos and Whitlock [86], Hammersley and Handscomb [62], and Spanier and Gelbard [183]. References on quasi–Monte Carlo methods include Niederreiter [132].
+3.1 Brief History
+The term “Monte Carlo” was coined in the 1940s, at the advent of electronic computing, to describe mathematical techniques that use statistical sampling to simulate phenomena or evaluate values of functions. These techniques were originally devised to simulate neutron transport by scientists such as Stanislaw Ulam, John von Neumann, and Nicholas Metropolis, among others, who were working on the development of nuclear weapons. However, early examples of computations that can be deﬁned as Monte Carlo exist, though without the use of computers to draw samples. One of the earliest documented examples of a Monte Carlo computation was done by Comte de Buﬀon in 1677. He conducted an experiment in which a needle of length L was thrown at random on a horizontal plane with lines drawn at a distance d apart (d > L). He repeated the experiment many times to estimate the probability P that the needle would intersect one of these lines. He also analytically evaluated P as
+2L P= .
+πd
+Laplace later suggested that this technique of repeated experimentation could be used to compute an estimated value of π. Kalos and Whitlock [86] present early examples of Monte Carlo methods.
+47
+
+i i
+
+i i
+
+48
+
+3. Monte Carlo Methods
+
+3.2 Why Are Monte Carlo Techniques Useful?
+
+Consider a problem that must be solved, for example, computing the value of the integration of a function with respect to an appropriately deﬁned measure over a domain. The Monte Carlo approach to solving this problem would be to deﬁne a random variable such that the expected value of that random variable would be the solution to the problem. Samples of this random variable are then drawn and averaged to compute an estimate of the expected value of the random variable. This estimated expected value is an approximation to the solution of the problem we originally wanted to solve.
+One major strength of the Monte Carlo approach lies in its conceptual simplicity; once an appropriate random variable is found, the computation consists of sampling the random variable and averaging the estimates obtained from the sample. Another advantage of Monte Carlo techniques is that they can be applied to a wide range of problems. It is intuitive that Monte Carlo techniques would apply to problems that are stochastic in nature, for example, transport problems in nuclear physics. However, Monte Carlo techniques are applicable to an even wider range of problems, for example, problems that require the higher-dimensional integration of complicated functions. In fact, for these problems, Monte Carlo techniques are often the only feasible solution.
+One disadvantage of Monte Carlo techniques is their relatively slow convergence rate of √1 , where N is the number of samples (see Sec-
+N
+tion 3.4). As a consequence, several variance reduction techniques have been developed in the ﬁeld, discussed in this chapter. However, it should be noted that despite all these optimizations, Monte Carlo techniques still converge quite slowly and, therefore, are not used unless there are no viable alternatives. For example, even though Monte Carlo techniques are often illustrated using one-dimensional examples, they are not typically the most eﬃcient solution technique for problems of this kind. But there are problems for which Monte Carlo methods are the only feasible solution technique: higher-dimensional integrals and integrals with nonsmooth integrands, among others.
+
+3.3 Review of Probability Theory
+In this section, we brieﬂy review important concepts from probability theory. A Monte Carlo process is a sequence of random events. Often, a numerical outcome can be associated with each possible event. For exam-
+
+i i
+
+i i
+i i
+
+i i
+
+i i
+
+3.3. Review of Probability Theory
+
+49
+
+ple, when a fair die is thrown, the outcome could be any value from 1 to 6. A random variable describes the possible outcomes of an experiment.
+
+3.3.1 Discrete Random Variables When a random variable can take a ﬁnite number of possible values, it is called a discrete random variable. For a discrete random variable, a probability pi can be associated with any event with outcome xi.
+A random variable xdie might be said to have a value of 1 to 6 associated with each of the possible outcomes of the throw of the die. The probability pi associated with each outcome for a fair die is 1/6.
+Some properties of the probabilities pi are:
+1. The probablity of an event lies between 0 and 1: 0 ≤ pi ≤ 1. If an outcome never occurs, its probability is 0; if an event always occurs, its probability is 1.
+2. The probability that either of two events occurs is:
+P r(Event1 or Event2) ≤ P r(Event1) + P r(Event2).
+Two events are mutually exclusive if and only if the occurence of one of the events implies the other event cannot possibly occur. In the case of two such mutually exclusive events,
+P r(Event1 or Event2) = P r(Event1) + P r(Event2).
+3. A set of all the possible events/outcomes of an experiment such that the events are mutually exclusive and collectively exhaustive satisﬁes the following normalization property: i pi = 1.
+Expected Value For a discrete random variable with n possible outcomes, the expected value, or mean, of the random variable is
+n
+E(x) = pixi.
+i=1
+
+i i
+
+i i
+
+i i
+
+50
+
+3. Monte Carlo Methods
+
+For the case of a fair die, the expected value of the die throws is
+
+6
+
+E(xdie) =
+
+pixi
+
+i=1
+
+61
+
+1
+
+=
+
+6 xi
+
+=
+
+(1 + 6
+
+2+3
+
++4+5+
+
+6)
+
+i=1
+
+= 3.5.
+
+Variance and Standard Deviation The variance σ2 is a measure of the deviation of the outcomes from the expected value of the random variable. The variance is deﬁned as the expected value of the square diﬀerence between the outcome of the experiment and its expected value. The standard deviation σ is the square root of the variance. The variance is expressed as
+
+σ2 = E[(x − E[x])2] = (xi − E[x])2pi.
+i
+Simple mathematical manipulation leads to the following equation:
+
+σ2 = E[x2] − (E[x])2 = x2i pi − ( xipi)2.
+
+i
+
+i
+
+In the case of the fair die, the variance is
+
+σd2ie
+
+=
+
+1 [(1 − 3.5)2 + (2 − 3.5)2 + (3 − 3.5)2 + (4 − 3.5)2 6
+
++(5 − 3.5)2 + (6 − 3.5)2]
+
+= 2.91.
+
+Functions of Random Variables
+Consider a function f (x), where x takes values xi with probabilities pi. Since x is a random variable, f (x) is also a random variable whose expected value or mean is deﬁned as
+
+E[f (x)] = pif (xi).
+i
+The variance of the function f (x) is deﬁned similarly as σ2 = E[(f (x) − E[f (x)])2].
+
+i i
+
+i i
+
+i i
+
+i i
+
+i i
+
+3.3. Review of Probability Theory
+
+51
+
+Example (Binomial Distribution)
+Consider a random variable that has two possible mutually exclusive events with outcomes 1 and 0. These two outcomes occur with probability p and 1 − p, respectively. The expected value and variance of a random variable distributed according to this distribution are
+
+E[x] = 1 · p + 0 · (1 − p) = p; σ2 = E[x2] − E[x]2 = p − p2 = p(1 − p).
+
+Consider an experiment in which N random samples are drawn from the probability distribution above. Each sample can take a value of 0 or 1. The sum of these N samples is given as
+
+N
+S = xi.
+i=1
+
+The probability that S = n, where n ≤ N , is the probability that n of the
+
+N samples take a value of 1, and N − n samples take a value of 0. This
+
+probability is
+
+P r(S = n) = CnN pn(1 − p)N−n.
+
+This distribution is called the binomial distribution. The binomial coeﬃ-
+
+cient, CnN , counts the number of ways in which n of the N samples can
+
+take
+
+a
+
+value
+
+of
+
+1:
+
+CnN
+
+=
+
+(N
+
+N! −n)!n!
+
+.
+
+The expected value of S is
+
+N
+E[S] = npi =
+i=1
+
+nCnN pn(1 − p)N−n = N p.
+
+The variance is
+
+σ2 = N p(1 − p).
+
+This expected value and variance can be computed analytically by evaluat-
+
+ing
+
+the expression:
+
+a
+
+d da
+
+(a+b)N
+
+,
+
+where
+
+a
+
+=
+
+p
+
+and b
+
+=
+
+(1−p).
+
+Another
+
+possi-
+
+ble way to compute the expected value and variance is to treat S as the sum
+
+of N random variables. Since these random variables are independent of
+
+each other, the expected value of S is the sum of the expected value of each
+
+variable as described in Section 3.4.1. Therefore, E[S] = E[xi] = N p.
+
+3.3.2 Continuous Random Variables
+We have been discussing discrete-valued random variables; we will now extend our discussion to include continuous random variables.
+
+i i
+
+i i
+
+i i
+
+52
+
+3. Monte Carlo Methods
+
+Probability Distribution Function and Cumulative Distribution Function
+For a real-valued (continuous) random variable x, a probability density function (PDF) p(x) is deﬁned such that the probability that the variable takes a value x in the interval [x, x + dx] equals p(x)dx. A cumulative distribution function (CDF) provides a more intuitive deﬁnition of probabilities for continuous variables. The CDF for a random variable x is deﬁned as follows:
+y
+P (y) = P r(x ≤ y) = p(x)dx.
+−∞
+The CDF gives the probability with which an event occurs with an outcome whose value is less than or equal to the value y. Note that the CDF P (y) is a nondecreasing function and is non-negative over the domain of the random variable.
+The PDF p(x) has the following properties:
+
+Also,
+
+∀x : p(x) ≥ 0;
+
+∞
+
+p(x)dx = 1;
+
+−∞
+
+dP (x)
+
+p(x) =
+
+.
+
+dx
+
+P r(a ≤ x ≤ b) = P r(x ≤ b) − P r(x ≤ a)
+b
+= CDF (b) − CDF (a) = p(z)dz.
+a
+
+Expected Value Similar to the discrete-valued case, the expected value of a continuous random variable x is given as:
+∞
+E[x] = xp(x)dx.
+−∞
+Now consider some function f (x), where p(x) is the probability distribution function of the random variable x. Since f (x) is also a random variable, its expected value is deﬁned as follows:
+E[f (x)] = f (x)p(x)dx.
+
+i i
+
+i i
+
+i i
+
+i i
+
+i i
+
+3.3. Review of Probability Theory
+
+53
+
+Variance and Standard Deviation The variance σ2 for a continuous random variable is
+σ2 = E[(x − E[x])2] = (x − E[x])2p(x)dx.
+
+Simple mathematical manipulation leads to the following equation: σ2 = E[x2] − (E[x])2 = x2p(x)dx − ( xp(x)dx)2.
+
+Example (Uniform Probability Distribution)
+
+For concreteness, we consider an example of one of the simplest probability
+
+distribution functions: the uniform probability distribution function. For
+
+a uniform probability distribution, the PDF is a constant over the entire
+
+domain, as depicted in Figure 3.1.
+
+We know that
+
+b a
+
+p(x)dx
+
+=
+
+1.
+
+Therefore, the PDF pu for a uniform
+
+probability distribution function is
+
+1
+
+pu(x)
+
+=
+
+b
+
+−
+
+. a
+
+The probability that x ∈ [a , b ] is
+
+(3.1)
+
+b1
+
+P r(x ∈ [a , b ]) =
+
+dx
+
+a b−a
+
+b −a = b−a ;
+
+y1
+
+P r(x ≤ y) = CDF (y) =
+
+dx
+
+−∞ b − a
+
+=
+
+y b
+
+− −
+
+a a
+
+.
+
+p(x)
+
+a a' b' b
+Figure 3.1. Uniform distribution.
+
+i i
+
+i i
+
+i i
+
+54
+For the special case where a = 0, b = 1: P r(x ≤ y) = CDF (y) = y.
+
+3. Monte Carlo Methods
+
+3.3.3 Conditional and Marginal Probabilities Consider a pair of random variables x and y. For discrete random variables, pij speciﬁes the probability that x takes a value of xi and y takes a value of yi. Similarly, a joint probability distribution function p(x, y) is deﬁned for continuous random variables.
+The marginal density function of x is deﬁned as
+p(x) = p(x, y)dy.
+
+Similarly, for a discrete random variable, pi = j pij. The conditional density function p(y|x) is the probability of y given
+
+some x:
+
+p(y|x)
+
+=
+
+p(x, y) =
+
+p(x, y) .
+
+p(x)
+
+p(x, y)dy
+
+The conditional expectation of a random function g(x, y) is computed as
+
+E[g|x] =
+
+g(x, y)p(y|x)dy =
+
+g(x, y)p(x, y)dy .
+
+p(x, y)dy
+
+These deﬁnitions are useful for multidimensional Monte Carlo computations.
+
+3.4 Monte Carlo Integration
+
+We now describe how Monte Carlo techniques can be used for the integration of arbitrary functions. Let us assume we have some function f (x) deﬁned over the domain x ∈ [a, b]. We would like to evaluate the integral
+
+b
+I = f (x)dx.
+
+(3.2)
+
+a
+
+We will ﬁrst illustrate the idea of Monte Carlo integration in the con-
+
+text of one-dimensional integration and then extend these ideas to higher-
+
+dimensional integration. However, it should be mentioned that several ef-
+
+fective deterministic techniques exist for one-dimensional integration, and
+
+Monte Carlo is typically not used in this domain.
+
+i i
+
+i i
+i i
+
+i i
+
+i i
+
+3.4. Monte Carlo Integration
+
+55
+
+3.4.1 Weighted Sum of Random Variables Consider a function G that is the weighted sum of N random variables g(x1), ...g(xN ), where each of the xi has the same probability distribution function p(x). The xi variables are called independent identically distributed (IID) variables. Let gi(x) denote the function g(xi):
+N
+G = wjgj.
+j=1
+The following linearity property can easily be proved:
+
+E[G(x)] = wjE[gj(x)].
+j
+
+Now consider the case where the weights wj are the same and all add to 1. Therefore, when N functions are added together, wj = 1/N :
+
+N
+
+G(x) =
+
+wj gj (x)
+
+j=1
+
+N1
+
+=
+
+N gj(x)
+
+j=1
+
+1N
+
+= N
+
+gj (x).
+
+j=1
+
+The expected value of G(x) is
+
+E[G(x)] =
+
+wj E [gj (x)]
+
+j
+
+1N
+
+= N
+
+E [gj (x)]
+
+j=1
+
+1N
+
+=
+
+E[g(x)]
+
+N
+
+j=1
+
+1 = N E[g(x)]
+N = E[g(x)].
+
+Thus, the expected value of G is the same as the expected value of g(x). Therefore, G can be used to estimate the expected value of g(x). G is called an estimator of the expected value of the function g(x).
+
+i i
+
+i i
+
+i i
+
+56
+
+3. Monte Carlo Methods
+
+The variance of G is
+
+σ2[G(x)]
+
+=
+
+N
+σ2[
+
+gi(x) ].
+
+N
+
+i=1
+
+Variance, in general, satisﬁes the following equation:
+
+σ2[x + y] = σ2[x] + σ2[y] + 2Cov[x, y],
+
+with the covariance Cov[x, y] given as
+
+Cov[x, y] = E[xy] − E[x] · E[y].
+
+In the case of independent random variables, the covariance is 0, and the following linearity property for variance does hold:
+σ2[x + y] = σ2[x] + σ2[y].
+
+This result generalizes to the linear combination of several variables. The following property holds for any constant a:
+σ2[ax] = a2σ2[x].
+
+Using the fact that the xi in G are independent identically distributed variables, we get the following variance for G:
+
+Therefore,
+
+σ2[G(x)] = N σ2[ gi(x) ]. N
+i=1
+
+σ2[G(x)] =
+
+N σ2[g(x)] N2
+
+i=1
+
+σ2[g(x)] = N N2
+
+σ2[g(x)]
+
+=
+
+.
+
+N
+
+Thus, as N increases, the variance of G decreases with N , making G an inc√reasingly good estimator of E[g(x)]. The standard deviation σ decreases as N .
+
+i i
+
+i i
+i i
+
+i i
+
+i i
+
+3.4. Monte Carlo Integration
+
+57
+
+3.4.2 Estimator
+The Monte Carlo approach to computing the integral is to consider N samples to estimate the value of the integral. The samples are selected randomly over the domain of the integral with probability distribution function p(x). The estimator is denoted as I and is
+
+I
+
+1 =
+
+N
+
+f (xi) .
+
+N i=1 p(xi)
+
+In Section 3.6.1, we explain why samples are computed from a probability distrubtion p(x) as opposed to uniform sampling of the domain of the integration. Let us for now accept that p(x) is used for sampling.
+Using the properties described in Section 3.4.1, the expected value of this estimator is computed as follows:
+
+E[ I ]
+
+=
+
+1 E[
+
+N f (xi) ]
+
+N i=1 p(xi)
+
+= 1 N E[ f (xi) ]
+
+N
+i=1
+
+p(xi)
+
+1
+
+f (x)
+
+=N
+
+p(x)dx
+
+N
+
+p(x)
+
+= f (x)dx
+
+= I.
+
+Also, from Section 3.4.1, we know that the variance of this estimator is
+
+σ2 =
+
+1
+
+f (x) (
+
+−
+
+I )2 p(x)dx.
+
+N p(x)
+
+Thus, as N increases, the variance decreases linearly with N . The error in the estimator is prop√ortional to the standard deviation σ; the standard deviation decreases as N . This is a classic result of Monte Carlo methods. In fact one problem with Monte Carlo is the slow convergence of the estimator to the right solution; four times more samples are required to decrease the error of the Monte Carlo computation by half.
+
+Example (Monte Carlo Summation)
+
+A discrete sum S =
+
+n i=1
+
+si
+
+can
+
+be
+
+computed
+
+using
+
+the
+
+estimator
+
+S
+
+= nx,
+
+where x takes the value of each term of the sum si with equal probability
+
+i i
+
+i i
+
+i i
+
+58
+
+3. Monte Carlo Methods
+
+1/n. We can see that the expected value of the estimator is S. Using the estimator, the following algorithm can be used to estimate the sum S: Randomly select a term si where each term has the same chance of being selected 1/n. An estimate of the sum is the product of the value of the selected term times the number of terms: nsi.
+Since computing sums is clearly a very eﬃcient computation in modern computers, it might appear that the above algorithm is not very useful. However, in cases where the sum consists of complex terms that are timeconsuming to compute, this technique of sampling sums is useful. We show how this technique is used in Chapter 6.
+
+Example (Simple MC Integration)
+
+Let us show how Monte Carlo integration works for the following simple
+
+integral:
+
+1
+I = 5x4dx.
+
+0
+
+Using analytical integration, we know that the value of this integral is 1. Assuming samples are computed from a uniform probability distribution
+
+i i
+
+Figure 3.2. Monte Carlo integration of a simple function 5x4 including the plot of the variance.
+i i
+
+i i
+
+i i
+
+i i
+
+3.4. Monte Carlo Integration
+
+59
+
+(i.e., p(x) = 1 over the domain [0, 1)), our estimator would be
+
+I
+
+1 =
+N
+
+N
+
+5x4i .
+
+i=1
+
+A possible evaluation of this integral using Monte Carlo techniques is shown in Figure 3.2.
+The variance of this function can be analytically computed as follows:
+
+σe2st
+
+=
+
+1 N
+
+1
+(5x4 − 1)2dx =
+
+16 .
+
+0
+
+9N
+
+As N increases, we get an increasingly better approximation of the integral.
+
+3.4.3 Bias
+When the expected value of the estimator is exactly the value of the integral I (as is the case for the estimator described above), the estimator is said to be unbiased. An estimator that does not satisfy this property is said to be biased; the diﬀerence between the expected value of the estimator and the actual value of the integral is called bias: B[ I ] = E[ I ] − I. The total error on the estimate is typically represented as the sum of the standard deviation and the bias. The notion of bias is important in characterizing diﬀerent approaches to solving a problem using Monte Carlo integration.
+A biased estimator is called consistent if the bias vanishes as the number of samples increases; i.e., if limN→∞ B[ I ] = 0. Sometimes, it is useful to use biased estimators if they result in a lower variance that compensates for the bias introduced. However, we must analyze both variance and bias for these estimators, making the analysis more complicated than for unbiased estimators.
+
+3.4.4 Accuracy
+
+Two theorems explain how the error of the Monte Carlo estimator reduces
+
+as the number of samples increases. Remember that these error bounds
+
+are probabilistic in nature.
+
+The ﬁrst theorem is Chebyshev’s Inequality, which states that the prob-
+
+ability that a sample deviates from the solution by a value greater than
+
+σ2 δ
+
+,
+
+where
+
+δ
+
+is
+
+an
+
+arbitrary
+
+positive
+
+number,
+
+is
+
+smaller
+
+than
+
+δ.
+
+This
+
+inequality is expressed mathematically as
+
+P r[| I − E[I]| ≥ σI2 ] ≤ δ, δ
+
+i i
+
+i i
+
+i i
+
+60
+
+3. Monte Carlo Methods
+
+where δ is a positive number. Assuming an estimator that averages N samples and has a well-deﬁned variance, the variance of the estimator is
+
+Therefore,
+
+if
+
+δ
+
+=
+
+1 10000
+
+,
+
+σI2
+
+=
+
+1 N
+
+σp2rimary
+
+.
+
+P r[| I − E[I]| ≥ 100σ√primary ] ≤
+
+1 .
+
+N
+
+10000
+
+Thus, by increasing N , the probability that I ≈ E[I] is very large. The Central Limit Theorem gives an even stronger statement about the
+accuracy of the estimator. As N → ∞, the Central Limit Theorem states that the values of the estimator have a normal distribution. Therefore, as N → ∞, the computed estimate lies in a narrower region around the expected value of the integral with higher probability. Thus, the computed estimate is within one standard deviation of the integral 68.3% of the time, and within three standard deviations of the integral 99.7% of the time. As N gets larger, the standard deviations, which vary as √1 , get smaller and
+N
+the estimator estimates the integral more accurately with high probability. However, the Central Limit Theorem only applies when N is large
+enough; how large N should be is not clear. Most Monte Carlo techniques assume that N is large enough; though care should be taken when small values of N are used.
+
+3.4.5 Estimating the Variance
+The variance of a Monte Carlo computation can be estimated using the same N samples that are used to compute the original estimator. The variance for the Monte Carlo estimator is
+
+σ2 = 1 N 1
+= N 1
+= N
+
+f (x) (
+
+−
+
+I )2 p(x)dx
+
+p(x)
+
+( f (x) )2p(x)dx − I2 p(x)
+
+f (x)2 dx − I2. p(x)
+
+The variance itself can be estimated by its own estimator σe2st [86]:
+
+1
+σe2st ≈ N
+
+N i=1
+
+(
+
+f (xi) p(xi )
+
+)2
+
+−
+
+(
+
+1 N
+
+N −1
+
+N i=1
+
+f (xi) p(xi)
+
+)2
+
+.
+
+i i
+
+i i
+
+i i
+
+i i
+
+3.4. Monte Carlo Integration
+
+i i
+61
+
+Figure 3.3. Deterministic one-dimensional integration.
+
+3.4.6 Deterministic Quadrature versus Monte Carlo
+As a point of comparison, note that a deterministic quadrature rule to compute a one-dimensional integral could be to compute the sum of the area of regions (perhaps uniformly spaced) over the domain (see Figure 3.3). Eﬀectively, one approximation of the integral I would be
+
+I≈
+
+N
+
+wif (xi) =
+
+N
+
+f (xi)(b − a) . N
+
+i=1
+
+i=1
+
+The trapezoidal rule and other rules [149] are typical techniques used for
+one-dimensional integration. Extending these deterministic quadrature rules to a d-dimensional integral would require N d samples.
+
+3.4.7 Multidimensional Monte Carlo Integration
+The Monte Carlo integration technique described above can be extended to multiple dimensions in a straightforward manner as follows:
+
+I=
+
+f (x, y)dxdy
+
+I = 1 N f (xi, yi) . N i=1 p(xi, yi)
+
+One of the main strengths of Monte Carlo integration is that it can be extended seamlessly to multiple dimensions. Unlike deterministic quadrature techniques, which would require N d samples for a d-dimensional integration, Monte Carlo techniques permit an arbitrary choice of N .
+
+i i
+
+i i
+
+i i
+62
+
+3. Monte Carlo Methods
+
+i i
+
+x
+
+Figure 3.4. Sampling of hemisphere.
+Example (Integration over a Hemisphere)
+Let us consider a simple example of Monte Carlo integration over a hemisphere. The particular problem we want to solve is to estimate the irradiance at a point by integrating the contribution of light sources in the scene.
+Let us consider a light source L. To compute the irradiance due to the light source, we must evaluate the following integral:
+
+I=
+
+Lsource cos θdωΘ
+
+2π
+
+π 2
+
+=
+
+Lsource cos θ sin θdθdφ.
+
+00
+
+The estimator for irradiance is:
+
+I = 1 N Lsource(Θi) cos θ sin θ .
+
+N
+i=1
+
+p(Θi)
+
+We can choose our samples from the following probability distribution:
+
+cos θ sin θ
+
+p(Θi) =
+
+. π
+
+The estimator for irradiance is then given as
+
+πN
+
+I= N
+
+Lsource(Θi).
+
+i=1
+
+3.4.8 Summary of Monte Carlo In summary, a Monte Carlo estimator for an integral I = f (x)dx is
+I = 1 N f (xi) . N i=1 p(xi)
+
+i i
+
+i i
+
+i i
+
+i i
+
+3.5. Sampling Random Variables
+
+63
+
+The variance of this estimator is
+
+σ2 =
+
+1
+
+f (x) (
+
+−
+
+I )2 p(x)dx.
+
+N p(x)
+
+Monte Carlo integration is a powerful, general technique that can handle arbitrary functions. A Monte Carlo computation consists of the following steps:
+
+• Sampling according to a probability distribution function.
+
+• Evaluation of the function at that sample.
+
+• Averaging these appropriately weighted sampled values.
+
+The user only needs to understand how to do the above three steps to be able to use Monte Carlo techniques.
+
+3.5 Sampling Random Variables
+
+We have discussed how the Monte Carlo technique must compute samples from a probability distribution p(x). Therefore, we want to ﬁnd samples such that the distribution of the samples matches p(x). We now describe diﬀerent techniques to achieve this sampling.
+
+3.5.1 Inverse Cumulative Distribution Function
+To intuitively illustrate the inverse cumulative distribution function (CDF) technique, we ﬁrst describe how to sample according to a PDF for a discrete PDF. We then extend this technique to a continuous PDF.
+
+Discrete Random Variables
+
+Given a set of probabilities pi, we want to pick xi with probability pi.
+
+We compute the discrete cumulative probability distribution (CDF) corre-
+
+sponding to the pi as follows: Fi =
+
+i j=1
+
+pi
+
+.
+
+Now,
+
+the
+
+selection
+
+of
+
+samples
+
+is done as follows. Compute a sample u that is uniformly distributed over
+
+the domain [0, 1). Output k that satisﬁes the property:
+
+Fk−1 ≤ u < Fk;
+
+k−1
+
+k
+
+pj ≤ u < pj;
+
+j=1
+
+j=1
+
+k−1
+pj ≤ u < Fk−1 + pk.
+j=1
+
+i i
+
+i i
+
+i i
+
+64
+
+3. Monte Carlo Methods
+
+We know from Equation 3.1 for a uniform PDF, F (a ≤ u < b) = (b − a). Clearly, the probability that the value of u lies between Fk−1 and Fk is Fk − Fk−1 = pk. But this is the probability that k is selected. Therefore, k is selected with probability pk, which is exactly what we want.
+The F values can be computed in O(n) time; the look-up of the appro-
+priate value to output can be done in O(log2(n)) time per sample by doing a binary search on the precomputed F table.
+
+Continuous Random Variables
+The approach above can be extended to continuous random variables. A sample can be generated according to a given distribution p(x) by applying the inverse cumulative distribution function of p(x) to a uniformly generated random variable u over the interval [0, 1). The resulting sample is F −1(u). This technique is illustrated in Figure 3.5.
+
+Pick u uniformly from [0,1) Output y = F −1(u)
+
+The resulting samples have the distribution of p(x) as can be proved
+below:
+y
+F (y) = p(x)dx.
+−∞
+
+i i
+
+i i
+
+Figure 3.5. Inverse CDF sampling.
+
+i i
+
+i i
+
+i i
+
+3.5. Sampling Random Variables
+
+65
+
+We want to prove that
+Y
+P r[y ≤ Y ] = p(x)dx.
+−∞
+Consider the new samples we compute. For every uniform variable u, we compute the sample as y = F −1(u). From Equation 3.1, we know that
+
+P r[u ≤ X] = X.
+
+Therefore,
+P r[F −1(u) ≤ F −1(X)] = X if X = F (Y )
+Y
+P r[y ≤ Y ] = F (Y ) = p(x)dx.
+−∞
+Note that the fact that the cumulative probability distribution function is a monotonically nondecreasing function is important in the proof above. Also note that this method of sampling requires the ability to compute and analytically invert the cumulative probability distribution.
+
+Example (Cosine Lobe)
+
+A cosine weighting factor arises in the rendering equation; therefore, it is
+
+often useful to sample the hemisphere to compute radiance using a cosine
+
+PDF. We show how the hemisphere can be sampled such that the samples
+
+are weighted by the cosine term.
+
+The PDF is
+
+cos θ p(θ, φ) = .
+π
+
+Its CDF is computed as described above:
+
+1
+
+F=
+
+cos θdω;
+
+π
+
+1 φθ
+
+F (θ, φ) =
+
+cos θ sin θ dθ dφ
+
+π0 0
+
+1φ
+
+θ
+
+=
+
+dφ cos θ sin θ dθ
+
+π0
+
+0
+
+=
+
+φ π
+
+(−
+
+cos2
+
+θ
+
+/2)|θ0
+
+= φ (1 − cos2 θ). 2π
+
+i i
+
+i i
+
+i i
+
+66
+
+3. Monte Carlo Methods
+
+The CDF, with respect to φ and θ functions, is separable:
+
+φ
+
+Fφ
+
+=
+
+; 2π
+
+Fθ = 1 − cos2 θ.
+
+Therefore, assuming we compute two uniformly distributed samples u1 and u2:
+φi = 2πu1
+
+and
+
+θi
+
+=
+
+cos−1
+
+√ u2,
+
+where 1 − u is replaced by u2 since the uniform random variables lie in the domain [0, 1). These φi and θi values are distributed according to the cosine PDF.
+
+3.5.2 Rejection Sampling
+It is often not possible to derive an analytical formula for the inverse of the cumulative distribution function. Rejection sampling is an alternative that could be used and was one of the primary techniques used in the ﬁeld in the past. In rejection sampling, samples are tentatively proposed and tested to determine acceptance or rejection of the sample. This method raises the dimension of the function being sampled by one and then uniformly samples the bounding box that includes the entire PDF. This sampling technique yields samples with the appropriate distribution.
+Let us see how this works for a one-dimensional PDF whose maximum value over the domain [a, b] to be sampled is M . Rejection sampling raises the dimension of the function by one and creates a two-dimensional function over [a, b] × [0, M ]. This function is then sampled uniformly to compute samples (x, y). Rejection sampling rejects all samples (x, y) such that p(x) < y. All other samples are accepted. The distribution of the accepted samples is exactly the PDF p(x) we want to sample.
+
+Compute sample xi uniformly from the domain of x
+
+Compute sample ui uniformly from [0, 1)
+
+if ui
+
+≤
+
+p(xi ) M
+
+then
+
+return
+
+xi
+
+else reject sample
+
+One criticism of rejection sampling is that rejecting these samples (those that lie in the unshaded area of Figure 3.6) could be ineﬃcient. The efﬁciency of this technique is proportional to the probabilty of accepting a proposed sample. This probability is proportional to the ratio of the area
+
+i i
+
+i i
+i i
+
+i i
+
+3.6. Variance Reduction
+
+i i
+67
+
+Figure 3.6. Rejection Sampling.
+under the function to the area of the box. If this ratio is small, a lot of samples are rejected.
+3.5.3 Look-Up Table Another alternative for sampling PDFs is to use a look-up table. This approach approximates the PDF to be sampled using piecewise linear approximations. This technique is not commonly used though it is very useful when the sampled PDF is obtained from measured data.
+3.6 Variance Reduction
+Monte Carlo integration techniques can be roughly subdivided into two categories: those that have no information about the function to be integrated (sometimes called blind Monte Carlo), and those that do have some kind of information (sometimes called informed Monte Carlo). Intuitively, one expects that informed Monte Carlo methods are able to produce more accurate results as compared to blind Monte Carlo methods. The Monte Carlo integration algorithm outlined in Section 3.4 would be a blind Monte Carlo method if the samples were generated uniformly over the domain of integration without any information about the function being integrated.
+Designing eﬃcient estimators is a major area of research in Monte Carlo literature. A variety of techniques that reduce variance have been developed. We discuss some of these techniques in this section: importance sampling, stratiﬁed sampling, multiple importance sampling, the use of control variates, and quasi–Monte Carlo.
+
+i i
+
+i i
+
+i i
+
+68
+
+3. Monte Carlo Methods
+
+3.6.1 Importance Sampling
+Importance sampling is a technique that uses a nonuniform probability distribution function to generate samples. The variance of the computation can be reduced by choosing the probability distribution wisely based on information about the function to be integrated.
+Given a PDF p(x) deﬁned over the integration domain D, and samples xi generated according to the PDF, the value of the integral I can be estimated by generating N sample points and computing the weighted mean:
+I = 1 N f (xi) . N i=1 p(xi)
+As proven earlier, the expected value of this estimator is I; therefore, the estimator is unbiased. To determine if the variance of this estimator is better that an estimator using uniform sampling, we estimate the variance as described in Section 3.4.5. Clearly, the choice of p(x) aﬀects the value of the variance. The diﬃculty of importance sampling is to choose a p(x) such that the variance is minimized. In fact, a perfect estimator would have the variance be zero.
+The optimal p(x) for the perfect estimator can be found by minimizing the equation of the variance using variational techniques and Lagrange multipliers as below. We have to ﬁnd a scalar λ for which the following expression L, a function of p(x), reaches a minimum,
+
+L(p) =
+
+( f (x) )2p(x)dx + λ p(x)dx,
+
+D p(x)
+
+D
+
+where the only boundary condition is that the integral of p(x) over the integration domain equals 1, i.e.,
+
+p(x)dx = 1.
+D
+
+This kind of minimization problem can be solved using the Euler-Lagrange diﬀerential equation:
+
+f (x)2
+
+L(p) = (
+
++ λp(x))dx.
+
+D p(x)
+
+i i
+
+i i
+
+i i
+
+i i
+
+3.6. Variance Reduction
+
+i i
+69
+
+Figure 3.7. Comparing three diﬀerent importance functions.
+
+To minimize the function, we diﬀerentiate L(p) with respect to p(x) and solve for the value of p(x) that makes this quantity zero:
+
+∂ f (x)2
+
+0= (
+
++ λp(x))
+
+∂p p(x)
+
+f 2(x) 0 = − p2(x) + λ
+
+p(x) = √1 |f (x)|. λ
+
+The constant √1 is a scaling factor, such that p(x) can fulﬁll the boundary
+λ
+condition. The optimal p(x) is then given by:
+
+|f (x)|
+
+p(x) =
+
+.
+
+D f (x)dx
+
+If we use this p(x), the variance will be exactly 0 (assuming f (x) does not change sign). However, this optimal p(x) requires us to know the value of the integral D f (x)dx. But this is exactly the integral we want to compute to begin with! Clearly, ﬁnding the optimal p(x) is not possible. However, importance sampling can still be a major tool in decreasing variance in Monte Carlo techniques. Intuitively, a good importance sampling function matches the “shape” of the original function as closely as possible. Figure 3.7 shows three diﬀerent probability functions, each of which will produce an unbiased estimator. However, the variance of the estimator on the left-hand side will be larger than the variance of the estimator shown on the right-hand side.
+
+3.6.2 Stratiﬁed Sampling
+One problem with the sampling techniques that we have described is that samples can be badly distributed over the domain of integration resulting in a poor approximation of the integral. This clumping of samples can happen irrespective of the PDF used, because the PDF only tells us something
+
+i i
+
+i i
+
+i i
+
+70
+
+3. Monte Carlo Methods
+
+about the expected number of samples in parts of the domain. Increasing the number of samples collected will eventually address this problem of uneven sample distribution. However, other techniques have been developed to avoid the clumping of samples: one such technique is stratiﬁed sampling.
+The basic idea in stratiﬁed sampling is to split the integration domain into m disjoint subdomains (also called strata) and evaluate the integral in each of the subdomains separately with one or more samples. More precisely,
+
+1
+
+α1
+
+α2
+
+f (x)dx = f (x)dx + f (x)dx + . . .
+
+0
+
+0
+
+α1
+
+αm−1
+
+1
+
++
+
+f (x)dx +
+
+f (x)dx.
+
+αm−2
+
+αm−1
+
+Stratiﬁed sampling often leads to a smaller variance as compared to a blind Monte Carlo integration method. The variance of a stratiﬁed sampling method, where each stratum receives a number of samples nj, which are in turn distributed uniformly over their respective intervals, is equal to
+
+σ2 =
+
+m αj − αj−1
+
+αj
+
+m
+
+f (x)2dx −
+
+1 (
+
+αj
+f (x)dx)2.
+
+j=1
+
+nj
+
+αj−1
+
+n j=1 j αj−1
+
+If all the strata are of equal size (αj − αj−1 = 1/m), and each stratum contains one uniformly generated sample (nj = 1; N = m), the above equation can be simpliﬁed to:
+
+σ2 =
+
+m1
+
+αj
+
+m
+
+αj
+
+f (x)2dx − (
+
+f (x)dx)2
+
+N j=1
+
+αj−1
+
+j=1 αj−1
+
+=
+
+1
+
+1
+
+N
+
+αj
+
+f (x)2dx − (
+
+f (x)dx)2.
+
+N0
+
+j=1 αj−1
+
+This expression indicates that the variance obtained using stratiﬁed sampling is always smaller than the variance obtained by a pure Monte Carlo sampling scheme. As a consequence, there is no advantage in generating more than one sample within a single stratum, since a simple equal subdivision of the stratum such that each sample is attributed to a single stratum always yields a better result.
+This does not mean that the above sampling scheme always gives us the smallest possible variance; this is because we did not take into account
+
+i i
+
+i i
+i i
+
+i i
+
+i i
+
+3.6. Variance Reduction
+
+71
+
+the size of the strata relative to each other and the number of samples per stratum. It is not an easy problem to determine how these degrees of freedom can be chosen optimally, such that the ﬁnal variance is the smallest possible. It can be proven that the optimal number of samples in one subdomain is proportional to the variance of the function values relative to the average function value in that subdomain. Applied to the principle of one sample per stratum, this implies that the size of the strata should be chosen such that the function variance is equal in all strata. Such a sampling strategy assumes prior knowledge of the function in question, which is often not available. However, such a sampling strategy might be used in an adaptive sampling algorithm.
+Stratiﬁed sampling works well when the number of samples required is known in advance and the dimensionality of the problem is relatively low (typically less than 20). The number of strata required does not scale well with an increase in the number of dimensions. For a d-dimensional function, the number of samples required is N d, which can be prohibitive for large values of d. Several techniques can be used to control the increase in the number of samples with the increase in dimensions. The N -rooks algorithm keeps the number of samples ﬁxed (irrespective of dimensionality). Quasi– Monte Carlo sampling uses nonrandom samples to avoid clumping. Both of these techniques are described below.
+3.6.3 N-Rooks or Latin Hypercube Algorithm
+As mentioned, one major disadvantage of stratiﬁed sampling arises when it is used for higher-dimensional sampling. Consider, for example, a twodimensional function; stratiﬁcation of both dimensions would require N 2
+
+y-axis
+
+y-axis
+
+i i
+
+Stratified
+
+x-axis
+
+N-Rooks
+
+x-axis
+
+Figure 3.8. Stratiﬁed sampling versus N -rooks sampling for two dimensions.
+
+i i
+
+i i
+
+72
+
+3. Monte Carlo Methods
+
+strata with one sample per stratum. The N -rooks algorithm addresses this by distributing N samples evenly among the strata. Each dimension is still subdivided into N subintervals. However, only N samples are needed; these samples are distributed such that one sample lies in each subinterval.
+This distribution is achieved by computing permutations of 1..N (let us call them q0, q1, ...), and letting the ith d-dimensional sample be:
+
+( q0(i) − u0 , q1(i) − u1 , ..., qd−1(i) − ud−1 ).
+
+N
+
+N
+
+N
+
+In two dimensions, this means that no row or column has more than one sample. An example distribution is shown in Figure 3.8.
+
+3.6.4 Combining Stratiﬁed Sampling and Importance Sampling
+Stratiﬁed sampling can easily be integrated with importance sampling: the samples computed from a uniform probability distribution can be stratiﬁed, and then these stratiﬁed samples are transformed using the inverse cumulative distribution function. This strategy (shown in Figure 3.9) avoids the clumping of samples, while at the same time distributing the samples according to the appropriate probability distribution function.
+
+Example (Stratiﬁed Sampling of Discrete Sums)
+
+The following example illustrates how stratiﬁcation can be combined with
+
+importance sampling. Stratiﬁcation of the following sum, S =
+
+n i=1
+
+ai,
+
+with probabilities pi, is done using the following code [124]:
+
+F(x)
+
+i i
+
+Figure 3.9. Combining stratiﬁed sampling and importance sampling.
+i i
+
+i i
+
+i i
+
+i i
+
+3.6. Variance Reduction
+
+73
+
+Compute a uniformly distributed random number u in [0, 1) Initialize: Nsum = 0, P = 0 for i = 1 to n
+P += pi Ni = P n + u − Nsum Sample the ith term of the sum Ni times Nsum + = Ni
+A single random number u is computed using the above algorithm. The ith term of the sum is sampled Ni times, where Ni is computed as above.
+
+3.6.5 Combining Estimators of Different Distributions
+We have explained that importance sampling is an eﬀective technique often used to decrease variance. The function f could consist of the product of several diﬀerent functions: importance sampling according to any one of these PDFs could be used. Each of these techniques could be eﬀective (i.e., have a low variance) depending on the parameters of the function. It is useful to combine these diﬀerent sampling techniques so as to obtain robust solutions that have low variance over a wide range of parameter settings. For example, the rendering equation consists of the BRDF, the geometry term, the incoming radiance, etc. Each one of these diﬀerent terms could be used for importance sampling. However, depending on the material properties or the distribution of objects in a scene, one of these techniques could be more eﬀective than the other.
+
+Using Variance Consider combining two estimators, I1 and I2 , to compute an integral I. Clearly, any linear combination w1 I1 + w2 I2 with constant weights w1 + w2 = 1 will also be an estimator for S. The variance of the linear combination however depends on the weights,
+σ2[w1 I1 + w2 I2 ] = w12σ2[ I1 ] + w22σ2[ I2 ] + 2w1w2Cov[ I1 I2 ],
+where Cov[ I1 I2 ] denotes the covariance of the two estimators:
+
+Cov[ I1 I2 ] = E[ I1 · I2 ] − E[ I1 ] · E[ I2 ].
+
+If I1 and I2 are independent, the covariance is zero. Minimization of the variance expression above allows us to ﬁx the optimal combination weights:
+
+w1 w2
+
+=
+
+σ2[ σ2[
+
+I2 I1
+
+] − Cov[ ] − Cov[
+
+I1 I1
+
+, ,
+
+I2 I2
+
+] . ]
+
+i i
+
+i i
+
+i i
+
+74
+
+3. Monte Carlo Methods
+
+For independent estimators, the weights should be inversely proportional to the variance. In practice, the weights can be calculated in two diﬀerent ways:
+
+• Using analytical expressions for the variance of the involved estimators (such as presented in this text).
+
+• Using a posteriori estimates for the variances based on the samples in an experiment themselves [86]. By doing so, a slight bias is introduced. As the number of samples is increased, the bias vanishes: the combination is asymptotically unbiased or consistent.
+
+Multiple Importance Sampling
+Veach [204] described a robust strategy, called multiple importance sampling, to combine diﬀerent estimators using potentially diﬀerent weights for each individual sample, even for samples from the same estimator. Thus, samples from one estimator could have diﬀerent weights assigned to them, unlike the approach above where the weight depends only on the variance. The balance heuristic is used to determine the weights that combine these samples from diﬀerent PDFs provided the weights sum to 1. The balance heuristic results in an unbiased estimator that provably has variance that diﬀers from the variance of the “optimal estimator” by an additive error term. For complex problems, this strategy is simple and robust.
+Let the sample computed from technique i with PDF pi be denoted Xi,j, where j = 1, .., ni. The estimator using the balance heuristic is
+
+1 n ni F=
+N
+i=1 j=1
+
+f (Xi,j ) , k ckpk(Xi,j )
+
+where N = i ni is the total number of samples and ck = nk/N is the fraction of samples from technique k.
+The balance heuristic is computed as follows:
+
+N=
+
+n i=1
+
+ni
+
+for i = 1 to n
+
+for j = 1 to ni
+
+X = Sample(pi)
+
+d=
+
+n k=1
+
+(nk/N )
+
+pk (X )
+
+F = F + f (X)/d
+
+return F/N
+
+i i
+
+i i
+
+i i
+
+i i
+
+i i
+
+3.6. Variance Reduction
+
+75
+
+3.6.6 Control Variates Another technique to reduce variance uses control variates. Variance could be reduced by computing a function g that can be integrated analytically and subtracted from the original function to be integrated.
+I = f (x)dx
+= g(x)dx + f (x) − g(x)dx.
+
+Since the integral of the function g(x)dx has been computed analytically, the original integral is estimated by computing an estimator for f (x) − g(x)dx.
+If f (x) − g(x) is almost constant, this technique is very eﬀective at decreasing variance. If f /g is nearly constant, g should be used for importance sampling [86].
+
+3.6.7 Quasi–Monte Carlo
+Quasi–Monte Carlo techniques decrease the eﬀects of clumping in samples by eliminating randomness completely. Samples are deterministically distributed as uniformly as possible. Quasi–Monte Carlo techniques try to minimize clumping with respect to a measure called the discrepancy.
+The most commonly used measure of discrepancy is the star discrepancy measure described below. To understand how quasi–Monte Carlo techniques distribute samples, we consider a set of points P . Consider each possible axis-aligned box with one corner at the origin. Given a box of size Bsize, the ideal distribution of points would have N Bsize points. The star discrepancy measure computes how much the point distribution P deviates from this ideal situation,
+
+DN∗ (P )
+
+=
+
+N umP oints(P
+
+supB |
+
+N
+
+∩
+
+B)
+
+−
+
+Bsize|,
+
+where N umP oints(P ∩ B) are the number of points from the set P that lie in box B.
+The star discrepancy is signiﬁcant because it is closely related to the error bounds for quasi–Monte Carlo integration. The Koksma-Hlawka inequality [132] states that the diﬀerence between the estimator and the integral to be computed satisifes the condition:
+
+|1 N
+
+N
+
+f (xk) −
+
+k=1
+
+1
+f (x)dx| ≤ VHK (f (x))D∗,
+0
+
+i i
+
+i i
+
+i i
+
+76
+
+3. Monte Carlo Methods
+
+i
+1 = 12 2 = 102 3 = 112 4 = 1002 5 = 1012 6 = 1102
+
+Reﬂection about decimal point
+.12 = 1/2 .012 = 1/4 .112 = 1/2 + 1/4 .0012 = 1/8 .1012 = 1/2 + 1/8 .0112 = 1/4 + 1/8
+
+Φb=2 (Base 2) 0.5 0.25 0.75 0.125 0.625 0.375
+
+Table 3.1. Examples of the radical inverse function for base 2.
+
+where the VHK term is the variation in the function f (x) in the sense of Hardy and Krause. Intuitively, VHK measures how fast the function can change. If a function has bounded and continuous mixed derivatives, then its variation is ﬁnite.
+The important point to take from this inequality is that the error in the MC estimate is directly proportional to the discrepancy of the sample set. Therefore, much eﬀort has been expended in designing sequences that have low discrepancy; these sequences are called low-discrepancy sequences (LDS).
+There are several low-discrepancy sequences that are used in quasi– Monte Carlo techniques: Hammersley, Halton, Sobol, and Niederreiter, among others. We describe a few of these sequences here.
+Halton sequences are based on the radical inverse function and are computed as follows. Consider a number i which is expressed in base b with the terms aj:
+
+∞
+
+i=
+
+aj(i)bj .
+
+j=0
+
+The radical inverse function Φ is obtained by reﬂecting the digits about the decimal point:
+
+∞
+
+Φb(i) =
+
+aj (i)b−j−1.
+
+j=0
+
+Examples of the radical inverse function for numbers 1 through 6 in base 2 (b = 2) are shown in Table 3.1. To compare the radical inverse function for diﬀerent bases, consider the number 11 in base 2: i = 10112. The radical inverse function Φ2(11) = .11012 = 1/2 + 1/4 + 1/16 = 0.8125. In base 3, Φ3(11) = .2013 = 2/3 + 1/27 = 0.7037.
+
+i i
+
+i i
+i i
+
+i i
+
+i i
+
+3.6. Variance Reduction
+
+77
+
+The discrepancy of the radical inverse sequence is O((log N )/N ) for any base b. To obtain a d-dimensional low-discrepancy sequence, a diﬀerent radical-inverse sequence is used in each dimension. Therefore, the ith point in the sequence is given as
+
+xi = (Φb1 (i), Φb2 (i), Φb3 (i), ..., Φbd (i)),
+
+where the bases bj are relatively prime.
+The Halton sequence for d dimensions sets the bi terms to be the ﬁrst d prime numbers; i.e., 2, 3, 5, 7, ..., and so on. The Halton sequence has a discrepancy of O((log N )d/N ). Intuitively, the reason the Halton sequence is uniform can be explained as follows: This sequence produces all binary strings of length m before producing strings of length m + 1. All intervals of size 2−m will be visited before a new point is put in the same interval.
+When the number of samples required N is known ahead of time, the Hammersley sequence could be used for a slightly better discrepancy. The ith point of the Hammersley sequence is
+
+i
+
+xi
+
+=
+
+( N
+
+,
+
+Φb1 (i),
+
+Φb2 (i),
+
+Φb3 (i),
+
+...,
+
+Φbd−1 (i)).
+
+This sequence is regular in the ﬁrst dimension; the remaining dimensions use the ﬁrst (d − 1) prime numbers. The discrepancy of the Hammersley point set is O((log N )d−1/N ).
+Other sequences, such as the Niederreiter, are also useful for Monte Carlo computations [19].
+
+Why Quasi–Monte Carlo?
+The error bound for low-discrepancy sequences when applied to MC integration is O((log N )d/N ) or O((log N )d−1/N ) for large N and dimension d. √This bound could have a substantial potential beneﬁt compared to the 1/ N error bounds for pure Monte Carlo techniques. Low-discrepancy sequences work best for low dimensions (about 10-20); at higher dimensions, their performance is similar to pseudorandom sampling. However, as compared to pseudorandom sampling, low-discrepancy sequences are highly correlated; e.g., the diﬀerence between successive samples in the van der Corput sequence (a base-2 Halton sequence) is 0.5 half of the time; Table 3.1 shows this.
+The upshot is that low-discrepancy sampling gives up randomness in return for uniformity in the sample distribution.
+
+i i
+
+i i
+
+i i
+
+78
+
+3. Monte Carlo Methods
+
+3.7 Summary
+
+In this chapter, we have described Monte Carlo integration techniques and discussed their accuracy and convergence rates. We have also presented variance reduction techniques such as importance sampling, stratiﬁed sampling, the use of control variates, multiple importance sampling, and quasi– Monte Carlo sampling. More details on MC methods can be found in Kalos and Whitlock [86], Hammersley and Handscomb [62], and Spanier and Gelbard [183]. References on quasi–Monte Carlo methods include Niederreiter [132].
+
+3.8 Exercises
+1. Write a program to compute the integral of a one-dimensional function using Monte Carlo integration. Plot the absolute error versus the number of samples used. This requires that you know the analytic answer to the integral, so use well-known functions such as polynomials.
+Experiment with various optimization techniques such as stratiﬁed sampling and importance sampling. Draw conclusions about how the error due to the Monte Carlo integration is dependent on the sampling scheme used.
+2. Using the algorithm designed above, try to compute the integral for sine functions with increasing frequencies. How is the error inﬂuenced by the various frequencies over the same integration domain?
+3. Write a program to compute the integral of a two-dimensional function using Monte Carlo integration. This is very similar to the ﬁrst exercise, but using two-dimensional functions poses some additional problems. Experiment with stratiﬁed sampling versus N -rooks sampling, as well as with importance sampling. Again, plot absolute error versus number of samples used.
+4. Implement an algorithm to generate uniformly distributed points over a triangle in the 2D-plane. Start with a simple triangle ﬁrst (connecting points (0, 0), (1, 0) and (0, 1)), then try to generalize to a random triangle in the 2D plane.
+How can such an algorithm be used to generate points on a triangle in 3D space?
+
+i i
+
+i i
+i i
+
+i i
+
+i i
+
+3.8. Exercises
+
+79
+
+5. Pick an interesting geometric solid in 3D: a sphere, cone, cylinder, etc. Design and implement an algorithm to generate uniformly distributed points on the surface of these solids. Visualize your results to make sure the points are indeed distributed uniformly.
+
+i i
+
+i i
+
+i i
+
+i i
+
+i i
+
+4
+
+Strategies for Computing Light Transport
+4.1 Formulation of the Rendering Equation
+The global illumination problem is basically a transport problem. Energy emitted by light sources is transported by means of reﬂections and refractions in a three-dimensional environment. We are interested in the energy equilibrium of the illumination in the environment. Since the human eye is sensitive to radiance values, and since we want to compute photorealistic images, we are primarily interested in radiance values or average radiance values computed over certain areas and solid angles in the scene. The latter means that we should compute ﬂux values for several areas of interest, which will be referred to as sets. The exact geometric shape of these sets can vary substantially, depending on the requested level of accuracy. As will be explained in subsequent chapters, ray tracing algorithms deﬁne sets as surface points visible through a pixel, with regard to the aperture of the eye. Radiosity algorithms often deﬁne sets as surface patches with the reﬂecting hemisphere as the directional component (Figure 4.1). Other algorithms might follow diﬀerent approaches, but the common factor is always that for a number of ﬁnite surface elements and solid angle combinations, average radiance values need to be computed.
+As explained in Chapter 2, the fundamental transport equation used to describe the global illumination problem is called the rendering equation and was ﬁrst introduced into the ﬁeld of computer graphics by Kajiya [85]. The rendering equation describes the transport of radiance through a three-dimensional environment. It is the integral equation formulation of the deﬁnition of the BRDF and adds the self-emittance of surface points at light sources as an initialization function. The self-emitted energy of light sources is necessary to provide the environment with some starting energy.
+81
+
+i i
+
+i i
+82
+
+4. Strategies for Computing Light Transport
+
+i i
+
+Figure 4.1. Sets of surface points and directions for ray tracing and radiosity algorithms.
+The radiance leaving some point x, in direction Θ, is written as:
+L(x → Θ) = Le(x → Θ) + fr(x, Ψ ↔ Θ)L(x ← Ψ) cos(Nx, Ψ)dωΨ.
+Ωx
+(4.1) The rendering equation tells us that the exitant radiance emitted by a point x in a direction Θ equals the self-emitted exitant radiance at that point and in that direction, plus any incident radiance from the illuminating hemisphere that is reﬂected at x in direction Θ. This is illustrated in Figure 4.2. Emission can result from various physical processes, e.g., heat or chemical reactions. The emission can also be time-dependent for a single surface point and direction, as is the case with phosphorescence. In the context of global illumination algorithms, one usually is not interested in the nature of the source of the self-emitted radiance of surfaces. Self-emitted radiance is merely considered as a function of position and direction. As was shown in Chapter 2, it is possible to transform the rendering equation from an integral over the hemisphere to an integral over all surfaces in the scene. Both the hemispherical and area formulation contain exitant and incident radiance functions. We know that radiance remains unchanged along straight paths, so we can easily transform exitant radi-
+i
+i
+
+i i
+
+i i
+
+4.1. Formulation of the Rendering Equation
+
+i i
+83
+
+Figure 4.2. Rendering equation: incident radiance is integrated over the hemisphere.
+ance to incident radiance and vice-versa, thus obtaining new versions of the rendering equation that contain exitant or incident radiance only. By combining both options with a hemispheric or surface integration, we obtain four diﬀerent formulations of the rendering equation.
+The formulations that integrate over surfaces or hemispheres are all mathematically equivalent. However, there can be some important differences when one develops algorithms starting from a speciﬁc formulation. For completeness, we list all possible formulations of the rendering equation.
+4.1.1 Exitant Radiance, Integration over the Hemisphere The incident radiance in the classic form of the rendering equation is replaced by the equivalent exitant radiance at the nearest visible point y = r(x, Ψ), found by evaluating the ray-casting function (Figure 4.3):
+L(x → Θ) = Le(x → Θ) + fr(x, Ψ ↔ Θ)L(y → −Ψ) cos(Nx, Ψ)dωΨ,
+Ωx
+
+y L(r(x,Ψ)→−Ψ)
+Nx y
+L(r(x,Ψ)→−Ψ)
+x
+
+L(x→Θ)
+Le(x→Θ) y
+L(r(x,Ψ)→−Ψ)
+
+Figure 4.3. Transport of exitant radiance using hemisphere integration.
+
+i i
+
+i i
+

@@ -1,0 +1,545 @@
+1
+
+Author: Wes McDermott Technical editors: Cyrille Damez, Nicolas Wirrmann Copy editors: Alexandre Bagard, Paul Gresty, Claudia Vance Layout: Charlotte Hubschwerlin Cover art: Elouan Harmand Copyright © 2018 Allegorithmic. All rights reserved. No part of this publication may be reproduced, stored in a retrieval system, or transmitted in any form or by any means, electronic, mechanical, photocopying, recording or otherwise without prior consent of the publishers.
+First edition published June 2016. Third edition February 2018. Legal deposit (third edition): February 2018. Substance Designer and Substance Painter are registered trademarks of Allegorithmic. All other nonAllegorithmic product names or trademarks belong to their respective holders. The authors, editors and publishers have made extensive efforts to ensure the accuracy of the information contained in this book. Any errors brought to the publisher’s attention will be corrected in future editions.
+2
+
+THE PBR GUIDE
+Wes McDermott
+3
+
+4
+
+Allegorithmic is the industry leader in 3D texturing technologies with its award-winning Substance suite. More than 85% of AAA game studios use Substance, making it the standard for creating next-generation PBR (Physically Based Rendering) assets. Clients include Activision, Electronic Arts, Naughty Dog, and Ubisoft. Substance is also spreading to the fields of VFX and animation, design and architecture, allowing a growing number of artists and designers to create objects, environments and characters using the latest PBR techniques. Founded in 2003, Allegorithmic is based in France with offices in Clermont-Ferrand and Paris, and has global offices in Los Angeles, Tokyo, and Seoul.
+5
+
+6
+
+Wes McDermott
+Born in Louisville, Kentucky, Wes McDermott approaches 3D art with a view to finding the key balance between technical knowledge and artistic skill sets. He has gained extensive experience in this field specializing in photography, video and multimedia in companies in a wide range of sectors. He is the author of Real World modo: The Authorized Guide: In the Trenches with modo (Focal Press, 2009) and Creating 3D Game Art for the iPhone with Unity: Featuring modo and Blender Pipelines (Focal Press, 2010). His mobile app CameraMan for Maya was nominated for the ‘Best Software Innovation of the Year’ Award by 3D World Magazine in 2011. He is currently a technical artist and Substance Integrations Product Manager at Allegorithmic.
+7
+
+8
+
+9
+
+10
+
+11
+
+12
+
+13
+
+TABLE OF CONTENTS
+PART 1
+THE THEORY OF PHYSICALLY BASED RENDERING AND SHADING
+• LIGHT RAYS .....................................................................................................................18 • ABSORPTION AND SCATTERING ........................................................... 19
+Transparency and Translucency
+• DIFFUSE AND SPECULAR REFLECTION ........................................ 22
+Microfacet Theory
+• COLOR ............................................................................................................................... 28 • BRDF .................................................................................................................................... 29 • ENERGY CONSERVATION ............................................................................. 30 • FRESNEL EFFECT .................................................................................................. 30
+F0 (Fresnel Reflectance at 0 Degrees)
+• CONDUCTORS AND INSULATORS ...................................................... 33
+Metals and Non-Metals
+• LINEAR SPACE RENDERING ....................................................................... 38 • KEY CHARACTERISTICS OF PBR .......................................................... 40
+14
+
+TABLE OF CONTENTS
+PART 2
+PRACTICAL GUIDELINES FOR CREATING PBR TEXTURES
+• WHAT IS PBR? ......................................................................................................... 45
+What Are The Benefits? What Does It Mean for the Artist?
+• METAL/ROUGHNESS WORKFLOW ................................................... 47
+Dielectric F0 / Base Color / Metallic / Roughness / Resolution and Texel Density Pros and Cons
+• SPECULAR/GLOSSINESS WORKFLOW ......................................... 64
+Diffuse / Specular / Glossiness / Resolution and Texel Density Pros and Cons
+• MAPS COMMON TO BOTH WORKFLOWS ........................................... 74
+Ambient Occlusion / Height/Normal
+• SUBSTANCE PBR UTILITIES ....................................................................... 80
+Substance Designer / Substance Painter / Substance Outputs and Rendering
+• APPENDIX - CHARTS ........................................................................................ 89
+Is the Surface Metal? / Reflectance Values / Correct/Incorrect Comparisons
+• REFERENCES/IMAGE CREDITS ................................................... 93/95
+15
+
+16
+
+THE PBR GUIDE
+PART 1
+THE THEORY OF PHYSICALLY BASED RENDERING AND SHADING
+Light is a complex phenomenon as it can exhibit properties of both a wave and a particle. As a result, different models have been created to describe its behavior. As texture artists, we are interested in the ray model of light as it describes the interaction of light and matter. Understanding how light rays interact with surface matter is important because our job is to create textures that describe a surface. The textures and materials we author interact with light in our virtual worlds. The more we understand how light behaves, the better our textures will look. In this guide, we will discuss the theory behind the physics of physically based rendering (PBR) models. We will start by examining the behavior of light rays and work up to defining the key characteristics of PBR.
+17
+
+LIGHT RAYS
+The ray model of light states that a light ray has the trajectory of a straight line in a homogeneous transparent medium such as air. The ray model also says that the ray will behave in a predictable manner when encountering surfaces such as opaque objects, or when passing through a different medium such as from air to water. This makes it possible to visualize the path of the light ray as it moves from its starting point to another point where it changes into another form of energy, such as heat. A light ray that hits a surface is called the incident ray and the angle at which it hits is called the angle of incidence (Figure 01).
+Figure 01: Angle of incidence, incident and reflected rays
+18
+
+A light ray is incident on a plane interface between two media. When a light ray hits a surface, one or both of the following events may occur:
+1. The light ray is reflected off the surface and travels in a different direction. It follows the Law of Reflection, which states that the angle of reflection is equal to the angle of incidence (reflected light).
+2. The light ray passes from one medium to another in the trajectory of a straight line (refracted light).
+At this point, light rays split into two directions: reflection and refraction. At the surface, the ray is either reflected or refracted, and it can be eventually absorbed by either medium. However, absorption does not occur at the surface of the material.
+ABSORPTION AND SCATTERING (Transparency and Translucency)
+When traveling in a non-homogeneous medium or translucent material, light can be absorbed or scattered:
+When light is absorbed, the light intensity decreases as it changes into another form of energy – usually heat. Its color changes as the amount of light absorbed depends on the wavelength, but the direction of the ray doesn’t change.
+19
+
+When light is scattered, the ray direction changes randomly, and the amount of deviation depends on the material. Scattering randomizes light direction, but doesn’t change its intensity. An ear is a good example of this phenomenon. The ear is thin (absorption is low), so you can see the scattered light radiating from the back of the ear, as shown in Figure 02. If there is no scattering and the absorption is low, rays can pass directly through the surface. This is the case with glass. For example, imagine you are swimming in a clean pool. You can open your eyes and see a great distance through the clear water. However, if that same pool is relatively dirty, the dirt particles will scatter the light and lower the clarity of the water, and the distance you can see will be reduced as a result. The further light travels in such a medium/material, the more it is absorbed and/or scattered. Therefore, object thickness plays a large role in how much the light is absorbed or scattered. A thickness map can be used to describe object thickness to the shader as shown in Figure 03.
+Figure 03: Thickness map used with subsurface scattering within Substance Painter
+20
+
+Figure 02: Scattered light radiating from the back of the ear 21
+
+DIFFUSE AND SPECULAR REFLECTION
+Specular reflection refers to light that has been reflected at the surface, as we discussed in the light ray section. The light ray is reflected off the surface and travels in a different direction. It follows the law of reflection, which states that on a perfectly planar surface the angle of reflection is equal to the angle of incidence. However, most surfaces are irregular, and the reflected direction will vary randomly based on the surface roughness. This changes light direction, but the light intensity remains constant. Rougher surfaces will have highlights that are larger, and that appear dimmer. Smoother surfaces will keep specular reflections focused, and they will appear to look brighter or more intense when viewed from the proper angle. However, the same total amount of light is reflected in both cases (Figure 04).
+Figure 04: Reflected direction will vary randomly based on the surface roughness 22
+
+Refraction is a change in a light ray’s direction. When light moves from one medium to another it changes speed and direction. The index of refraction, or IOR, is an optical measurement that describes the change in the direction a light ray is traveling. Essentially, the IOR value is used to determine how much the ray will be bent when it passes through one medium to another. For example, water has an IOR of 1.33, whereas plate glass has an IOR of 1.52. In figure 05 you can see a rendering of a straw placed in a glass of water. The straw appears bent due to refraction as the light travels through different mediums (air, water and glass).
+Figure 05: The straw appears bent due to refraction 23
+
+Diffuse reflection is light that has been refracted. The light ray passes from one medium to another; as our example, we’ll assume that it enters an object. The light is then scattered multiple times within this object. It is finally refracted again, out of the object, making its way back to the original medium at approximately the same point where it initially entered (Figure 06).
+Diffuse materials are absorbent. If the refracted light travels for too long in such a material, it may be absorbed completely. If the light does exit this material, it has likely traveled only a very small distance from the point of entry.
+Therefore, the distance between the entry and exit points can be considered negligible. The Lambertian model1, which is used for diffuse reflection in a traditional shading sense, does not take surface roughness into account. Other diffuse reflection models, such as the Oren-Nayar model2, do account for this roughness, however.
+Materials that have both high scattering and low absorption are sometimes referred to as participating media or translucent materials. Examples of these are smoke, milk, skin, jade and marble. Rendering of the latter three may be possible with the additional modeling of subsurface scattering where the difference between the ingoing and outgoing point of the light ray is no longer considered negligible. Accurate rendering of media with highly varying and very low scattering and absorption, such as smoke or fog, may require even more expensive methods such as Monte Carlo3 simulations.
+1 https://en.wikipedia.org/wiki/Lambertian_reflectance 2 http://www.cs.cornell.edu/~srm/publications/egsr07-btdf.pdf 3 https://en.wikipedia.org/wiki/Monte_Carlo_method
+24
+
+Figure 06: A light ray travelling from one medium to another scattering inside the object
+Microfacet Theory
+In theory, both diffuse and specular reflection are dependent on the surface irregularities where the light rays intersect with a medium. In practice however, the effect of roughness on diffuse reflection is less visible because of the scattering that occurs inside the material. As a result, the outgoing direction of the ray is fairly independent of surface roughness and the incident direction. The most common model for diffuse reflection (Lambertian) completely neglects roughness.
+In this guide, we refer to these surface irregularities as surface roughness. Surface irregularities can have several other names, including roughness, smoothness, glossiness or micro-surface, depending on the PBR workflow in use. All these terms describe the same aspect of a surface, which is sub-texel geometric detail.
+25
+
+These surface irregularities are authored in the roughness or glossiness map depending on the workflow that is being used. A physically-based BRDF is based on the microfacet theory, which supposes that a surface is composed of small-scaled planar detail surfaces of varying orientation called microfacets. Each of these small planes reflects light in a single direction based on its normal (Figure 07). Micro-facets whose surface normal is oriented exactly halfway between the light direction and view direction will reflect visible light. However, in cases where the microsurface normal and the half normal are equal, not all microfacets will contribute as some will be blocked by shadowing (light direction) or masking (view direction) as illustrated in Figure 07. The surface irregularities at a microscopic level cause light diffusion. For example, blurred reflections are caused by scattered light rays. The rays are not reflected in parallel, so we perceive the specular reflection as blurred (Figure 08).
+26
+
+Figure 07: Physically-based BRDF based on microfacet theory
+Based on Siggraph 2010 Paper- Physically-based Shading Models for Film and Game Production
+Figure 08: Blurred reflections are due to scattered light rays 27
+
+COLOR
+The visible color of a surface is due to the wavelengths emitted by the light source. These wavelengths are absorbed by the object and reflected both specularly and diffusely. The remaining reflected wavelengths are what we see as color. For example, the skin of an apple mostly reflects red light. Only the red wavelengths are scattered back outside the apple skin, while the others are absorbed (Figure 09). The apple also has bright specular highlights the same color as the light source because with materials that do not conduct electricity (dielectrics) – like the skin of an apple – specular reflection is almost independent of wavelength. For these materials, the specular reflection is never colored. We will discuss the different type of materials (metals and dielectrics) in later sections. Substance PBR shaders use the GGX microfacet distribution4.
+Figure 09: Red wavelengths are reflected to the eye
+4 http://www.cs.cornell.edu/~srm/publications/egsr07-btdf.pdf 28
+
+BRDF
+A bidirectional reflectance distribution function (BRDF) is a function that describes the reflectance properties of a surface. In computer graphics, there are different BRDF models – some of which are not physically plausible. For a BRDF to be physically plausible, it must be energy conserving and exhibit reciprocity. Reciprocity refers to the Helmholtz Reciprocity Principle, which states that incoming and outgoing light rays can be considered as reversals of each other without affecting the outcome of the BRDF. The BRDF used by Substance’s PBR shaders are based on Disney’s principled reflectance model. This model is based on the GGX microfacet distribution. GGX provides one of the better solutions in terms of specular distribution: with a shorter peak in the highlight and a longer tail in the falloff, it looks more realistic (Figure 10).
+Figure 10: GGX vs Blinn specular distribution – GGX provides one of the better solutions in terms of specular distribution
+29
+
+ENERGY CONSERVATION
+Energy conservation plays a vital role in physically-based rendering solutions. This principle states the total amount of light re-emitted by a surface (reflected and scattered back) is less than the total amount received. In other words, the light reflected from the surface will never be more intense than it was before it hit the surface. As artists, we don’t have to worry about controlling energy conservation. This is one of the advantages of PBR: energy conservation is always enforced by the shader. This is part of the physically-based model and it allows us to focus on art rather than physics.
+FRESNEL EFFECT
+The Fresnel reflection factor also plays a vital role in physicallybased shading as a coefficient of the BRDF. The Fresnel Effect, as observed by French physicist Augustin-Jean Fresnel, states that the amount of light reflected from a surface depends on the viewing angle at which it is perceived. Think of a pool of water. If you look straight down, perpendicular to the water surface, you can see down to the bottom. Viewing the water surface in this manner would be at zero degrees or normal incidence, normal being the surface normal. If you look at the pool of water at a grazing incidence, more parallel to the water surface, you will see that the specular reflections on the water surface become more intense and you may not be able to see below the surface of the water at all.
+Fresnel is not something that we control in PBR as we did in traditional shading. Again, this is another aspect of physics that is handled by the PBR shader. When viewing a surface at a
+30
+
+grazing incidence, all smoothed surfaces will become reflectors at nearly 100% at a 90-degree angle of incidence. For rough surfaces, reflectance will become increasingly specular but will not approach 100% specular reflection. The most important factor here is the angle between the normal of each microfacet and the light, rather than the angle between the normal of the ‘‘macrosurface’’ and the light. Because the light rays are dispersed in different directions, the reflection appears softer, or dimmer. What occurs at a macroscopic level is somewhat similar to the average of all the Fresnel Effect you would observe for the collective microfacets.
+F0 (Fresnel Reflectance at 0 Degrees)
+When light hits a surface straight on or perpendicularly (at a 0-degree angle), a percentage of that light is reflected as specular. Using the index of refraction (IOR) for a surface, you can derive the amount that is reflected. This is referred to as F0 (Fresnel zero) (Figure 11). The amount of light that is refracted into the surface is referred to as 1–F0.
+Figure 11: For a smooth dielectric surface, F0 will reflect between 2-5% of light and 100% at grazing angles
+31
+
+The F0 range for most common dielectrics will be from 0.020.05 (linear values). For conductors, the F0 range will be 0.51.0. The reflectivity of a surface is therefore determined by the refractive index as shown in the equation below (Lagarde 2011).
+
+F(0°)
+
+=
+
+_(n_-_1)_² (n+1)²
+
+=
+
+0.02
+
+It is the F0 reflectance value that concerns us when authoring our textures. Non-metals (dielectrics/insulators) will have a greyscale value and metals (conductors) will have an RGB value. With regards to PBR, and from an artistic interpretation of reflectance, we can state that for a common smooth dielectric surface, F0 will reflect between 2% and 5% of light and 100% at grazing angles (Figure 11).
+The dielectric (non-metal) reflectance values do not change drastically. When altered by roughness, the actual changes in value can be hard to see. However, there is a difference in the values. Figure 11 presents a chart that shows the F0 ranges for both metal and non-metal materials.
+Notice that the ranges for non-metals do not deviate drastically from one another. Gemstones are an exception as they have higher values. We will discuss F0 as it specifically relates to conductors and insulators a bit later.
+
+32
+
+CONDUCTORS AND INSULATORS (Metals and Non-Metals)
+When creating materials for PBR, it is helpful to think in terms of metal or non-metal. Ask yourself if the surface is metal or not. If it is, you will need to follow one set of guidelines. If it is not, you will need to follow another. This can be a simplistic approach as some materials may not fall into these categories such as metalloids (a mix of metal and non-metal), but in the overall process of creating materials, distinguishing between metal and non-metal is a good approach and metalloids are an exception. To set up guidelines for materials, we must first understand what we are trying to create. With PBR, we can look at the properties of metals (conductors) and non-metals (insulators) to derive this set of guidelines as shown in Figure 12.
+Values from DONTNOD Physically based rendering chart for Unreal Engine 4: Values available in PBR Base Material and Metal Refectance Nodes
+Figure 12: F0 ranges for both metal and non-metal materials
+33
+
+Refracted light is absorbed, and the color tint of metals comes from the reflected light, so in our maps, we don’t give metals a diffuse color.
+Metals
+Metals are good conductors of heat and electricity. The electric field in conducting metals is zero, and when an incoming light wave made of electric and magnetic fields hits the surface, the wave is partially reflected, and all the refracted light is absorbed. The reflectance value for polished metal is high at a range of about 70-100% reflective (Figure 13).
+Figure 13: The reflectance value for metal is around 70-100% specular
+Some metals absorb light at different wavelengths. For example, gold absorbs blue light at the high-frequency end of the visible spectrum, so it appears yellow. However, since the refracted light is absorbed, the color tint of metals comes from the reflected light. In our maps, therefore, we don’t give metals
+34
+
+a diffuse color. For example, in the specular/gloss workflow, raw metal is set to black in the diffuse map and the reflectance value is a tinted color value in the specular map. With metals, the reflectance value will be RGB and can be tinted. Since we are working within a physically-based model, we need to use realworld measured values for the metal reflectance in our maps.
+Another important aspect of metals in terms of texturing is their tendency to corrode. This means that weathering elements can play a large role in the reflective state of metal. If the metal rusts, this changes the reflective state of the metal. The corroded areas are then treated as a dielectric material denoted by a black value in the metallic map as shown in Figure 14. As we will discuss in Part 2, the shader in the metallic/roughness workflow hardcodes the F0 value for dielectrics to be 4% reflective. Figure 14 shows the rusted areas in the base color map as diffuse reflected color with a hardcoded F0 value of 4%.
+Also, painted metal is treated as a dielectric rather than a metal. The paint acts as a layer on top of the raw metal. Only the raw metal exposed from chipped paint is treated as metal. The same goes for dirt on metal or any matter that obscures the raw metal.
+As noted at the beginning of this chapter, it is helpful to ask if a material is a metal or not when creating PBR materials. To be even more precise, the question should also include information about the state of the metal: whether it is painted, rusted or covered in another matter like dirt or grease. The material will be treated as dielectric if it is not raw metal. Depending on weathering, there could be some blending between metal and non-metal as weathering elements play a role in the reflective state of a metal.
+35
+
+Figure 14: Corrosive areas are treated as a dielectric with an F0 value of 4% reflective
+Non-Metals
+Non-metals (insulators/dielectrics) are poor conductors of electricity. The refracted light is scattered and/or absorbed (often re-emerging from the surface), so they reflect a much smaller amount of light than metals and will have an albedo color.
+We stated earlier that the value for common dielectrics is around 2-5% based on the F0 as computed by the index of refraction. These values are contained within the linear range of 0.017-0.067 (40-75 sRGB) as shown in Figure 14. Apart from some non-metal materials such as gemstones, most dielectrics will not have an F0 value greater than 4%.
+As with metals, we need to use real-world measured values, but it can be difficult to find an index of refraction (IOR) for other
+36
+
+materials that are not transparent. However, the value between most common dielectric materials does not change drastically, so we can use a few guidelines for reflectance values. We will cover them later in this guide. The value for common dielectrics is around 2-5% based on the F0 as computed by the IOR. You can see this range illustrated in Figure 15.
+Figure 15: Conversions from sRGB to linear were done using the gamma 2.2 approximation – see the section on linear space rendering for more details
+37
+
+LINEAR SPACE RENDERING
+Linear space rendering is a highly complex subject. For this guide, we will take a simplistic approach in stating that linear space rendering provides the correct math for lighting calculations. It creates an environment that allows light interactions to be represented in a credible real-world manner. In linear space, the gamma is 1.0 and calculations are performed linearly in this space. For the rendered image to look correct to our eye, the linear gamma needs to be adjusted.
+Our eyes perceive changes in light values non-linearly, meaning that they work at a gamma that is greater than 1.0. The human eye is more sensitive to darker tones than brighter tones. Computer monitors factor in this sensitivity to display images so that we can perceive them correctly, which is to say we view color on a monitor using a non-linear gamma or in gammaencoded space (sRGB).
+Computations of color values and operations on colors should be performed in linear space. The process transforms gammaencoded values into linear encoded values from our color maps, and from colors chosen while viewing on a monitor via a color picker. In a color-managed workflow, this process typically involves tagging a texture map to be interpreted as linear or sRGB. The computations are then carried out in linear space (gamma 1.0) and the final rendered result is viewed in gammaencoded space (sRGB).
+A more simplistic way to consider this is that if the map represents color that you see (diffuse reflected color), such as the color tint of a metal or the green color of grass, then it should be interpreted as sRGB. If the map represents data, such
+38
+
+as how rough the surface is or if the material is metal, then it should be interpreted as linear. Substance handles the conversion between linear/sRGB space for inputs automatically as well as gamma-correction on the computed result in the rendered viewport. As artists, we don’t usually need to worry about the linear computation and conversions within the Substance software. When using Substances via the Substance Integration plugin, the interpretations for linear space are also handled automatically. However, it’s important to understand the process: when Substance maps are utilized as exported bitmaps and not Substances, you may need to manually handle the conversions depending on the renderer you are using. Proper (standard) conversion from sRGB to linear is defined as:
+For the sake of simplicity, for all the conversions in this guide as well as in Substance Designer and Substance Painter, we used the following simplified (but approximate) conversion functions instead:
+39
+
+KEY CHARACTERISTICS OF PBR
+Now that we have explored the basic theory behind the physics, we can derive some key characteristics of PBR:
+1. Energy conservation. A reflected ray is never brighter than the value it had when it first struck the surface. Energy conservation is handled by the shader.
+2. Fresnel. The BRDF is handled by the shader. The F0 reflectance value has minimal change for most common dielectrics and falls within a range of 2-5%. The F0 for metals is a high value, ranging from 70-100%.
+3. Specular intensity is controlled through the BRDF, roughness or glossiness map and the F0 reflectance value.
+4. Lighting calculations are computed in linear space. All maps that have gamma-encoded values such as base color or diffuse are usually converted by the shader to linear, but you may have to ensure that the conversion is properly handled by checking the appropriate option when importing the image in your game engine or renderer. Maps that describe surface attributes such as roughness, glossiness, metallic and height should be set to be interpreted as linear.
+40
+
+41
+
+42
+
+THE PBR GUIDE
+PART 2
+PRACTICAL GUIDELINES FOR CREATING PBR TEXTURES
+In Part 1, we defined PBR from a technical and theoretical standpoint. In Part 2, we will discuss the practical application of authoring PBR textures and provide a set of guidelines that are based on the foundations established in Part 1.
+We will begin by redefining PBR from an artistic perspective. From there, we will address the principles of the metal/ roughness workflow. We will then follow up with the specular/ glossiness workflow and discuss the differences in the authoring methods. It is best to read through both workflows to get a full idea of the overall guidelines for authoring PBR textures.
+In this guide, we will discuss workflows using the Substance toolset, but the principles discussed for map creation apply to any software used to create physically-based textures and materials. Physically Based Rendering (PBR) is a methodology rather than a hard standard. There are specific principles and guidelines, but no one true rule, which means there can be different implementations. The map types and workflow used can vary. A GGX BRDF is commonly used but there can be variation
+43
+
+in the terms. Also, some implementations change the map names, even though their underlying usage remains the same. In this part, we will discuss the two most common workflows, which are metal/roughness and specular/glossiness (Figure 16). The Substance toolset for authoring PBR maps, which is comprised of Substance Designer, Substance Painter and Substance B2M, supports both workflows. The Substance PBR shaders for metal/roughness and specular/ glossiness use GGX BRDF and do not use any value remapping for roughness/ glossiness. However, if any custom remapping is needed, this can easily be implemented in Substance.
+Figure 16: Metallic/Roughness and Specular/Glossiness workflows
+Furthermore, custom shaders are supported in the Substance toolset, which means you can adapt Substance to any customized pipeline. While both workflows have pros and cons in their implementation, one is not superior to the other. It is the underlying concepts and guidelines that will make the PBR maps you author accurate, rather than the workflow itself. The workflows represent the same data, but they implement it in different ways.
+44
+
+WHAT IS PBR?
+Physically Based Rendering (PBR) is a method of shading and rendering that provides a more accurate representation of how light interacts with surfaces. It is referred to as Physically Based Rendering (PBR) or Physically Based Shading (PBS). Depending on what aspect of the pipeline is being discussed, PBS is usually specific to shading concepts and PBR is specific to rendering and lighting. However, both terms describe the process of representing assets from a physically accurate standpoint.
+What are the benefits?
+As artists, we can view the benefits of PBR from an artistic and production efficiency mindset:
+1. PBR removes the guesswork of authoring surface attributes, such as specularity, since its methodology and algorithms are based on physically accurate formulas. It is therefore easier to create realistic-looking assets.
+2. Assets will look accurate in all lighting conditions. 3. PBR provides a workflow for creating consistent artwork, even between different artists.
+What does it mean for the artist?
+As artists, we need to think differently about the maps that describe the attributes of a surface as advances in computer hardware and rendering allow us now to more closely simulate the physics of light.
+45
+
+We need to throw out the concepts of diffuse and specular maps from traditional rendering workflows because these maps only serve as workarounds for approximating light interaction with materials.
+In PBR, the shader handles the heavy lifting of the rules of physics through energy conservation and BRDF while, as artists, we create maps that are guided by physical principles. The scientific aspects of PBR take the guesswork out of material values and allow us to spend more time on the creative aspects of texturing. While it is important to adhere to guidelines and author maps correctly, this doesn’t mean that we must now disregard our artistic intuition. It is the artistic perspective that truly brings character to a material, revealing its story through carefully crafted detail and expression. The physics of the process should never be the artist’s main concern. Just because we are working in a more physically accurate environment does not mean that we cannot create stylized art. For example, Disney’s physically-based reflectance model was designed to be a principled approach. That is, it was geared more towards art direction rather than a strictly physical model. It is important to know the principles and use the guidelines without being slaves to them.
+As artists, we need to think differently about the maps that describe the attributes of a surface. There are new map types with rules and guidelines to follow.
+46
+
+METAL/ROUGHNESS WORKFLOW
+The metal/roughness workflow is defined through a set of channels, which are fed to a sampler in the PBR shader as textures. The maps specific to the metal/roughness workflow are base color, metallic and roughness (Figure 17). We will discuss each of these map types, which are common to both workflows. The PBR shader will also use ambient occlusion, normal and possibly height for parallax or displacement mapping (Figure 18).
+Figure 17: Metallic/Roughness workflow
+Figure 18: Height map and ambient occlusion as optional inputs to the shader
+47
+
+In the metal/roughness workflow, the reflectance value for metals is placed in the base color map along with the reflected color for dielectrics. The reflection at grazing angles is handled by the BRDF. A metallic map is used, which works like a mask to differentiate metal and dielectric data found in the base color map. The dielectric F0 values are not authored by hand as the shader handles them. When the shader sees black in the metal map, it treats the corresponding area in the base color map as dielectric and uses a 4% (0.04) reflectance value (Figure 19).
+Figure 19: Black denotes non-metal and 0.04 (4%) reflectance is used
+As we discussed in Part 1, the 4% value covers most common dielectric materials. It’s important to note that all values, such as dielectric F0, metal reflectance and brightness ranges for albedo color, are derived from actual measured data. As we look at each map type, we will talk about guidelines, which are based on measured data. In Part 1, we discussed the notion of energy conservation where the light reflected off the surface will never be more intense than it was before it hit the surface. In terms of implementation, the shader typically handles the control of energy conservation. This is the case with Substance. With the metal/roughness workflow
+48
+
+it is not possible to break the law of energy conservation. The diffuse (reflected color) and specular balance are controlled through the metallic mask, and so it is impossible to create a situation where the diffuse and specular can combine to reflect/ refract more light than is initially received. The reflectance value for metals are placed in the base color map along with the reflected color for dielectrics.
+Dielectric F0
+The F0 for common dielectric materials is typically set to 0.04 (linear) 4% reflective. In the metal/roughness workflow, this value is hardcoded in the shader. Some metal/roughness implementations, such as those found in the Substance toolset and Unreal Engine 4, have a specular control, which allows the artist to change the constant F0 value for dielectrics. In Substance, this output is labeled as ‘‘specularLevel’’ and is supplied by a texture sampler in the metal/roughness PBR shader. It represents the range of 0.0-0.08, as shown in Figure 20. This range is remapped in the shader to 0.0-1.0 where 0.5 represents 4% reflective.
+Figure 20: Specular level output represents the 0.0-0.08 range in shader for dielectric F0
+49
+
+If you need to manually set the F0 for a dielectric, you can do so using the specularLevel output in the Substance graph within Substance Designer or the specularLevel channel in Substance Painter as shown in figure 21. We will discuss F0 for dielectrics in depth in the specular/glossiness workflow, as you have full control over F0 in the specular workflow.
+Figure 21: Set custom dielectric F0 using specular level channel
+Figure 22: Base color contains reflected diffuse color and reflectance values for metals
+50
+
+Base Color (RGB – sRGB)
+The base color map is an RGB map that can contain 2 types of data: diffuse reflected color for dielectrics and reflectance values for metals, as shown in Figure 22. The color that represents dielectrics represents reflected wavelengths, as discussed in Part 1. The reflectance values are present if an area is denoted as metal in the metallic map (white values).
+Creation Guidelines
+The base color map can be thought of as being somewhat flat in tonality. That is, its contrast is lower than that of a traditional diffuse map. It is inadvisable to have values that are too bright or too dark. Objects tend to be much lighter in tone than we remember them as being. We can visualize this range in terms of the darkest substance being coal and the brightest being fresh white snow. Coal is dark, but it is not 0.0 black. The color values we choose need to stay within a brightness range.
+As regards to brightness ranges, we are mostly referring to dielectric reflected color. In Figure 23, you can see an example where the dirt value has fallen below the correct brightness range. For dark values, you should not go under 30-50 sRGB. The range for dark values could be more tolerant at 30 sRGB and stricter at 50 sRGB. For bright colors, you should not have any values that are higher than 240 sRGB (Figure23).
+We stated that the base color contains data for reflected light in terms of dielectric materials, and thus it should be devoid of lighting information such as ambient occlusion. There can be exceptions for adding micro-occlusion in cases where the shader would not be able to represent this level of detail with
+51
+
+Figure 23: Base color value ranges for dielectric materials (reflected color)
+only an ambient occlusion channel, as shown in Figure 24. However, if micro-occlusion is added to the map, it still needs to be governed by the brightness ranges. The values in the map that indicate the reflectance values for metals should be obtained from real-world measured values. These values are going to be around 70-100% specular, which we can map to an sRGB range of 180-255.
+Figure 24: The exception to the inclusion of lighting information in the base color is micro-occlusion
+52
+
+In the Substance PBR Utilities section, we will discuss tools that provide preset F0 values for common materials. The metal/ roughness charts provided by Sébastien Lagarde are also great resources (Lagarde 2014).
+Values that indicate the reflectance values for metals should be obtained from real-world measured values.
+• Color represents albedo for non-metal materials and reflectance values for metals. • Base color should be devoid of lighting information with the exception of micro-occlusion. • Dark values should not be lower than 30 sRGB (tolerant range) to 50 sRGB (strict range). • Bright values should not be higher than 240 sRGB. • Reflectance for raw metal is going to be high, in the range of 70-100% specular, which we can map to 180255 sRGB.
+As you will read in the Metallic section below, the base color also can contain metal reflectance values. If dirt or oxidation is added to the base color, this will cause the metal reflectance value to diminish to a range that cannot be considered as raw metal.
+The metallic map must also account for the addition of dirt or oxidation, and its value must be lowered in these areas to indicate that it is no longer considered as raw metal. In Figure 25 you can see that rusted metal is treated as dielectric and set to black in the metallic map. The dirt layer is also accounted for in the metallic map with transitional grey values. The metallic map may not always be binary i.e. 0.0 (black) or 1.0 (white) when there is a thin layer of a dielectric material such as dirt.
+The metallic map operates in a manner similar to a mask, as it tells the shader how to interpret data found in the base color.
+53
+
+Figure 25: The addition of dirt and/or oxidation must also be accounted for in the metallic map
+Metallic (Grayscale – Linear)
+The metallic map is used to define which areas of a material denote raw metal. As a grayscale map, it operates in a manner similar to a mask, as it tells the shader how it should interpret data found in the base color.
+Figure 26: Base color map contains reflectance values for raw metal as indicated by the metal map
+54
+
+The data in the metallic map does not contain real-world data that is directly used as material value. It simply describes to the shader which areas in the base color should be interpreted as reflected color (dielectric) and which areas denote metal reflectance values. In the metallic map, 0.0 (black – 0 sRGB) represents non-metal and 1.0 (white – 255 sRGB) represents raw metal. In terms of defining raw metal and non-metal, this metallic map is often binary: black or white, metal or non-metal. In practice, when the shader looks at the metal map and sees white, it then checks the corresponding areas in the base color map to get the reflectance values for the metal as shown in Figure 26.
+Creation Guidelines
+Metal surfaces have two important aspects relating to texturing: first, their reflectance values will be high in the range of 70100% specular; second, some metals can be corroded. We will look at these two aspects individually as we discuss the creation guidelines.
+Metal areas that fall in this range will need to have a reflectance range of 70-100% reflective.
+Raw Metal
+The metal map is to be authored as 0 or 1, metal or not, and is used to define a raw, polished metal state. As a general guide, the grayscale range for raw metal will be defined as 235-255 sRGB in the metal map. Metal areas that fall in this range will need to have a reflectance range of 70-100% reflective in the base color map, which we can map to 180-255 sRGB as shown in Figure 27. Again, these values are based on real-world measured data.
+55
+
+Figure 27: Base metal will be defined as >= 235 sRGB in the metal map
+Corroded or dielectric layer When you weather a surface, you may need to consider that the metal is oxidized, or to compensate for other environmental aspects such as dirt and grime. In these cases, the metal needs to be treated as dielectric. The same is true for painted metal. If you look at painted metal where portions of the paint have been scratched or chipped away, the metal exposed is “raw” (white in the metallic map) and the paint is a dielectric layer (black in the metallic map), as shown in Figure 28.
+Figure 28: Painted metal is treated as dielectric
+56
+
+The metallic map can represent a blended state between metal and non-metal that is represented by transitional gray values in the map. If the metallic map has gray values lower than 235 sRGB you need to lower the “raw” metal reflectance value in the base color. Think of a dirt layer that partially obscures portions of raw metal as shown in Figure 29. The dirt is dielectric. If you were to leave the metallic map at full white it would treat these dirt areas in the base color as the reflectance value for metal. The dirt color value is much lower than the value needed to represent the 70-100% reflectance for polished metals. By lowering the metallic map value in areas represented by the dirt, you create the appropriate blend between the dielectric and metal reflectance values.
+Figure 29: Grayscale range for metal will be defined as >= 235 sRGB in the metal map
+The opacity of the dirt layer can indicate how much to lower the reflectance value in the base color. There are no hard-and-fast rules here. You are essentially moving from a high-reflectance surface
+57
+
+(conductive) to a lower reflectance surface (dielectric). However, the degree to which this transition is taking place may vary. The Substance toolset allows easy use of weathering effects, as well as control over how these effects will propagate to the channels through multi-channel support. Substance Designer and Substance Painter allow you to change parameters on a Substance effect generator, which will automatically adjust the channels that are controlled by the Substance effect. For example, in Substance Designer you can use a Material Color Blend node to apply an effect such as dirt across multiple channels. On the Material Color Blend, you can control the dirt layer’s effect on metal by adjusting the metallic value slider, as shown in Figure 30. Metal that is oxidized needs to be treated as dielectric, or rusted, metal. The same is true for painted metal.
+Figure 30: Material color blend. Lower metallic value indicates a thin layer of dirt (transitional state between dirt and metal)
+58
+
+• Black (0.0) is non-metal and white (1.0) is metal. There can be transitional grayscale values to account for oxidation or dirt. • If metal map has values lower than 235 sRGB, then the reflectance value needs to be lowered in the base color map.
+Roughness (Grayscale - Linear)
+The roughness map describes the surface irregularities that cause light diffusion, as shown in Figure 31. As discussed in Part 1, the reflected direction will vary randomly based on the surface roughness. This changes light direction, but the light intensity remains constant. Rougher surfaces will have larger and dimmer-looking highlights. Smoother surfaces will keep specular reflections focused, which can appear to look brighter or more intense even though the same total amount of light is reflected.
+Figure 31: The roughness map describes the surface irregularities that cause light diffusion
+59
+
+In this map, black (0.0) represents a smooth surface and white (1.0) represents a rough surface. The roughness map is the most creative map as it allows the artist to visually define the character of a surface. It allows you to creatively tell a story about the condition of a surface. What is its environment? Has it been handled with care or disregard? Has it been exposed to the elements? The condition of a surface tells a lot about its environment and thus relates to the overall design of the assets and worlds you are trying to create.
+Roughness is a highly subjective area. You, the artist, are in full creative control. A good place to start with roughness is the normal map. The normal map will often contain key surface details that should also be represented in the roughness map.
+Creation Guidelines
+Be creative and tell a visual story about the surface.
+Resolution and Texel Density
+A byproduct of using the metal/roughness workflow is that it can produce a white edge artifact, as shown in Figure 32. This issue also occurs in the specular/glossiness workflow. In that case, however, it is not nearly as visible because the effect is reversed: there is a black fringe instead of white, as shown in Figure 33.
+This fringe is due to texture interpolation, and is apparent in the transitional areas between materials where there is a sharp contrast between a dielectric material and a very bright metal. This is shown in Figure 34. With metal/roughness, the base color contains a brighter value for the metal reflectance that is
+60
+
+Figure 32: A byproduct of using the metal/roughness workflow is that it can produce a white edge artifact
+Figure 33: A byproduct of using the specular/glossiness workflow is that it can produce a dark edge artifact
+interpolated with the non-metal diffuse color, which produces the white edge. With specular/glossiness, the diffuse map contains black since raw metal has no diffuse color. The black value is interpolated with the non-metal diffuse color, which in turn produces a black fringe.
+61
+
+Figure 34: Fringe is apparent in the transitional areas between materials
+The document resolution and texel density have a direct impact on the visibility of edge artifacts. For example, if you use a hard edge brush to create the transitional areas between metal and non-metal, a low document resolution will still soften the edge and thus exacerbate the artifact. This low-resolution issue is also caused by UVs that are not scaled to provide an adequate texel density based on the document resolution. Providing a good texel density for UVs is the best method for minimizing any edge artifacts, as shown in Figure 35.
+Figure 35: Providing a good texel density for UVs is the best method for minimizing any edge artifacts
+62
+
+In Figure 35, both texture sets use the same 2048-pixel resolution. However, the image on the right shows a poor UV layout with a low texel density. The document resolution and texel density have a direct impact on the visibility of edge artifacts.
+Creation Guidelines
+Texel density and resolution impact the white edge that can appear in the metal/roughness workflow. To minimize artifacts, make sure that your UVs provide an adequate density to match the document resolution.
+Pros and Cons of the Metal/Roughness Workflow
+Pros • Can be easier to author and less prone to errors caused by supplying incorrect dielectric F0 data. • Uses less texture memory, as metallic and roughness are both grayscale maps. • Seems to be a more widely-adopted workflow.
+Cons • No control over F0 for dielectrics in map creation. However, most implementations have a specular control to override the base 4% value. • Edge artifacts are more noticeable, especially at lower resolutions.
+63
+
+SPECULAR/GLOSSINESS WORKFLOW
+Just as with metal/roughness, the specular/glossiness workflow is defined through a set of maps which are fed as textures to a sampler in the PBR shader. The maps specific to the specular/ glossiness workflow are diffuse, specular and glossiness (Figure 36).
+Figure 36: Specular/glossiness workflow
+Although the specular/glossiness workflow uses more familiar names such as diffuse and specular, it is important to make the distinction that these maps are not the same as their traditional counterparts. Substance uses the term diffuse, but some implementations may refer to diffuse as albedo. The PBR shader will also use ambient occlusion, normal and possibly height for parallax mapping which, as mentioned earlier, will be discussed in the Maps Common to Both Workflows section. In this workflow, the reflectance values for metal and F0 for non-metal materials are placed in the specular map. With the specular/glossiness workflow, you have two RGB maps: one
+64
+
+for diffuse color (albedo) and another for reflectance values (specular). With the specular map, you have control over the F0 for dielectric materials within the map itself.
+As we stated in the metal/roughness workflow, the PBR shaders in Substance handle energy conservation. This becomes even more important in the specular/glossiness workflow as the specular map provides full control over the dielectric F0. This means that the map is more susceptible to containing incorrect values. For example, a white (1.0) diffuse and a white (1.0) specular value can combine to reflect/refract more light than was initially received, which in turn breaks the law of energy conservation. Consequently, when authoring the textures, the texture data would not correspond to the actual result.
+As you will see, the data that the maps represent is the same as in the metal/roughness workflow. We will follow the same guidelines; however, the difference will be in how the maps are authored. The data will be placed in different maps, but we will follow the same principles. As stated earlier all values, such as dielectric F0, metal reflectance and brightness ranges for albedo color, are derived from actual measured data. As we look at each map type, we will discuss guidelines that are based on measured data. This section will not repeat the precise information covered in the metal/roughness section; rather, it will focus on the differences and where distinctions must be made for the specular/glossiness workflow.
+Diffuse (RGB – sRGB)
+As with the base color map from the metal/roughness workflow, the diffuse map contains albedo color. However, it doesn’t contain any reflectance values.
+65
+
+Creation Guidelines The diffuse map is only albedo color. The areas that indicate raw metal will be black (0.0) as metal doesn’t have a diffuse color (Figure 37). In cases where oxidation has occurred, the metal area will contain color, as it is no longer treated as raw metal. The same is true for dirt or other effects that create a dielectric layer over the raw metal.
+Figure 37: Areas that indicate raw metal will be black (0.0) because metal doesn’t have a diffuse color
+The guidelines for the diffuse map in terms of tonality are the same as for the base color map. The exception is that if raw metal is present, then a value of 0.0 (black) is allowed and it is not governed by the guidelines for the darkness ranges
+• Color represents albedo for non-metal materials and black (0.0) for raw metal. • Base color should be devoid of lighting information except for micro-occlusion. • Dark values should not be lower than 30 sRGB (tolerant
+66
+
+range) or 50 sRGB (strict range), except where raw metal is black. • Bright values should not be higher than 240 sRGB.
+Specular (RGB – sRGB)
+The specular map defines the reflectance values for metal and the F0 for non-metal (Figure 38). This RGB map allows for different values for dielectric materials to be authored in the map. This is different from the metal/roughness workflow where dielectrics are hard-coded at 4% reflectivity and can be modified only through the ‘‘specularLevel’’ channel. Just as we covered in the metal/roughness workflow, the F0 data should be derived from real-world measured values. The F0 for dielectrics will be a darker value. The metal reflectance can be colored as some metals absorb light at different wavelengths. The F0 for both dielectrics and metals are authored in the RGB specular map. The specular map allows different values for dielectric F0 to be authored in the map.
+Figure 38: The specular map defines the reflectance values for metal and the F0 for non-metal
+67
+
+Creation Guidelines Since the specular map contains the F0 value for both metals and non-metals, we will break the map into a separate category for each material type. Raw Metal The F0 value should be based on real-world data. As we covered in the metallic map, the reflectance for raw metal will need to be lowered if there is oxidation or some layer that indicates nonmetal. In the case of the specular/glossiness workflow, dirt or oxidation will raise the diffuse color for raw metal in the diffuse map and lower the reflectance value in the specular map, as shown in Figure 39. Also shown in Figure 39 is an example of a dirt layer on raw metal. The dirt in the specular map contains the appropriate F0 value for dielectric. In this case, we are using 0.04 or 4%.
+Figure 39: Oxidation/dirt will raise diffuse color for raw metal and lower reflectance value in the specular map
+68
+
+Dielectric The F0 for dielectric materials is authored in the specular map as well. Here you have full control over the F0 value, but it is important to use the correct data. As we discussed in Part 1, non-metals (insulators/dielectrics) are poor conductors of electricity. The refracted light is scattered and/or absorbed (often re-emerging from the surface) and thus these materials reflect a much smaller amount of light than metals. We stated that the value for common dielectrics would be around 2-5% based on the F0 as computed by the index of refraction (IOR). Except for gemstones, the F0 can be within the 0.02-0.05 (linear) range for common dielectric materials (Figure 40).
+Figure 40: Common dielectric values fall within the 2-5% range
+In terms of sRGB, we are looking at a scale of values between 40-75 sRGB, which overlaps the linear 0.02-0.05 (2-5%) range. If you cannot find an IOR value for a specific material, you can assume 4% (0.04 - plastic). Gemstones are an exception and have a range of 0.05-0.17 (linear) as shown in Figure 40. In the
+69
+
+metal workflow, t he s hader i s m apped to a range o f 0.0-0.08 (linear) when using the specularLevel channel as zero is needed to represent air, as shown in Figure 40.
+• The specular map contains F0 for dielectrics and the reflectance value for raw metal. • Dielectrics reflect a smaller amount of light than metals. The value for common dielectrics would be around 2-5%. In terms of sRGB, the values should be between sRGB 40-75, which overlap the 0.02-0.05 (linear) range. • Common gemstones fall within the 0.05-0.17 (linear) range. • Common liquids fall within the 0.02-0.04 (linear) range. • The reflectance value for raw metal will be high in the range of 70-100% specular, which we can map to 180255 sRGB. • If you can’t find an IOR value for a specific material, you can use 4% (0.04 - plastic).
+Glossiness (Grayscale - Linear)
+The glossiness map describes the surface irregularities that cause light diffusion (Figure 41). In this map, black (0.0) represents a rough surface and white (1.0) represents a smooth surface. It is the inverse of the roughness map in the metal/ roughness workflow. This map has the same artistic guidelines covered in the roughness section above.
+Creation Guidelines Once again, be creative and tell a visual story about the surface.
+70
+
+Figure 41: The glossiness map describes the surface irregularities that cause light diffusion
+Resolution and Texel Density
+We discussed earlier how edge artifacts could appear in both workflows. This was discussed in depth in the metal/ roughness section, as the edge artifacts are more apparent in that workflow. We also mentioned that with specular/ glossiness, the diffuse map contains black since raw metal has no diffuse color. The black value is interpolated with the non-metal diffuse color, which produces a black fringe as shown again in Figure 42.
+Figure 42: A byproduct of using the specular/glossiness workflow is that it can produce a dark edge artifact
+71
+
+Here again, the document resolution and texel density have a direct impact on the visibility of edge artifacts. If you use a hard edge brush to create the transitional areas between metal and non-metal, a low document resolution will still soften the edge and thus exacerbate the artifact. This low-resolution issue is also caused by UVs that are not scaled to provide an adequate texel density compared to the document resolution. Providing a good texel density for UVs is the best method for controlling this issue (Figure 43).
+Figure 43: Providing a good texel density for UVs is the best method for minimizing any edge artifacts
+Creation Guidelines Texel density and resolution impact the black fringe that can appear in the specular/glossiness workflow. Be sure that your UVs provide an adequate density to match the document resolution in order to minimize artifacts.
+72
+
+Pros and Cons of the Specular/Glossiness Workflow
+Pros • Edge artifacts are less apparent. • Control over dielectric F0 in the specular map.
+Cons • Because the specular map provides control over dielectric F0, it is more susceptible to use of incorrect values. It is possible to break the law of conservation if handled incorrectly in the shader. • Uses more texture memory with an additional RGB map. • Can be more confusing as it uses similar terminology to traditional workflows but requires different data. It also requires more knowledge of physically-based guidelines such as correct F0 for dielectrics, black for raw metal diffuse color and possible energy conservation if not handled in the shader.
+73
+
+MAPS COMMON TO BOTH WORKFLOWS Ambient Occlusion (AO)
+The ambient occlusion map defines how much of the ambient environment lighting is accessible to a surface point. It only affects the diffuse contribution and should not occlude the specular contribution. Some engines, such as Unreal Engine 4, have an option for screen space reflection to simulate local reflections. The best combination is to use AO with screen space reflections. In Substance PBR shaders, the ambient lighting (generated by the environment map) is multiplied by the AO. The AO map is supplied by a texture sampler in the PBR shader and is an optional channel (Figure 44). The AO should not be baked into texture maps, but only supplied as its own channel to the shader. AO only affects the diffuse contribution and should not occlude the specular contribution.
+Figure 44: The AO should not be baked into texture maps, but only supplied as its own channel to the shader
+74
+
+Creating Ambient Occlusion In Substance Designer and Substance Painter, AO can be baked from a mesh or converted from a normal map using the integrated baking toolset. Also in both Substance Designer and Substance Painter you can use the HBAO node/filter to generate horizon-based ambient occlusion from a height input, which provides similar results to a raytraced bake, as shown in figure 45.
+Figure 45: Using the HBAO node in Designer or filter in Painter produces similar results to a raytraced bake
+Height
+A height map is often used for displacement in rendering. It can be used for parallax mapping, helping to add more apparent depth and thus greater realism to normal and bump mapping. Substance uses the relief mapping parallax algorithm. The height is supplied by a texture sampler in the PBR shader and is also an option channel input to the PBR shader. In Substance Designer, you can use a parallax occlusion or tessellation shader (Figure 46). With Substance Painter, you can use a displacement channel to drive parallax occlusion.
+75
+
+Figure 46: The height is supplied by a texture sampler in the PBR shader and is also an option channel
+Creating Height
+Like AO, height can be baked in Substance Designer or Substance Painter from a mesh using the integrated baking toolset. In Substance Designer, you can use a node to convert height from a normal map (Figure 47). In Substance Painter you can directly paint height details as shown in figure 48.
+In regard to using height with a realtime shader, it’s best to reduce the amount of high-frequency detail contained in the map. The height map should be designed to represent the overall silhouette of the forms used to displace the geometry. A good practice is to use a blurred version of the height to bring out the forms and reduce any high-frequency details. This will cause the normal map to provide the high-frequency details, and the height will displace the silhouette of the forms (Figure 49). If you are using height as displacement in a raytrace renderer, this high-frequency detail is needed.
+76
+
+Figure 47: Use normal to height node to create a height map from normal data
+Figure 48: Paint height details directly onto the mesh 77
+
+Figure 49: The normal provided the high-frequency detail and the height the silhouette of the forms
+Normal
+The normal map is used to simulate surface details. It is an RGB map where each component corresponds to the X, Y and Z coordinates of the surface normal. It can be used to store the projected details of a high-resolution model to a low-resolution model. In the Substance toolset you can bake the normal or convert a height map to a normal map.
+Creating Normal
+A normal map can be baked in Substance Designer and Substance Painter from a mesh using the integrated baking toolset. In Substance Designer, you can use a normal node to convert height into a normal map as shown in Figure 50. In Substance Painter, you can paint normal data directly in the 3D viewport (Figure 51).
+78
+
+Figure 50: The normal node can create normal data from a height input
+Figure 51: The normal channel can be used to paint normal data
+79
+
+SUBSTANCE PBR UTILITIES
+In this section, we will discuss several Substance utilities that can help with authoring PBR textures and setting correct reflectance values. These tools were built based on the principles and concepts covered in this guide.
+Substance Designer
+PBR Base Material This node is a utility for creating a full base material and can be found under Material Filters > PBR Utilities as shown in Figure 52. It supports both metal/roughness and specular/ glossiness workflows and provides common presets for raw metal materials. It also allows you to set the albedo if creating a non-metal. There are controls for roughness and glossiness depending on the workflow, which also have a grunge amount
+Figure 52: PBR utility for creating a base material using preset values or custom map inputs
+80
+
+option. You can enable map inputs to feed in channels such as base color, normal or height. Dielectric F0 This node outputs F0 values for common dielectric materials (Figure 53) and can also be found under Material Filters > PBR Utilities. You can choose from preset values, and the node has an IOR input field that takes an IOR and computes the F0 value. It was designed for dielectric materials and can be used with the specular/glossiness workflow.
+Figure 53: PBR utility for computing dielectric F0 values using presets or a custom IOR
+Metal Reflectance This node outputs reflectance values for common raw metal materials. Find it in the Substance Designer Library under Material Filters > PBR Utilities. You can choose from several preset metal values as shown in Figure 54.
+81
+
+Figure 54: PBR utility containing presets for metal reflectance values
+PBR Metal/Roughness Validate
+This node is designed to work with the metal/roughness workflow and is a utility which checks for incorrect values for the base color and metal maps (Figure 55). It can be found under Material Filters > PBR Utilities. The node outputs a heat map moving from red > yellow > green where red is incorrect and green/yellow is correct. With metal, it checks the corresponding F0 values in the base color for areas indicated as metal in the metallic map (greater than 235 sRGB). The heat map displays the range in which the F0 range may be too low. For the albedo, it checks to see if dielectric brightness ranges are correct.
+PBR Safe Color
+This node corrects values in the base color or diffuse maps, as shown in Figure 56. It makes sure that values fall within the corrected brightness ranges for dielectrics. It can be found in under Material Filters > PBR Utilities.
+82
+
+Figure 55: PBR utility that checks ranges for albedo/metal reflectance values and outputs a heat map to display correct/incorrect values
+Figure 56: PBR utility that checks ranges for base color and diffuse
+83
+
+Conversion
+BaseColor_metallic_roughness_converter
+This node converts maps from the metal/roughness workflow to various renders and can be found under Material Filters > PBR Utilities.
+• Vray (GGX) • Corona • Corona 1.6 • Redshift 1.x * • Arnold 4 (aiSurface)* • Arnold 4 (aiStandard)* • Renderman (pxrSurface)
+*Arnold 5 supports the base color/metallic/roughness workflow. * Redshift 2.x supports the base color/metallic/roughness workflow.
+Substance Painter
+PBR Metal/Roughness Validate (filter)
+This filter is designed to work with the metal/roughness workflow and is a utility which checks for incorrect values for the base color and metal maps (Figure 57). It is a free filter that can be downloaded from Substance Share. https://share. allegorithmic.com/libraries/824
+The filter outputs a heat map moving from red > yellow > green where red is incorrect and green/yellow is correct. With metal, it checks the corresponding F0 values in the base color for areas indicated as metal in the metallic map (greater than 235 sRGB).
+84
+
+The heat map displays the range in which the F0 range may be too low. For the albedo, it checks to see if dielectric brightness ranges are correct. To use this in Painter, import the filter into your Substance Painter project and tag it as a Filter or copy the filter to the Filter folder in your Shelf.
+Figure 57: PBR utility that checks ranges for albedo/ metal reflectance values and outputs a heat map to display correct/incorrect values
+Substance Outputs and Rendering
+A Substance material from Substance Source supports both the metallic/roughness and specular/glossiness workflows. These outputs can be used with physically-based real-time shaders such as those found in Unreal Engine 4 and Unity. The base color/metallic/roughness outputs can be used with raytraced renderers that support a metallic workflow such as Arnold. The specular/glossiness maps are used only for realtime shaders. Depending on the renderer, you may be able to
+85
+
+use the base color/metallic/roughness outputs directly, or you may need to convert them. Custom materials or resources you download from Substance Share may not have the appropriate outputs for a given renderer as they main only contain base color/metallic/ roughness outputs, so it’s important to understand the type of material inputs your material will accept so that you can utilize the Substance material’s outputs correctly if they need to be converted. For example, with Arnold 5 you can use the metallic/roughness outputs directly. However, with a Vray material, you will need to convert the metallic/roughness outputs to generate reflection and 1/IOR maps. Substance Painter supports several third-party renderer configurations, as shown in figure 58.
+Figure 58: Painter ships with export configurations for popular renderers such as Arnold, Vray, Keyshot, Corona and Redshift
+86
+
+The goal for the Substance Integration plugins is to automatically convert Substance outputs to work with specific renderers. For example, the 3ds Max Substance plugin has presets for working with Arnold, Vray and Corona. Choosing the preset will automatically convert the Substance outputs for use with these renderers (Figure 59).
+Figure 59: Using the Corona preset will create a Corona material and automatically convert the Substance outputs
+For more information on working with third-party renderers with Substance Painter and Substance Designer (Substance Materials), please refer to our rendering documentation for Substance Integrations. https://support.allegorithmic.com/documentation/display/ integrations/Rendering
+87
+
+Figure 60: Is the surface metal? Metal/roughness workflow
+Figure 61: Is the surface metal? Specular/glossiness workflow 88
+
+APPENDIX - CHARTS
+Is the surface metal? It can be helpful to break down a surface into the metal or nonmetal categories. It is often useful to begin the texturing process by first examining the material and asking whether or not it is metal. With this question, you can derive some guidelines for the texturing process as we have covered in this volume and as shown in Figures 60 and 61. Figure 60 uses the metal/roughness workflow and Figure 61 is specular/glossiness. Reflectance Values Figure 62 shows the F0 ranges for dielectrics as they relate to the Substance PBR shader in the metallic/roughness workflow. Dielectrics reflect a smaller amount of light than metals. The value for common dielectrics would be around 2-5%. For sRGB, the values should be between sRGB 40-75, which overlaps the 0.02-0.05 (linear) range.
+Figure 62: Values for common dielectric F0 and metal reflectance values
+89
+
+In Figure 63, you can see both dielectric F0 and metal reflectance values. With metals, the specular range is within 70-100% and maps to the sRGB values of 180-255.
+
+Range in shader
+
+* conversions from sRGB to linear where done using the gamma 2.2 * based on DONTNOD specular and glossiness chart
+
+Figure 63: Values for dielectric F0 and metal reflectance values
+
+Conversions from sRGB to linear were completed using the gamma 2.2 approximation. See the section on Linear Space Rendering in Part 1 for more details.
+
+Correct/Incorrect Comparisons
+In Figure 64, you can see an example of maps created correctly and incorrectly using the metal/roughness workflow. The dirt is marked as raw metal in the metallic map. Also, the metal reflectance value is set too low in the base color as it doesn’t reflect the 70-100% specular range.
+
+90
+
+1. Dirt is marked as raw metal in the metallic map. 2. Metal reflectance is set too low in the base color map. Figure 64: Comparison of correct and incorrect maps – metal/ roughness
+91
+
+92
+
+REFERENCES
+Burley, B. (2012). Physically-Based Shading at Disney. [PDF] Available from:
+https:/disney-animation.s3.amazonaws.com/library/s2012_ pbs_disney_brdf_ notes_v2.pdf [Accessed 5 July 2016].
+Kwast, D. An Introduction to BRDF Models. [PDF] Available from:
+http://hmi.ewi.utwente.nl/verslagen/capita-selecta/CS-Jimenez-KwastDaniel.pdf [Accessed 5 July 2016].
+Lagarde, S. (2014). ‘Dontnod Physically Based Rendering Chart for Unreal Engine,’ Sebastien Lagarde, blog post, April 14, 2014. Available from:
+https://seblagarde.wordpress.com/2014/04/14/dontnod-physically-basedrendering-chart-for-unreal-engine-4/ [Accessed 5 July 2016].
+Lagarde, S. (2011). ‘Feeding a Physically-Based Shading Model,’ Sebastien Lagarde, blog post, August 17, 2011. Available from:
+https://seblagarde.wordpress.com/2011/08/17/feeding-a-physical-basedlighting-mode/. [Accessed 5 July 2016].
+Walter, B., Marschner, S., Li., H. and Torrance, K. (2007). Microfacet Models for Refraction through Rough Surfaces. [PDF] Eurographics Symposium on Rendering, 2007. Available from:
+https://www.cs.cornell.edu/~srm/publications/EGSR07-btdf.pdf [Accessed 5 July 2016].
+Epic Games. (2004-2017). ‘Using Refraction,’ Epic Games, UE4 Documentation, 2017. Available from:
+https://docs.unrealengine.com/latest/INT/Engine/Rendering/Materials/ HowTo/Refraction/. [Accessed 5 July 2016]
+93
+
+94
+
+IMAGE CREDITS
+Cover image Courtesy of Elouan Harmand https://www.artstation.com/eharmand
+Textures from source.allegorithmic.com
+P. 9 Plastic Dot Grid, Scrapped Paint, Dirty Mirror. P. 10-11 Slate Rockery, Rotten Wood, Beach Shell, Slate Tile Mossy. Bronze Formed Panel, Waffled Thread Plate 2, Square Padded Wall, Plastic Hexagonal Cube. P. 12-13 Acoustic Foam, Concrete Damp Wall Eroded.
+P. 97 Slate Floor Tile 4, Slate Floor Tile 1, Slate Floor Tile 10, Granite 1. P. 98-99 Italian Venice Floor Mosaic, Old Dirty Tile Wall. Wall Tile Unstuck, Shield Tile 2. P. 100-101 Aluminium Foil, Bone Dirty. Arabesque Tile Wall 2.
+95
+
+96
+
+97
+
+98
+
+99
+
+100
+

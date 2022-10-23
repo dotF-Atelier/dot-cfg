@@ -1,0 +1,1403 @@
+Mathematica Notebook for the
+SIGGRAPH 2013 talk “Background:
+Physics and Math of Shading”
+This notebook contains some computations referenced in the course notes.
+Off NIntegrate::inumr SetOptions Plot, PlotRange 0, All ;
+Based on the default Matlab color scheme, with some tweaks pCol RGBColor 0, 0, 1 ; blue bCol RGBColor 0.85, 0.0, .85 ; magenta tsCol RGBColor 0, 0.75, 0.75 ; cyan trCol RGBColor 1, 0, 0 ; red abcCol RGBColor 0, 0.75, 0 ; green sgdCol RGBColor 1, 0.75, 0 ; orange gtrCol RGBColor 0.6, 0.3, 0.0 ; brown
+
+Phong NDF
+
+This is the unnormalized Phong distribution function:
+In[10]:= unnormalizedphong Cos Θ Αp;
+Compute the normalization factor (relative to projected area) for the Phong distribution function:
+In[11]:= phongnormf Integrate unnormalizedphong Sin Θ Cos Θ , Φ, Π, Π , Θ, 0, Π 2 , Assumptions Αp 0
+2Π
+Out[11]=
+2 Αp
+
+unnormalizedphong In[12]:= phong
+phongnormf
+
+Out[12]=
+
+2 Αp Cos Θ Αp 2Π
+
+Here are the distribution curves for some logarithmically spaced cosine powers (as well as 0, which corresponds to the uniform distribution):
+
+2 s2013_pbs_physics_math_notebook.nb
+
+In[13]:= GraphicsRow Plot phong . Αp & 0, 1, 2, 4, 8 , Θ, 0, Π 2 , PlotStyle Plot phong . Αp & 16, 32, 64, 128 , Θ, 0, Π 2 , PlotStyle pCol , Plot phong . Αp & 256, 512, 1024, 2048 , Θ, 0, Π 2 , PlotStyle pCol , ImageSize Full
+
+pCol ,
+
+1.5
+1.0 Out[13]=
+0.5
+
+20 15 10
+5
+
+0.5
+
+1.0
+
+1.5
+
+300 250 200 150 100
+50
+
+0.5
+
+1.0
+
+1.5
+
+0.5
+
+1.0
+
+1.5
+
+And an interactive graph:
+
+In[14]:= Manipulate Plot phong . Αp
+
+8000a 1 , Θ, 0, Π 2 , PlotStyle
+
+pCol ,
+
+a, 0.25 , 0, 1
+
+a
+
+1.5
+
+Out[14]=
+
+1.0
+
+0.5
+
+0.5
+
+1.0
+
+1.5
+
+Beckmann NDF
+
+This is the unnormalized Beckmann distribution function:
+
+In[15]:= unnormalizedbeckmann
+
+1 Αb2 Cos Θ 4
+
+1 Cos Θ 2
+; Cos Θ 2 Αb2
+
+Compute the normalization factor (relative to projected area) for the Beckmann distribution function:
+
+In[16]:= beckmannnormf Integrate unnormalizedbeckmann Sin Θ Cos Θ , Φ, Π, Π , Θ, 0, Π 2 , Assumptions Αb 0
+Π Out[16]=
+
+We see here that the correct normalization factor for the Beckmann distribution, given normalization over projected area, is 1 .
+Π
+
+s2013_pbs_physics_math_notebook.nb 3
+
+We see here that the correct normalization factor for the Beckmann distribution, given normalization over projected area, is 1 .
+Π
+
+unnormalizedbeckmann In[17]:= beckmann
+beckmannnormf
+
+Out[17]=
+
+1 Cos Θ 2 Sec Θ 2
+
+Αb2
+
+Sec Θ 4
+
+Π Αb2
+
+The Beckmann Αb parameter is equal to the RMS (root mean square) microfacet slope. Therefore its valid range is from 0 (non-inclusive – 0 corresponds to a perfect mirror or Dirac delta and causes divide by 0 errors in the Beckmann formulation) and up to arbitrarily high values. There is no special significance to a value of 1 – this just means that the RMS slope is 1/1 or 45°. We will look at the shape of the Beckmann NDF for moderately rough surfaces (m from 0.4 to 1):
+
+In[18]:= Plot beckmann . Αb & Range 0.4, 1.0, 0.1 , Θ, 0, Π 2 , PlotStyle bCol
+
+2.0
+
+1.5
+
+Out[18]= 1.0
+
+0.5
+
+0.5
+
+1.0
+
+1.5
+
+We see here that at Αbvalues above 0.75, a local minimum starts appearing at 0°. This is significantly different than a Phong or Gaussian lobe, where the "roughest" possible surface is a uniform distribution. The Beckmann distribution is qualitatively different in that its parameter is not related to the variance of the angle but the mean of the slope. Thus a "very rough" surface in the Beckmann context is not a uniform or almost-uniform distribution, but a distribution clustered around high slopes. Let us look at even larger values of m:
+
+4 s2013_pbs_physics_math_notebook.nb
+
+In[19]:= Plot beckmann . Αb & Range 1, 7 , Θ, 0, Π 2 , PlotStyle bCol
+8 6 Out[19]= 4 2
+
+0.5
+
+1.0
+
+1.5
+
+This behavior is unfortunate for environment map prefiltering, since the frequency content of the NDF decreases to a certain roughness and then starts increasing with m. Beckmann is supposed to be a good match to real-world measurements, but I am not sure over what range of parameters these comparisons were carried out, and whether values this high (or even higher than 0.75, where the local minima starts appearing) are observed in practice.
+
+Let us compare Beckmann and Phong, using an equivalence between the parameters of the two NDFs published in "Microfacet Models for Refraction through Rough Surfaces" (EGSR 2007) – note that the equivalence breaks down for Αb 1:
+
+In[20]:= Αb2Αp Αb_ :
+
+2 2
+Αb2
+
+In[21]:= GraphicsRow Plot beckmann . Αb & Range 0.2, 0.5, 0.1 , phong . Αp Αb2Αp & Range 0.2, 0.5, 0.1 , Θ, 0, Π 2 ,
+PlotStyle bCol, pCol , Plot beckmann . Αb & Range 0.6, 1.0, 0.1 , phong . Αp Αb2Αp & Range 0.6, 1.0, 0.1 , Θ, 0, Π 2 , PlotStyle bCol, pCol , ImageSize Full
+
+8 0.8
+6 0.6
+
+Out[21]= 4 0.4
+
+2
+
+0.2
+
+0.5
+
+1.0
+
+1.5
+
+0.5
+
+1.0
+
+1.5
+
+For rough surfaces (left plot), the equivalence holds about as well as can be expected, but the shape of the NDFs starts to differ significantly as m increases. For relatively smooth surfaces (right plot) the two NDFs match surprisingly well. This is to Phong’s credit, who devised his NDF (although not as such) purely from observation. As the value of Αb decreases, the match improves.
+
+s2013_pbs_physics_math_notebook.nb 5
+
+Interactive graph for “normal”(not super-rough) values, comparing with Phong:
+In[22]:= Manipulate Plot beckmann . Αb a, phong . Αp Αb2Αp a , Θ, 0, Π 2 , PlotStyle bCol, pCol , a, 0.25 , 0.01, 1.0
+
+a
+
+5
+
+4
+
+Out[22]=
+
+3
+
+2
+
+1
+
+0.5
+
+1.0
+
+1.5
+
+Interactive graph for Beckmann by itself for super-rough values: In[23]:= Manipulate Plot beckmann . Αb a, Θ, 0, Π 2 , PlotStyle bCol , a, 1.0, 10.0
+
+a
+
+0.4
+0.3 Out[23]=
+0.2
+0.1
+
+0.5
+
+1.0
+
+1.5
+
+Torrance-Sparrow NDF
+This NDF is a Gaussian on the angle between the microfacet normal and the macroscopic surface normal. We will need to normalize it since Torrance and Sparrow did not supply a normalization factor:
+
+6 s2013_pbs_physics_math_notebook.nb
+
+This NDF is a Gaussian on the angle between the microfacet normal and the macroscopic surface normal. We will need to normalize it since Torrance and Sparrow did not supply a normalization factor:
+
+In[24]:= unnormalizedtorrancesparrow
+
+Θ2
+; Αts
+
+We'll try for an analytical normalization factor:
+
+In[25]:= normts Integrate unnormalizedtorrancesparrow Sin Θ Cos Θ , Φ, Π, Π , Θ, 0, Π 2 , Assumptions Αts 0
+
+1
+Out[25]=
+4
+
+Αts2 Π3 2 Αts
+
+Π
+
+Erf
+
+Αts
+
+2 Αts
+
+Π Erf
+2 Αts
+
+Αts 2 Erfi Αts
+
+Wow, that’s ugly! It also appears to be complex-valued, which is odd since the function being integrated was real-valued. Let’s see if it is really complex-valued:
+
+In[26]:= Plot Im normts , Αts, 0.05, 1 , PlotRange
+
+0.01, 0.01 , PlotStyle Thick
+
+0.010
+
+0.005
+
+Out[26]= 0.005
+
+0.4
+
+0.6
+
+0.8
+
+1.0
+
+0.010
+
+The imaginary part is 0 – looks like the normalization factor actually is real-valued and Mathematica is just being weird. If we were actually going to use this, we would fit a cheap function to the curve instead of using the analytical expression. But since we are just comparing it to other NDFs, no need to do that. Let’s compare it to Blinn-Phong, using the Beckmann parameter conversion (according to the CookTorrance paper, the Beckmann and Torrance-Sparrow parameterizations are the same – both are equal to RMS slope):
+
+unnormalizedtorrancesparrow In[27]:= torrancesparrow
+Re normts
+
+Θ2
+
+4 Out[27]=
+
+Αts2
+
+Π3 2 Re Αts2 Αts
+
+Π
+
+Erf
+
+Αts
+
+2 Αts
+
+Π Erf
+2 Αts
+
+Αts 2 Erfi Αts
+
+s2013_pbs_physics_math_notebook.nb 7
+
+In[28]:= Plot torrancesparrow . Αts & Range 0.2, 0.5, 0.1 , phong . Αp Αb2Αp & Range 0.2, 0.5, 0.1 , Θ, 0, Π 2 , PlotStyle tsCol, pCol
+8
+6
+Out[28]= 4
+2
+
+0.5
+
+1.0
+
+1.5
+
+The curves do look similar, but it appears that the equivalence between the parameterizations of the two distributions is a bit different than the one implied in the Cook-Torrance paper. We could work out the exact equivalence, but if the Torrance-Sparrow NDF turns out to have similar behavior to Phong over the whole range then it would be wasted effort since there would be no reason to use the (much more expensive) Torrance-Sparrow NDF. Let’s adjust parameter values manually to make the peaks coincide:
+
+In[29]:= Plot torrancesparrow . Αts & 0.2027, 0.3097, 0.425, 0.552 , phong . Αp Αb2Αp & Range 0.2, 0.5, 0.1 , Θ, 0, Π 2 , PlotStyle tsCol, Thick , pCol
+
+8
+
+6
+
+Out[29]= 4
+
+2
+
+0.5
+
+1.0
+
+1.5
+
+The curves appear to be extremely close. Let’s look at a rougher part of the domain:
+
+8 s2013_pbs_physics_math_notebook.nb
+
+In[30]:= Plot torrancesparrow . Αts & 0.7035, 0.899, 1.195, 1.81 , torrancesparrow . Αts 100.0, phong . Αp Αb2Αp & Range 0.6, 1.0, 0.1 , Θ, 0, Π 2 , PlotStyle tsCol, tsCol, Thick , pCol
+0.8
+0.6
+Out[30]= 0.4
+0.2
+
+0.5
+
+1.0
+
+1.5
+
+All in all, the behavior appears to be very similar to Phong. The curves for rough surfaces are a bit higher at glancing angles, but the overall trend is towards a uniform distribution, like Phong (and unlike Beckmann). Given this similarity in behavior and the much higher computational complexity of the Torrance-Sparrow NDF (even higher than it appears as first, since it uses the angle directly rather than the cosine), there does not appear to be a reason to use it.
+
+Trowbridge-Reitz NDF
+
+The original paper by Trowbridge and Reitz, the 1977 Blinn paper, and the 2007 paper by Walter et al. (where they refer to it as “the GGX distribution”) all have slightly different forms of this NDF. They are all equivalent other than constant factors; we will independently derive the normalization factor here:
+
+In[31]:= unnormalizedtrowbridgereitz
+
+1 Cos Θ 2 Αtr2 1
+
+; 12
+
+In[32]:= trowbridgereitznormf Integrate unnormalizedtrowbridgereitz Sin Θ Cos Θ , Φ, Π, Π , Θ, 0, Π 2 , Assumptions Αtr 0
+Π
+Out[32]=
+Αtr2
+
+unnormalizedtrowbridgereitz In[33]:= trowbridgereitz
+trowbridgereitznormf
+
+Out[33]=
+Π1
+
+Αtr2 1 Αtr2 Cos Θ 2 2
+
+We’ll look at the distribution curves for moderate parameter values (on the left) as well as for high parameter values (on the right):
+
+s2013_pbs_physics_math_notebook.nb 9
+
+In[34]:= GraphicsRow Plot trowbridgereitz . Αtr & Range 0.4, 1.0, 0.1 , Θ, 0, Π 2 , PlotStyle trCol , Plot trowbridgereitz . Αtr & Range 1, 7 , Θ, 0, Π 2 , PlotStyle trCol , ImageSize Full
+2.0 15
+1.5 10
+Out[34]= 1.0
+5 0.5
+
+0.5
+
+1.0
+
+1.5
+
+0.5
+
+1.0
+
+1.5
+
+On the left, we see that the parameterization behaves approximately like Beckmann’s: higher is rougher. Unlike Beckmann, a value of 1.0 gives a uniform distribution (flat line). On the right, we see that the Trowbridge-Reitz distribution also supports “super-rough”distributions, like Beckmann.
+Let’s compare Trowbridge-Reitz to Phong for the rough-to-moderate range (on the left) and for smoother surfaces (on the right). We use the Beckmann parameter equivalence, since behavior with respect to the parameterization appears similar:
+In[35]:= GraphicsRow Plot trowbridgereitz . Αtr & Range 0.4, 0.9, 0.1 , trowbridgereitz . Αtr 1.0, phong . Αp Αb2Αp & Range 0.4, 1.0, 0.1 , Θ, 0, Π 2 , PlotStyle trCol, trCol, Thick , pCol ,
+Plot trowbridgereitz . Αtr & Range 0.1, 0.4, 0.1 , phong . Αp Αb2Αp & Range 0.1, 0.4, 0.1 , Θ, 0, Π 2 , PlotStyle trCol, pCol , ImageSize Full
+
+2.0 30
+
+25 1.5
+
+20
+
+Out[35]= 1.0
+
+15
+
+10 0.5
+5
+
+0.5
+
+1.0
+
+1.5
+
+0.5
+
+1.0
+
+1.5
+
+The distributions are somewhat similar, but the Trowbridge-Reitz distribution seems to have narrower peaks and longer “tails”across the entire range (except for the uniform distribution which is identical for both).
+Finally, here’s an interactive plot comparing it to Phong:
+
+10 s2013_pbs_physics_math_notebook.nb
+
+In[36]:= Manipulate Plot trowbridgereitz . Αtr a, phong . Αp Αb2Αp a , Θ, 0, Π 2 , PlotStyle trCol, pCol , a, 0.25 , 0.01, 1.0
+
+a
+
+5
+
+4
+
+Out[36]=
+
+3
+
+2
+
+1
+
+0.5
+
+1.0
+
+1.5
+
+ABC NDF
+
+In[37]:= unnormalizedabc
+
+1 1 Αabc 1 Cos Θ
+
+;
+Γabc
+
+In[38]:= abcnormf Integrate unnormalizedabc Sin Θ Cos Θ , Φ, Π, Π , Θ, 0, Π 2 , Assumptions Αabc 0, Γabc 0
+
+Out[38]= 2 Π 1 Αabc Γabc Αabc2 2 Γabc
+
+1 Αabc 2 1 Γabc
+
+1 Αabc Γabc
+
+1 Αabc
+
+2 Γabc
+
+This function has singularities at Γabc = 1.0 and Γabc = 2.0. However, we can generate specific normalization terms for these values. These are the same as the limits of the more general function in the neighborhood of these values, indicating that the singularities are removable:
+
+In[39]:= abcnormfg1 Integrate unnormalizedabc . Γabc 1 Sin Θ Cos Θ , Φ, Π, Π , Θ, 0, Π 2 , Assumptions Αabc 0
+
+1
+
+Out[39]=
+
+2Π
+
+Αabc2
+
+Αabc
+
+1 Αabc Log 1 Αabc
+
+In[40]:= Limit abcnormf, Γabc 1
+
+1
+
+Out[40]=
+
+2Π
+
+Αabc2
+
+Αabc
+
+1 Αabc Log 1 Αabc
+
+s2013_pbs_physics_math_notebook.nb 11
+
+In[41]:= abcnormfg2 Integrate unnormalizedabc . Γabc 2 Sin Θ Cos Θ , Φ, Π, Π , Θ, 0, Π 2 , Assumptions Αabc 0
+
+2 Π Αabc Log 1 Αabc
+
+Out[41]=
+
+Αabc2
+
+In[42]:= Limit abcnormf, Γabc 2
+
+2 Π Αabc Log 1 Αabc
+
+Out[42]=
+
+Αabc2
+
+We’ll create a piecewise form of the function covering the singularity cases, so that we can easily plot the normalized NDF over a range of parameter values:
+
+In[43]:= abcnormfpw Piecewise abcnormfg1, Γabc 1 , abcnormfg2, Γabc 2 , abcnormf
+
+Out[43]=
+
+2 Π Αabc 1 Αabc Log 1 Αabc Αabc2
+2 Π Αabc Log 1 Αabc Αabc2
+2 Π 1 Αabc Γabc 1 Αabc 2
+Αabc2 2 Γabc 1 Γabc
+
+1 Αabc Γabc
+
+1 Αabc 2 Γabc
+
+Γabc 1 Γabc 2 True
+
+unnormalizedabc In[44]:= abc
+abcnormfpw
+
+Out[44]= 1 Αabc 1 Cos Θ
+
+Γabc
+
+1 Αabc2
+
+2
+
+Π
+
+Αabc
+
+1
+
+2 Π Αabc Log 1 Αabc
+
+Αabc2
+
+2 Π 1 Αabc Γabc
+
+Αabc2 2 Γabc
+
+Αabc Log 1 Αabc
+
+1 Αabc 2 1 Γabc
+
+1 Αabc Γabc
+
+1 Αabc
+
+2 Γabc
+
+Γabc 1 Γabc 2 True
+
+This normalization term has an extremely complicated form - definitely too expensive for games; even for film use, it would be convenient to simplify it. Since when plotted it yields smooth curves, it should be possible to create a much simpler approximation for production use. Let us look at the behavior of the normalized ABC NDF as its parameters are varied. Since the parameter space is two-dimensional, we’ll need more plots than in the previous sections:
+
+12 s2013_pbs_physics_math_notebook.nb
+
+In[45]:= plot1abc x_ : Labeled Plot abc . Αabc , Γabc x & 1.0, 10.0, 100.0, 1000.0 ,
+
+Θ, 0, Π 2 , PlotStyle abcCol , "Γabc " ToString x
+
+plot2abc x_ : Labeled Plot abc . Αabc x, Γabc
+
+& 0.1, 0.5, 1.0, 1.5 ,
+
+Θ, 0, Π 2 , PlotStyle abcCol , "Αabc " ToString x GraphicsGrid plot1abc 0.1, 0.5, 1.0, 1.5 ,
+
+plot2abc 1.0, 10.0, 100.0, 1000.0 , ImageSize Full, AspectRatio 0.25
+
+4 0.5
+
+0.4
+
+3
+
+0.3 2
+0.2
+
+0.1
+
+1
+
+25
+
+80
+
+20
+
+60
+
+15 40
+10
+
+5
+
+20
+
+Out[47]= 0.4 0.3 0.2 0.1
+
+0.5
+
+1.0
+
+Γabc 0.1
+
+1.5
+1.4 1.2 1.0 0.8 0.6 0.4 0.2
+
+0.5
+
+1.0
+
+1.5
+
+Αabc 1.
+
+And here’s an interactive plot:
+
+0.5
+
+1.0
+
+Γabc 0.5
+
+0.5
+
+1.0
+
+Αabc 10.
+
+1.5
+10 8 6 4 2
+1.5
+
+0.5
+
+1.0
+
+Γabc 1.
+
+0.5
+
+1.0
+
+Αabc 100.
+
+1.5
+80 60 40 20
+1.5
+
+0.5
+
+1.0
+
+1.5
+
+Γabc 1.5
+
+0.5
+
+1.0
+
+1.5
+
+Αabc 1000.
+
+In[48]:= Manipulate Plot abc . Αabc a, Γabc b , Θ, 0, Π 2 , PlotStyle abcCol , a, 1.0, 1000.0 , b, 0.25, 2.5
+
+a b
+0.35 0.30 0.25 Out[48]= 0.20 0.15 0.10 0.05
+
+0.5
+
+1.0
+
+1.5
+
+Experimenting with various values shows us that the value of Γabc appears to control the shape, while the value of Αabc controls the roughness. (They are not cleanly separated, so when varying Γabc you need to change Αabc to keep the same roughness.) Let’s see if we can fit Trowbridge-Reitz using ABC:
+
+s2013_pbs_physics_math_notebook.nb 13
+
+In[49]:= Manipulate Plot trowbridgereitz . Αtr ktr, abc . Αabc kabc1, Γabc kabc2 , Θ, 0, Π 2 , PlotStyle trCol, abcCol , ktr, 0.5 , 0.1, 0.8 , kabc1, 6.3 , 1.04, 254.0 , kabc2, 1.75 , 0.25, 2.5
+
+ktr kabc1 kabc2
+
+1.2
+1.0 Out[49]=
+0.8
+0.6
+0.4
+0.2
+
+0.5
+
+1.0
+
+1.5
+
+We can see that an Γabc value of about 1.75 fits pretty well to Trowbridge-Reitz across the roughness range (less well for rough surfaces, better for smooth ones). Note that we don’t have an equivalence between them, so we just manually adjust the Αabc parameter of the ABC curves until the peaks coincide with the Trowbridge-Reitz ones.
+Now let’s try to fit Phong with ABC:
+
+14 s2013_pbs_physics_math_notebook.nb
+
+In[50]:= Manipulate Plot phong . Αp 8000.0klogphong, abc . Αabc kabc1, Γabc 1 kabc2recip , Θ, 0, Π 2 , PlotStyle pCol, abcCol , klogphong, 0.5 , 0.0, 1.0 , kabc1, 0.0905 , 0.0001, 10.0 , kabc2recip, 0.001 , 0.0001, 0.999
+
+klogphong kabc1
+kabc2recip
+
+14 12 Out[50]= 10
+8 6 4 2
+
+0.5
+
+1.0
+
+1.5
+
+It seems that ABC asymptotically approaches Phong as the value of Γabc approaches infinity (here we also lacked an equivalence so we adjusted Αabc values manually until the peaks matched).
+Let’s demonstrate ABC’s fit to Trowbridge-Reitz with a static plot for Γabc = 1.75, and to Phong with a static plot for Γabc set to a high value (1000):
+
+s2013_pbs_physics_math_notebook.nb 15
+
+In[51]:= GraphicsRow Plot trowbridgereitz . Αtr & Range 0.3, 0.7, 0.1 ,
+
+abc . Αabc , Γabc 1.75 & 23.5, 11.6, 6.3, 3.55, 2.0 , Θ, 0, Π 2 ,
+
+PlotStyle trCol, abcCol, Thick, AbsoluteDashing 2, 8
+
+,
+
+Plot phong . Αp Αb2Αp & Range 0.3, 0.7, 0.1 ,
+
+abc . Αabc , Γabc 1000.0 &
+
+0.0212, 0.0114, 0.0068, 0.0043, 0.0026 , Θ, 0, Π 2 ,
+
+PlotStyle pCol, abcCol, Thick, AbsoluteDashing 2, 8
+
+, ImageSize Full
+
+3.5
+
+3.5
+
+3.0
+
+3.0
+
+2.5
+
+2.5
+
+2.0
+
+2.0
+
+Out[51]=
+
+1.5
+
+1.5
+
+1.0
+
+1.0
+
+0.5
+
+0.5
+
+0.5
+
+1.0
+
+1.5
+
+0.5
+
+1.0
+
+1.5
+
+Since they are not directly apparent from the Plot command, let’s see the range of Phong parameters covered in the right plot:
+In[52]:= Αb2Αp 0.3 Out[52]= 20.2222
+
+In[53]:= Αb2Αp 0.7
+Out[53]= 2.08163
+As we have seen, with an Γabc value of 1.75, ABC can mimic Trowbridge-Reitz quite well. With higher values, ABC can approach the appearance of Phong. (It should be noted that these are much higher than any of the values fitted to the Matusik dataset by Low et al.; this may indicate that real-world materials do not typically exhibit Gaussian normal distributions.) With Γabc values lower than 1.75, the ABC distribution is even “spikier”than Trowbridge-Reitz; we will look at a value of 0.5 (a relatively low value for the Matusik dataset fitting performed in the paper by Low et al. – lower values were only used for very rough surfaces), comparing it to Trowbridge-Reitz (manually adjusted so the peaks match):
+
+16 s2013_pbs_physics_math_notebook.nb
+
+In[54]:= GraphicsRow Plot trowbridgereitz . Αtr & Range 0.5, 0.8, 0.1 , abc . Αabc , Γabc 0.5 & 82.5, 33.5, 14.0, 5.75 , Θ, 0, Π 2 , PlotStyle trCol, abcCol ,
+Plot trowbridgereitz . Αtr & Range 0.2, 0.5, 0.1 , abc . Αabc , Γabc 0.5 & 4250, 785, 240, 82.5 , Θ, 0, Π 2 , PlotStyle trCol, abcCol , ImageSize Full
+
+8 1.2
+
+1.0 6
+
+0.8
+
+Out[54]= 0.6
+
+4
+
+0.4 2
+0.2
+
+0.5
+
+1.0
+
+1.5
+
+0.5
+
+1.0
+
+1.5
+
+We see that with an Γabc value of 0.5, ABC is significantly “spikier”than Trowbridge-Reitz when modeling rough surfaces (on the left), and extremely so when modeling smooth ones (on the right).
+
+Shifted Gamma Distribution
+
+ΑsgdΓsgd 1 In[55]:= p22 x_ :
+Gamma 1 Γsgd, Αsgd
+
+Αsgd2 x Αsgd
+Αsgd2 x Γsgd
+
+In[56]:= sgd
+
+p22 1 Cos Θ 2
+Cos Θ 2
+Π Cos Θ 4
+
+Out[56]=
+
+Αsgd2 1 Cos Θ 2 Sec Θ 2
+
+Αsgd
+
+Αsgd 1 Γsgd Sec Θ 4 Αsgd2
+
+1 Cos Θ 2 Sec Θ 2 Γsgd
+
+Π Gamma 1 Γsgd, Αsgd
+
+First, let’s confirm that it’s normalized, using an analytical integral:
+
+In[57]:= sgdnormf Integrate sgd Sin Θ Cos Θ , Φ, Π, Π , Θ, 0, Π 2 , Assumptions
+1 Out[57]=
+
+Αsgd 0, Γsgd 0
+
+Yes, it’s normalized. Let’s take a look at various parameter values, spanning the rough-to-moderate part of the range of values used for fitting SGD to the Matusik database:
+
+s2013_pbs_physics_math_notebook.nb 17
+
+In[58]:= plot1sgd x_ : Labeled Plot sgd . Αsgd , Γsgd x & 1.0, 0.5, 0.2, 0.1 ,
+
+Θ, 0, Π 2 , PlotStyle sgdCol , "Γsgd " ToString x
+
+plot2sgd x_ : Labeled Plot sgd . Αsgd x, Γsgd
+
+& 0.0, 0.5, 1.0, 1.5 ,
+
+Θ, 0, Π 2 , PlotStyle sgdCol , "Αsgd " ToString x GraphicsGrid plot1sgd 0.0, 0.5, 1.0, 1.5 , plot2sgd 1.0, 0.5, 0.2, 0.1 ,
+ImageSize Full, AspectRatio 0.25
+
+8 3.0
+
+2.5
+
+6
+
+2.0
+
+1.5
+
+4
+
+1.0 2
+0.5
+
+15
+
+25
+
+20 10
+15
+
+5
+
+10
+
+5
+
+Out[60]=
+0.6 0.5 0.4 0.3 0.2 0.1
+
+0.5
+
+1.0
+
+Γsgd 0.
+
+1.5
+1.5 1.0 0.5
+
+0.5
+
+1.0
+
+Γsgd 0.5
+
+1.5 8 6 4 2
+
+0.5
+
+1.0
+
+Γsgd 1.
+
+1.5
+25 20 15 10
+5
+
+0.5
+
+1.0
+
+1.5
+
+Γsgd 1.5
+
+0.5
+
+1.0
+
+1.5
+
+Αsgd 1.
+
+0.5
+
+1.0
+
+1.5
+
+Αsgd 0.5
+
+0.5
+
+1.0
+
+1.5
+
+Αsgd 0.2
+
+0.5
+
+1.0
+
+1.5
+
+Αsgd 0.1
+
+Let’s look at an interactive graph with the parameters covering the range of fitted values for the Matusik database:
+
+In[61]:= Manipulate Plot sgd . Αsgd a, Γsgd b , Θ, 0, Π 2 , PlotStyle sgdCol , a, 0.25 , 0.0001, 1.0 , b, 0.0, 1.5
+
+a b
+
+1.2
+1.0 Out[61]=
+0.8
+0.6
+0.4
+0.2
+
+0.5
+
+1.0
+
+1.5
+
+Finally, let’s compare it with ABC:
+
+18 s2013_pbs_physics_math_notebook.nb
+
+In[62]:= Manipulate Plot sgd . Αsgd a, Γsgd b , abc . Αabc c, Γabc d , Θ, 0, Π 2 , PlotStyle sgdCol, abcCol , a, 0.25 , 0.0001, 1.0 , b, 1.0 , 0.0, 1.5 , c, 27.0 , 1.0, 1000.0 , d, 1.7 , 0.25, 2.5
+a b c d
+
+3.5
+
+Out[62]=
+
+3.0
+
+2.5
+
+2.0
+
+1.5
+
+1.0
+
+0.5
+
+0.5
+
+1.0
+
+1.5
+
+We see that the SGD NDF goes quickly to 0.0 even for moderately smooth surfaces and cannot replicate the “long tails”that ABC can produce. We also see that unlike ABC, the SGD NDF can model slightly “super-rough”surfaces, though it’s unclear how useful this feature is (also, the combination of parameters that produces this behavior is not found in the material fitting performed by Bagher et al.).
+
+Generalized Trowbridge-Reitz NDF
+
+In[63]:= unnormalizedgtr
+
+1 Cos Θ 2 Αgtr2 1
+
+; 1 Γgtr
+
+In[64]:= gtrnormf Integrate unnormalizedgtr Sin Θ Cos Θ , Φ, Π, Π , Θ, 0, Π 2 , Assumptions Αgtr 0, Γgtr 0
+
+Out[64]=
+
+Π 1 Αgtr2 2 Γgtr 1 Αgtr2 1 Γgtr
+
+This function has singularities at Γgtr = 1.0 and Αgtr = 1.0. However, we can generate specific normalization terms for these values. These are the same as the limits of the more general function in the neighborhood of these values, indicating that the singularities are removable:
+
+s2013_pbs_physics_math_notebook.nb 19
+
+In[65]:= gtrnormfg1 Integrate unnormalizedgtr . Γgtr 1 Sin Θ Cos Θ , Φ, Π, Π , Θ, 0, Π 2 , Assumptions Αgtr 0
+
+2 Π Log Αgtr
+
+Out[65]=
+
+1 Αgtr2
+
+In[66]:= Limit gtrnormf, Γgtr 1
+
+2 Π Log Αgtr
+
+Out[66]=
+
+1 Αgtr2
+
+In[67]:= gtrnormfa1 Integrate unnormalizedgtr . Αgtr 1 Sin Θ Cos Θ , Φ, Π, Π , Θ, 0, Π 2 , Assumptions Γgtr 0
+Π Out[67]=
+
+In[68]:= Limit gtrnormf, Αgtr 1 Π Out[68]=
+
+We’ll create a piecewise form of the function covering the singularity cases, so that we can easily plot the normalized NDF over a range of parameter values:
+
+In[69]:= gtrnormfpw Piecewise gtrnormfa1, Αgtr 1 , gtrnormfg1, Γgtr 1 , gtrnormf
+
+Π
+
+Αgtr 1
+
+Out[69]=
+
+2 Π Log Αgtr 1 Αgtr2
+
+Γgtr 1
+
+Π 1 Αgtr2 2 Γgtr 1 Αgtr2 1 Γgtr
+
+True
+
+unnormalizedgtr In[70]:= gtr
+gtrnormfpw
+
+Out[70]=
+
+1
+
+1 Αgtr2 Cos Θ 2 Γgtr
+
+Π
+
+Αgtr 1
+
+2 Π Log Αgtr 1 Αgtr2
+
+Γgtr 1
+
+Π 1 Αgtr2 2 Γgtr 1 Αgtr2 1 Γgtr
+
+True
+
+This normalization term has a somewhat complicated form, which is likely too expensive for performance-critical applications such as games. However, when plotted it yields smooth curves, indicating that it should be possible to create a simpler approximation for game use. Let us look at the behavior of the normalized GTR NDF as its parameters are varied.
+
+20 s2013_pbs_physics_math_notebook.nb
+
+In[71]:= plot1gtr x_ : Labeled Plot gtr . Αgtr , Γgtr x & 1.0, 0.5, 0.25, 0.1 ,
+
+Θ, 0, Π 2 , PlotStyle gtrCol , "Γgtr " ToString x
+
+plot2gtr x_ : Labeled Plot gtr . Αgtr x, Γgtr
+
+& 1.0, 1.5, 2.0, 2.5 ,
+
+Θ, 0, Π 2 , PlotStyle gtrCol , "Αgtr " ToString x GraphicsGrid plot1gtr 1.0, 1.5, 2.0, 2.5 , plot2gtr 1.0, 0.5, 0.25, 0.1 ,
+
+ImageSize Full, AspectRatio 0.25
+
+7 30
+
+6
+
+15
+
+40
+
+25
+
+5
+
+4
+
+10
+
+20
+
+30
+
+3
+
+15
+
+20
+
+2 1
+
+5
+
+10
+
+5
+
+10
+
+Out[73]=
+0.30 0.25 0.20 0.15 0.10 0.05
+
+0.5
+
+1.0
+
+Γgtr 1.
+
+0.5
+
+1.0
+
+Αgtr 1.
+
+1.5 1.5 1.0 0.5
+1.5
+
+0.5
+
+1.0
+
+Γgtr 1.5
+
+0.5
+
+1.0
+
+Αgtr 0.5
+
+1.5
+7 6 5 4 3 2 1
+1.5
+
+0.5
+
+1.0
+
+Γgtr 2.
+
+0.5
+
+1.0
+
+Αgtr 0.25
+
+1.5
+40 30 20 10 1.5
+
+0.5
+
+1.0
+
+1.5
+
+Γgtr 2.5
+
+0.5
+
+1.0
+
+1.5
+
+Αgtr 0.1
+
+As a generalized form of Trowbridge-Reitz, GTR inherits some of its properties. When the Αgtr parameter is equal to 1.0, we get the uniform (constant) distribution. Decreasing Αgtr makes the surface smoother (creating narrower and more intense highlights. Increasing Αgtr beyond 1.0 will create “superrough”surfaces (this behavior is very similar to Trowbridge-Reitz, so we won’t bother plotting it). As with ABC, the separation of roughness and shape is not perfect, so when varying Γgtr you need to change Αgtr to keep the same roughness.)
+
+And here’s an interactive plot:
+
+s2013_pbs_physics_math_notebook.nb 21
+
+In[74]:= Manipulate Plot gtr . Αgtr a, Γgtr b , Θ, 0, Π 2 , PlotStyle gtrCol , a, 0.01, 1.0 , b, 1.0, 2.5
+
+a b
+350 300 250 Out[74]= 200 150 100
+50
+
+0.5
+
+1.0
+
+1.5
+
+Let’s see if we can fit Phong using GTR:
+
+22 s2013_pbs_physics_math_notebook.nb
+
+In[75]:= Manipulate Plot phong . Αp 8000.0klogphong, gtr . Αgtr kgtr1, Γgtr 1 kgtr2recip , Θ, 0, Π 2 , PlotStyle pCol, gtrCol , klogphong, 0.5 , 0.0, 1.0 , kgtr1, 0.9778 , 0.01, 1.0 , kgtr2recip, 0.001 , 0.0001, 0.999
+
+klogphong kgtr1
+kgtr2recip
+
+14 12 Out[75]= 10
+8 6 4 2
+
+0.5
+
+1.0
+
+1.5
+
+Similarly to ABC, it appears that GTR asymptotically approaches Phong as the value of Γgtr approaches infinity (and also as with ABC, we don’t have a known parameter equivalence so we adjusted Αgtr values manually until the peaks matched). Let’s demonstrate the match with a very high Γgtr value (10000) on a pair of static plots (one covering smoother surfaces and one covering rougher ones):
+
+s2013_pbs_physics_math_notebook.nb 23
+
+In[76]:= GraphicsRow Plot phong . Αp & 8, 4, 2, 1 ,
+
+gtr . Αgtr , Γgtr 10 000 & 0.999752, 0.999859, 0.99992, 0.999956
+
+Θ, 0, Π 2 , PlotStyle pCol, gtrCol ,
+
+Plot phong . Αp & 100, 50, 25, 8 , gtr . Αgtr , Γgtr 10 000 &
+
+0.99745, 0.9987, 0.999325, 0.99975 , Θ, 0, Π 2 ,
+
+PlotStyle pCol, gtrCol, Thick, AbsoluteDashing 2, 8
+
+, ImageSize
+
+, Full
+
+1.5
+
+15
+
+1.0
+
+10
+
+Out[76]=
+
+0.5
+
+5
+
+0.5
+
+1.0
+
+1.5
+
+0.5
+
+1.0
+
+1.5
+
+Of course, GTR can match Trowbridge-Reitz exactly since setting Γgtr to 2.0 makes the two exactly equivalent. Let’s see if GTR can match the even “spikier”curves we get with ABC by setting Γabc to 0.5:
+In[77]:= Manipulate Plot abc . Αabc kabc, Γabc 0.5 , gtr . Αgtr kgtr1, Γgtr kgtr2 , Θ, 0, Π 2 , PlotStyle abcCol, gtrCol , kabc, 10.0 , 5.0, 4000.0 , kgtr1, 0.1 , 0.01, 1.0 , kgtr2, 2.0 , 0.5, 2.5
+
+kabc kgtr1 kgtr2
+
+30
+25 Out[77]=
+20
+15
+10
+5
+
+0.5
+
+1.0
+
+1.5
+
+We can see that an Γgtr value of about 0.54 fits pretty well to ABC with Γabc=0.5 across the roughness range (better for smoother surfaces, slightly less well for rough ones). Note that we don’t have a known equivalence between them, so we just manually adjust the Αgtr parameter of the GTR curves until the peaks coincide with the ABC ones. Let’s show the match with two static plots (one covering smoother surfaces and one covering rougher ones):
+
+24 s20W13e_pcbas_npshyeseicst_hmaat tahn_nΓotgetbrovoka.lnube of about 0.54 fits pretty well to ABC with Γabc=0.5 across the roughness range (better for smoother surfaces, slightly less well for rough ones). Note that we don’t have a known equivalence between them, so we just manually adjust the Αgtr parameter of the GTR curves until the peaks coincide with the ABC ones. Let’s show the match with two static plots (one covering smoother surfaces and one covering rougher ones):
+
+In[78]:= GraphicsRow Plot abc . Αabc , Γabc 0.5 & 100, 30, 15, 5 ,
+
+gtr . Αgtr , Γgtr 0.54 & 0.146, 0.251, 0.338, 0.517 , Θ, 0, Π
+
+PlotStyle abcCol, gtrCol, Thick, AbsoluteDashing 2, 8
+
+,
+
+Plot abc . Αabc , Γabc 0.5 & 4000, 750, 250, 100 ,
+
+gtr . Αgtr , Γgtr 0.54 & 0.02625, 0.05725, 0.0955, 0.146 ,
+
+Θ, 0, Π 2 , PlotStyle abcCol, gtrCol, Thick, AbsoluteDashing 2, 8
+
+ImageSize Full
+
+2, ,
+
+1.4
+
+7 1.2
+
+6 1.0
+5
+
+0.8
+
+Out[78]=
+
+4
+
+0.6 3
+
+0.4
+
+2
+
+0.2
+
+1
+
+0.5
+
+1.0
+
+1.5
+
+0.5
+
+1.0
+
+1.5
+

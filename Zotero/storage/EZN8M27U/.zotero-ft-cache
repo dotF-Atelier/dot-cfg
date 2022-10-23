@@ -1,0 +1,580 @@
+Background: Physics and Math of Shading
+Naty Hoffman 2K
+1
+Hi. Over the next 15 minutes I’ll be going from the physics underlying shading, to the math used to describe it and from there to the kind of rendering implementations we’ll see in the rest of the course.
+
+2
+We’ll start with the physics that happen when light interacts with matter.
+
+3
+The simplest case is light propagating through a homogeneous medium with exactly the same properties everywhere. In this case light moves in a straight line.
+
+4
+Some homogeneous media don’t significantly change the light’s color or intensity...
+
+5
+...while others absorb part of the visible light traveling though them, changing its intensity and potentially its color. For example, this medium absorbs more light in the blue part of the spectrum, giving it a red appearance.
+
+6
+Scale is important. For example, clean water does absorb a little light in the red end of the visible spectrum, but it’s not noticeable over a few inches.
+
+7
+But this absorption is quite significant over distances of dozens of yards.
+
+?
+8
+In an inhomogeneous medium, the index of refraction (which is the property of matter that affects light) changes. This causes light to no longer move in a straight line.
+
+Scattering
+9
+Abrupt changes in the index of refraction cause scattering, which changes the direction of light propagation.
+
+10
+An inhomogeneous medium contains numerous scattering particles. These could be dense enough to randomize the light’s direction somewhat, giving a cloudy appearance...
+
+11
+...or to randomize it completely, giving the medium an opaque appearance.
+
+12
+Scale also matters for scattering: for example, clean air doesn’t noticeably scatter light over a few yards, but it deﬁnitely does over a distance of miles.
+
+Absorption Scattering Emission
+13
+To summarize, there are three basic modes of light / matter interaction: absorption (which changes light’s intensity and / or color), scattering (which changes light’s direction), and emission (which creates new light; most materials don’t exhibit emission and I won’t further discuss it in this talk).
+
+Absorption (color)
+
+Scattering (cloudiness)
+14
+The overall appearance of a medium is determined by the combination of its absorption and scattering properties. For example, a white appearance (like the whole milk in the lower right corner) is caused by high scattering and low absorption.
+
+15
+While media are easy to understand, most of the time in graphics we are concerned with rendering solid objects, in particular the surfaces of these objects.
+
+16
+You may recall that a few slides ago, I said that abrupt changes in index of refraction cause scattering. Small particles (like those found in cloudy liquids) are one special case of this; they scatter light in all directions.
+
+Image from “Real-Time Rendering, 3rd Edition”, A K Peters 2008
+17
+A flat surface (defined as a plane separating two volumes with different indices of refraction) is another special case of scattering; such a surface scatters light into exactly two directions: reflection and refraction. In this case “flat” means optically ﬂat - any irregularities are smaller than visible light wavelengths and thus do not affect visible light.
+
+Microgeometry
+Image from “Real-Time Rendering, 3rd Edition”, A K Peters 2008
+18
+Some rare real-world surfaces (like high-end telescope optics) are optically ﬂat, but most aren’t. Most have microgeometry - bumps that are bigger than a light wavelength but too small to be individually visible. Each surface point reﬂects (and refracts) light in a different direction - the surface appearance is the aggregate result of all the different reﬂection & refraction directions.
+
+Rougher = Blurrier Reflections
+Images from “Real-Time Rendering, 3rd Edition”, A K Peters 2008
+19
+These two surfaces, equally smooth to the naked eye, differ in roughness at the microscopic scale. The surface on the top is only a little rough; incoming light rays hit bits of the surface that are angled slightly differently and get reﬂected to somewhat different outgoing directions, causing slightly blurred reﬂections. The surface on the bottom is much rougher, causing much blurrier reﬂections.
+
+Image from “Real-Time Rendering, 3rd Edition”, A K Peters 2008
+20
+In the macroscopic view, we treat the microgeometry statistically and view the surface as reflecting (and refracting) light in multiple directions. The rougher the surface, the wider the cones of reflected and refracted directions will be.
+
+?
+21
+What happens to the refracted light? It depends what kind of material the object is made of.
+
+Metals
+22
+Metals immediately absorb all refracted light.
+
+Non-Metals
+Image from “Real-Time Rendering, 3rd Edition”, A K Peters 2008
+23
+Non-metals behave like those cups of liquid we saw earlier - refracted light is scattered and / or absorbed to some degree. Unless the object is made out of a clear substance like glass or crystal, there will be enough scattering that some of the refracted light is scattered back out of the surface - these are the blue arrows you see coming out of the surface in various directions.
+
+24
+The re-emitted light comes out at varying distances (shown by the yellow bars) from the entry point. The distribution of distances depends on the density and properties of the scattering particles.
+
+Image from “Real-Time Rendering, 3rd Edition”, A K Peters 2008
+25
+If the pixel size (or shading sample area) is large (like the green circle) compared to the entry-exit distances, we can assume the distances are effectively zero for shading purposes.
+
+Image from “Real-Time Rendering, 3rd Edition”, A K Peters 2008
+26
+By ignoring the entry-to-exit distance, we can then compute all shading locally at a single point. The shaded color is only affected by light hitting that surface point.
+
+specular
+
+diffuse
+
+27
+It is convenient to split these two very different light-material interactions into different shading terms. We call the surface reﬂection term “specular” and the term resulting from refraction, absorption, scattering, and re-refraction we call “diffuse”.
+
+28
+If the pixel is small compared to the entry-exit distances (like the red circle), then special “subsurface scattering” rendering techniques are needed. It’s important to note that even regular diffuse shading is a result of subsurface scattering - the difference is the shading resolution compared to the scattering distance.
+
+Physics
+
+Math
+
+29
+So far we’ve discussed the physics of light/matter interactions. To turn these physics into mathematical models that can be used for shading, the ﬁrst step is to quantify light as a number.
+
+Radiance
+30
+Radiometry is the measurement of light. Of the various radiometric quantities, we’ll use radiance...
+
+Radiance Single Ray
+31
+...which measures the intensity of light along a single ray...
+
+Radiance
+Single Ray
+Spectral/RGB
+32
+...Radiance is spectral (it varies with wavelength) - it’s technically a continuous spectral power distribution but for production purposes it’s represented as an RGB triplet.
+
+33
+Given the assumption that shading can be handled locally, light response at a surface point only depends on the light and view directions.
+
+Bidirectional Reflectance Distribution Function
+
+f (l, v)
+
+Image from “Real-Time Rendering, 3rd Edition”, A K Peters 2008
+34
+We represent this variation with the BRDF, a function of light direction l and view direction v. In principle, the BRDF is a function of the 3 or 4 angles shown in the figure. In practice, BRDF models use varying numbers of angles. Note that the BRDF is only defined for light and view vectors above the macroscopic surface; see the course notes for some tips on how to handle other cases.
+
+The Reflectance Equation
+
+Z
+
+L (v) = f (l, v) ⌦ L (l)(n · l)d!
+
+o
+
+i
+
+i
+
+⌦
+
+35
+This scary-looking equation just says that outgoing radiance from a point equals the integral of incoming radiance times BRDF times a cosine factor, over the hemisphere of incoming directions. If you’re not familiar with integrals you can think of this as a sort of weighted average over all incoming directions. The “X in circle” notation is from the Real-Time Rendering book - it means component-wise RGB multiplication.
+
+Surface Reflection (Specular Term)
+36
+We’ll start by looking at the specular term.
+
+Microfacet Theory
+37
+Microfacet theory is a way to derive BRDFs for surface (oe specular) reflection from general (non-optically flat) surfaces. It assumes the surface is composed of many microfacets. Each facet is a perfect mirror (optically ﬂat), so it reﬂects each incoming ray of light into only one outgoing direction, which depends on the light direction l and the microfacet normal m.
+
+The Half Vector
+Image from “Real-Time Rendering, 3rd Edition”, A K Peters 2008
+38
+Only those microfacets which happen to have their surface normal m oriented exactly halfway between l and v will reflect any visible light - this direction is the half-vector h.
+
+Shadowing and Masking
+
+shadowing
+
+masking
+
+Images from “Real-Time Rendering, 3rd Edition”, A K Peters 2008
+39
+Not all microfacets with m = h will contribute - some will be blocked by other microfacets from either the light direction (shadowing) or the view direction (masking).
+
+Multiple Surface Bounces
+Image from “Real-Time Rendering, 3rd Edition”, A K Peters 2008
+40
+In reality, blocked light continues to bounce; some will eventually contribute to the BRDF. Microfacet BRDFs ignore this, so effectively they assume all blocked light is lost.
+
+Microfacet BRDF
+F (l, h)G(l, v, h)D(h) f (l, v) = 4(n · l)(n · v)
+41
+This is a general microfacet BRDF. I’ll go over its various parts, explaining each.
+
+Fresnel Reflectance
+F (l, h)G(l, v, h)D(h) f (l, v) = 4(n · l)(n · v)
+42
+The Fresnel reflectance is the fraction of incoming light that is reflected (as opposed to refracted) from an optically flat surface of a given substance. It depends on thelight direction and the surface (in this case microfacet) normal. This tells us how much of the light hitting the relevant microfacets (the ones facing in the half-angle direction) is reflected.
+
+Fresnel Reflectance
+Image from “Real-Time Rendering, 3rd Edition”, A K Peters 2008
+43
+Fresnel reflectance (on the y-axis in this graph) depends on refraction index (in other words, what the object’s made of) and light-tonormal angle (which is plotted here on the x-axis). In this graph, substances with three lines (copper & aluminum) have colored reflectance which is plotted separately for the R, G and B channels – the other substances, with one line, have uncolored reflectance.
+
+44
+With an optically flat surface and non-directional lighting (like an overcast sky) the relevant angle for Fresnel reflectance is the one between the view and normal vectors. This image shows the Fresnel reflectance of glass (the green curve from the previous slide) over a 3D shape - see how the dark reflectance color in the center brightens to white at the edges.
+
+Fresnel Reflectance
+barely changes
+changes somewhat
+goes rapidly to 1
+45
+As angle increases, up to about 45 degrees (the green area on the graph) the Fresnel reflectance barely changes; afterwards it starts changing, first slowly (the yellow area, up to about 75 degrees) and then for very glancing angles (the red zone) it rapidly goes to 100% at all wavelengths.
+
+46
+Here’s a visualization of the same zone colors over a 3D object. We can see that the vast majority of visible pixels are in the areas where the reflectance changes barely at all (green) or only slightly (yellow).
+
+Image from “Real-Time Rendering, 3rd Edition”, A K Peters 2008
+47
+Recall that in a microfacet BRDF the relevant normal direction is the h vector (only the microfacets with normals aligned to h are visible). This means that we need to use the angle between v and h for Fresnel reflectance (or l and h - it’s the same angle).
+
+48
+<DEMO> unlike Fresnel for surface normals, <SWITCH MODE> visualizing Fresnel zones for the h vector it seems like the whole object can be in the yellow or even the red zone <MOVE LIGHT AROUND>. But when we combine Fresnel with the rest of the BRDF <SWITCH MODE> then we can see that green still predominates, and red can only be seen - rarely - at the object edges <MOVE LIGHT AROUND>.
+
+Fresnel Reflectance
+F(0°)
+Is the surface’s characteristic specular color:
+cspec
+49
+Since the reflectance over most angles is close to that at normal incidence, the normal-incidence reflectance - F() at 0 degrees - is the surface’s characteristic specular color.
+
+Normal-Incidence Fresnel for Metals
+Table from “Real-Time Rendering, 3rd Edition”, A K Peters 2008
+50
+Metals have relatively bright specular colors. Note that metals have no subsurface term, so the surface Fresnel reflectance is the material’s only source of color. The “linear” and “sRGB” columns refer to whether the values are in linear or gamma space.
+
+Normal-Incidence Fresnel for Non-Metals
+Text
+Table from “Real-Time Rendering, 3rd Edition”, A K Peters 2008
+51
+Note that for non-metals the specular colors are achromatic (gray) and are relatively dark (especially if excluding gems and crystals). Most non-metals also have a subsurface (or diffuse) color in addition to their Fresnel (or specular) reflectance.
+
+The Schlick Approximation to Fresnel
+• Pretty accurate, cheap, parameterized by cspec
+FSchlick(cspec, l, n) = cspec + (1 cspec)(1 (l · n))5
+• For microfacet BRDFs (m = h):
+FSchlick(cspec, l, h) = cspec + (1 cspec)(1 (l · h))5
+52
+The Schlick approximation to Fresnel is commonly used. It is cheap and reasonably accurate - more importantly it has a convenient parameter (normal incidence Fresnel reﬂectance, or specular color). As we saw previously, when using it in microfacet BRDFs the h vector is used in place of the normal.
+
+Normal Distribution Function
+F (l, h)G(l, v, h)D(h) f (l, v) = 4(n · l)(n · v)
+53
+The next part of the microfacet BRDF we will discuss is the microfacet normal distribution function, or NDF. The NDF gives the concentration of microfacet normals pointing in a given direction (in this case, the half-angle direction). The NDF determines the size and shape of the highlight.
+
+Dp(m)
+
+=
+
+↵p + 2⇡
+
+2 (n
+
+·
+
+m)↵p
+
+1 Duabc(m) = (1 + ↵abc1 (1 (n · m)))↵abc2
+
+Dtr (m)
+
+=
+
+⇡ ((n
+
+↵t2r · m)2 (↵t2r
+
+1) + 1)2
+
+0
+1
+
+(n · m)2 1
+
+@
+
+A
+
+1 Db(m) = ⇡↵b2(n · m)4 e
+
+↵b2(n · m)2
+
+h
+
+i
+
+p22
+
+1 (n·m)2 (n·m)2
+
+Dsgd(m) = ⇡(n · m)4
+
+54
+The course notes detail various options for NDFs.
+
+2.0
+
+1.5
+
+8
+
+1.0
+
+0.8
+
+6
+
+0.5
+
+0.6
+
+0.5
+
+1.0
+
+4
+
+0.4
+
+2
+
+0.2
+
+0.5
+
+1.0
+
+1.5
+
+Some NDFs are Gaussian with “blobby” highlights...
+
+15 10 5 1.5
+0.5
+55
+
+4
+
+0.5
+
+25
+
+07.4
+
+3
+
+20
+
+06.3
+
+2
+
+15
+
+15
+
+05.2
+
+10
+
+04.1
+
+1
+10
+
+5
+
+3
+
+0.5
+
+1.0
+
+1.5
+
+2
+
+Γabc 0.1
+
+0.5
+
+1.0
+
+1.5
+
+5 Γabc 0.5
+
+1
+
+1.4
+
+0.4
+
+1.2
+
+0.3
+
+0.5
+
+1.0
+
+1.01.5
+
+0.2
+
+Γgtr 1.
+
+0.8 0.6
+
+0.30 1.5 Oth0e.r1s have a more “spiky” shape with long tails, leading to sharp 0hi.g4hlights with “halos” around them.
+0.2
+
+0.5 Γgtr
+
+10
+8
+1.0 1.5 6
+4
+56
+2
+
+0.25
+
+Geometry Factor
+F (l, h)G(l, v, h)D(h) f (l, v) = 4(n · l)(n · v)
+57
+The geometry factor gives the chance that a microfacet with a given orientation (again, the half-angle direction is the relevant one) is lit and visible (in other words, not shadowed and/or masked) from the given light and view directions.
+
+The Visibility Term
+F (l, h)G(l, v, h)D(h) f (l, v) = 4(n · l)(n · v)
+G(l, v, h) V (l, v) = (n · l)(n · v)
+58
+In some cases, expressions are found for the geometry factor divided by the n-dot-l-times-n-dot-v “foreshortening term”. We’ll call this combined term the “visibility term”.
+
+Simplest Visibility Term
+G(l, v, h) = 1 (n · l)(n · v)
+Equivalent to:
+Gimplicit(lc, v, h) = (n · lc)(n · v)
+59
+Some BRDFs have no visibility term, effectively equating it to one. This implies an “implicit” geometry factor equal to n-dot-l times ndot-v. It behaves as expected, going from one when view and light are in the normal direction, to zero when either is at 90 degrees. And it’s “cheaper than free” in a sense. But it darkens too fast compared to real surfaces and it isn’t affected by roughness, which is implausible.
+
+✓
+
+◆
+
+2(n · h)(n · v) 2(n · h)(n · l)
+
+Gct(l, v, h) = min 1,
+
+, (v · h)
+
+(v · h)
+
+Gct(l, v, h) (n · l)(n · v)
+
+⇡
+
+(l
+
+1 · h)2
+
+60
+The course notes also discuss some other options for geometry factors. The best of these are inﬂuenced by the roughness, or better, by the exact shape of the NDF.
+
+F (l, h)G(l, v, h)D(h) f (l, v) = 4(n · l)(n · v)
+61
+Putting it all together, we see that the BRDF is proportional to the concentration of active microfacets (the ones with normals aligned with h) times their visibility times their Fresnel reflectance. The rest of the BRDF (in the denominator) consists of correction factors relating to the various frames involved (light frame, view frame, local surface frame).
+
+Subsurface Reflection (Diffuse Term)
+62
+Until now we’ve been focusing on the specular, or surface, reﬂection term. Next, we’ll take a quick look at the diffuse (or subsurface) term.
+
+Lambert
+
+• Constant value (n•l is part of reflection equation):
+
+fLambert(l, v)
+
+=
+
+cdi↵ ⇡
+
+• cdiff: fraction of light reflected, or diffuse color
+
+63
+The Lambert model is the most common diffuse term used in game and ﬁlm production. By itself, it’s the simplest possible BRDF - a constant value. The well-known cosine factor is part of the reﬂection equation, not the BRDF.
+
+Beyond Lambert: Diffuse-Specular Tradeoff
+64
+There are a few important physical phenomena that Lambert doesn’t account for. Diffuse comes from refracted light - since the specular term comes from surface reﬂection, in a sense it gets “dibs” on the incoming light and diffuse gets the leftovers. Since surface reﬂection goes to 100% at glancing angles, it follows that diffuse should go to 0%. The course notes discuss a few ways to model this.
+
+Beyond Lambert: Surface Roughness
+65
+Lambert also doesn’t account for surface roughness. In most cases, microscopic roughness only affects specular; diffuse reﬂectance at a point comes from incoming light over an area, which tends to average out any microgeometry variations. But some surfaces have microgeometry larger than the scattering distance, and these do affect diffuse reﬂectance. That’s when you need models like OrenNayar.
+
+Math
+
+Rendering
+
+66
+We’ve talked about how to represent the physics of light / matter interactions in mathematical shading models. But how do we implement these in a renderer?
+
+shading model + illumination model = rendering implementation
+67
+To be implemented in a renderer, a shading model needs to be combined with a specific illumination model.
+
+• General Lighting
+68
+In the most general illumination model, the BRDF is integrated against continuous incoming light from all directions (area light sources, skylight, indirect reflections). Implementing this requires global illumination algorithms such as ray-tracing. However, even ray tracers can gain significant performance advantages from using less general illumination models, such as...
+
+• General Lighting • Image-Based Lighting
+69
+...image-based lighting, where incoming radiance from various directions is cached into an image, such as an environment map.
+
+• General Lighting • Image-Based Lighting • Area Light Sources
+70
+It is often advantageous to separate light sources such as the sun and lamps into specialized illumination models which take account of their brightness and area. Area light sources are commonly used in film but are difficult to implement efficiently enough to be used in games - in Brian Karis’ talk later in this course we will hear of one way to do so. Instead of area light sources, games typically use...
+
+• General Lighting • Image-Based Lighting • Area Light Sources • Punctual Light Sources
+71
+...punctual light sources, which can be implemented much more efficiently (these are also still used in film to some extent).
+
+• General Lighting • Image-Based Lighting • Area Light Sources • Punctual Light Sources • Ambient Light
+72
+Ambient light covers various low-frequency lighting representations, ranging from a single constant light color and intensity over all incoming directions to more complex representations such as spherical harmonics . We will now focus on punctual lights and imagebased lighting due to their common use in game and film production rendering.
+
+Punctual Light Sources
+• Parameterized by light color clight and direction to the light (center) position lc • clight equals radiance from a white Lambertian surface illuminated by the light at 90 degrees
+73
+Punctual light sources are commonly used in games - sometimes in ﬁlm. Inﬁnitely small and bright, such light sources are not realistic, but are the easiest to implement with arbitrary BRDFs. The resulting shading appears reasonable for rough surfaces, less so for smooth ones. Punctual lights are parameterized by direction and color - the latter typically related to the brightness of a white diffuse surface lit by the light.
+
+Punctual Light Equation
+
+L (v)
+o
+
+=
+
+⇡f
+
+(lc,
+
+v)
+
+⌦
+
+clight(n
+
+·
+
+lc)
+
+74
+Implementing a shading model with punctual lights is extremely simple - just evaluate the BRDF in a single light direction and multiply by π (the derivation of this in the course notes). Games often clamp the dot product between the light and normal vectors as a convenient method to remove the contribution of backfacing lights.
+
+Image Based Lighting
+Optically flat (mirror) surface is easy - just multiply reflection by Fresnel function; same cspec, different angle:
+– F(v, n) instead of F (l, h) or F (v, h)
+75
+Image-based lighting is useful for all materials, but especially for smooth or metallic ones. The trivial case is optically flat surfaces - for which there is a single reflection direction and a single surface normal.
+
+Image Based Lighting
+Non-mirror (glossy/diffuse) surfaces require many samples
+– Importance sampling helps – Prefiltering (alone or with importance sampling)
+76
+Surfaces that aren’t simple mirrors require sampling the environment many times. Film typically uses importance sampling (sometimes combined with prefiltering) to reduce the number of samples needed. Games can only afford a single sample, so they rely on prefiltering - the other speakers will discuss some ways to make this more accurate.
+
+Acknowledgements
+• A K Peters for permission to use RTR3 images • Brent Burley, Paul Edelstein, Yoshiharu Gotanda, Christophe Hery, Sébastien Lagarde, Dimitar Lazarov, and Brian Smits for thought-provoking discussions • Steve Hill for helping improve the course notes and slides, and for the WebGL framework used for the Fresnel visualization
+77
+I’d like to close by thanking some people who helped me with this talk.
+
+78
+And ﬁnally, I wanted to note that 2K is hiring - there are positions across many of our studios. In particular, I’m personally looking for a top-notch rendering programmer for the 2K Core Tech group.
+

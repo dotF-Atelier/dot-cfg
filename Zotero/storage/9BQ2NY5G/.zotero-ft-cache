@@ -1,0 +1,126 @@
+
+Temporal anti-aliasing
+From Wikipedia, the free encyclopedia
+Jump to navigation Jump to search
+Spatial anti-aliasing technique
+
+Temporal anti-aliasing ( TAA ) is a spatial anti-aliasing technique for computer-generated video that combines information from past frames and the current frame to remove jaggies in the current frame. In TAA, each pixel is sampled once per frame but in each frame the sample is at a different location within the pixel. Pixels sampled in past frames are blended with pixels sampled in the current frame to produce an anti-aliased image. [1]
+Contents
+
+    1 TAA compared to MSAA
+    2 TAA compared to FXAA
+    3 Implementation
+    4 TAA compared to DLSS
+    5 See also
+    6 References
+
+TAA compared to MSAA [ edit ]
+
+Prior to the development of TAA, MSAA was the dominant anti-aliasing technique. MSAA samples (renders) each pixel multiple times at different locations within the frame and averages the samples to produce the final pixel value. In contrast, TAA samples each pixel only once per frame, but it samples the pixels at a different locations in different frames. This makes TAA faster than MSAA. In parts of the picture without motion, TAA effectively computes MSAA over multiple frames and achieves the same quality as MSAA with lower computational cost.
+TAA compared to FXAA [ edit ]
+
+TAA and FXAA both sample each pixel only once per frame, but FXAA does not take into account pixels sampled in past frames, so FXAA is simpler and faster but can not achieve the same image quality as TAA or MSAA.
+Implementation [ edit ]
+
+Sampling the pixels at a different position in each frame can be achieved by adding a per-frame "jitter" when rendering the frames. The "jitter" is a 2D offset that shifts the pixel grid, and its X and Y magnitude are between 0 and 1. [1] [2]
+
+When combining pixels sampled in past frames with pixels sampled in the current frame, care needs to be taken to avoid blending pixels that contain different objects, which would produce ghosting or motion-blurring artifacts. Different implementation of TAA have different ways of achieving this. Possible methods include:
+
+    Using motion vectors from the game engine to perform motion compensation before blending.
+    Limiting (clamping) the final value of a pixel by the values of pixels surrounding it. [1] 
+
+TAA compared to DLSS [ edit ]
+
+Nvidia 's DLSS operates on similar principles to TAA. Like TAA, it uses information from past frames to produce the current frame. Unlike TAA, DLSS does not sample every pixel in every frame. Instead, it samples different pixels in different frames and uses pixels sampled in past frames to fill in the unsampled pixels in the current frame. DLSS uses machine learning to combine samples in the current frame and past frames, and it can be thought of as an advanced TAA implementation. [3] [4]
+See also [ edit ]
+
+    Multisample anti-aliasing
+    Fast approximate anti-aliasing
+    Deep learning super sampling
+    Deep learning anti-aliasing
+    Supersampling
+    Deinterlacing 
+
+References [ edit ]
+
+    ^ Jump up to: a b c Brian Kari, Epic Games "High Quality Temporal Supersampling" .
+    ^ Ziyad Barakat "Temporal Anti Aliasing – Step by Step" .
+    ^ Edward Liu, NVIDIA "DLSS 2.0 - Image Reconstruction for Real-time Rendering with Deep Learning"
+    ^ yellowstone6 "How DLSS 2.0 works (for gamers)" .
+
+Retrieved from ""
+Categories :
+
+    Anti-aliasing algorithms 
+
+Hidden categories:
+Navigation menu
+
+    Not logged in
+    Talk
+    Contributions
+    Create account
+    Log in 
+
+    Article
+    Talk 
+
+    Read
+    Edit
+    View history 
+
+Search
+
+    Main page
+    Contents
+    Current events
+    Random article
+    About Wikipedia
+    Contact us
+    Donate 
+
+Contribute
+
+    Help
+    Learn to edit
+    Community portal
+    Recent changes
+    Upload file 
+
+Tools
+
+    What links here
+    Related changes
+    Special pages
+    Permanent link
+    Page information
+    Cite this page
+    Wikidata item 
+
+Print/export
+
+    Download as PDF
+    Printable version 
+
+Languages
+
+    Deutsch
+    Русский 
+
+Edit links
+
+    This page was last edited on 26 June 2022, at 05:11  (UTC) .
+    Text is available under the Creative Commons Attribution-ShareAlike License 3.0 ; additional terms may apply. By using this site, you agree to the Terms of Use and Privacy Policy . Wikipedia® is a registered trademark of the Wikimedia Foundation, Inc. , a non-profit organization.
+
+    Privacy policy
+    About Wikipedia
+    Disclaimers
+    Contact Wikipedia
+    Mobile view
+    Developers
+    Statistics
+    Cookie statement
+
+    Wikimedia Foundation
+    Powered by MediaWiki
+
