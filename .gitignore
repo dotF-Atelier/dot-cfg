@@ -61,7 +61,6 @@ gcloud/
 zsh/.zshrc.backup
 rclone/rclone.conf
 calibre/
-nvim/plugin/
 lutris/
 qBittorrent/
 LanguageTool/
@@ -73,3 +72,4 @@ hakuneko-dev/
 EmptyProject/
 doom/flycheck_+prog.el
 ogre/
+Zotero/
