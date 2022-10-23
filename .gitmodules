@@ -1,3 +1,6 @@
 [submodule "doom"]
 	path = doom
 	url = git@github.com:dotF-Atelier/dot-emacs.git
+[submodule "nvim"]
+	path = nvim
+	url = git@github.com:dotF-Atelier/dot-vim.git
