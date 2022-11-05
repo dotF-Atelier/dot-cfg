@@ -28,12 +28,11 @@ bspc rule -a feh                state=floating follow=on
 bspc rule -a Gpick              state=floating follow=on
 bspc rule -a Tilda              state=floating floating=on focus=on sticky=on
 bspc rule -a kitty              state=floating floating=on focus=on sticky=on border=off
-bspc rule -a Friends List       state=floating floating=on focus=on sticky=on border=off
+bspc rule -a "Friends List"       state=floating floating=on focus=on border=off
 bspc rule -a Demo               state=floating floating=on focus=on sticky=on
 bspc rule -a Microbench         desktop='^3' state=floating floating=on focus=on sticky=on
 bspc rule -a ShaderBench        desktop='^3' state=floating floating=on focus=on sticky=on
 bspc rule -a vulkanExample      state=floating floating=on focus=on sticky=on
-bspc rule -a steam_app_38400     state=floating floating=on focus=on sticky=on
 
 bspc monitor DisplayPort-0 -d TERM WEB CODE FILES
 bspc monitor HDMI-A-0 -d MEDIA EXTRA COMMUNI READ
