@@ -4,7 +4,7 @@
 export XDG_CONFIG_HOME="$HOME/.config"
 export XDG_DATA_HOME="$XDG_CONFIG_HOME/local/share"
 export XDG_CACHE_HOME="$XDG_CONFIG_HOME/cache"
-export XDG_STATE_STATE="$XDG_CONFIG_HOME/local/state"
+export XDG_STATE_HOME="$XDG_CONFIG_HOME/local/state"
 
 ## text editor
 export EDITOR="nvim"
