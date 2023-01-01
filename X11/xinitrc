@@ -16,4 +16,5 @@ export XDG_RUNTIME_DIR=$(mktemp -d /tmp/$(id -u)-runtime-dir.XXX)
 
 [[ -f $MYXPATH/Xresources ]] && xrdb -merge $MYXPATH/Xresources
 sxhkd&
-exec bspwm
+# exec bspwm
+exec qtile start

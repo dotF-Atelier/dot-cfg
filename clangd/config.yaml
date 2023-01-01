@@ -3,7 +3,7 @@ CompileFlags:
   # Remove extra warnings specified in compile commands.
   # Single value is also acceptable, same as "Remove: [-mabi]"
   Compiler: g++
-  Remove: [-fvar-tracking,-fvar-tracking-assignments]
+  Remove: [-f*]
 Diagnostics:
   # Tweak Clang-Tidy checks.
   ClangTidy:
