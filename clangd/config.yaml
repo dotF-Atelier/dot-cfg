@@ -2,8 +2,10 @@ CompileFlags:
   Add: [-std=c++17, -Wall, -Wno-unused-variable]
   # Remove extra warnings specified in compile commands.
   # Single value is also acceptable, same as "Remove: [-mabi]"
-  Compiler: g++
+  Compiler: clang++
   Remove: [-f*]
+Index:
+  Background: Skip
 Diagnostics:
   # Tweak Clang-Tidy checks.
   ClangTidy:

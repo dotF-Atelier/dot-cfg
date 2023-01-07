@@ -153,7 +153,6 @@ screens = [
                     filename='~/.config/qtile/assets/4.png',                
                 ),
                 widget.Spacer(
-                    width=880,
                     length=880,
                     background='#ff0000.0',
                     opacity=1,
