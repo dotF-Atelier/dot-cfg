@@ -33,7 +33,7 @@ my-backward-delete-word() {
 
 zle -N my-backward-delete-word
 bindkey '^W' my-backward-delete-word
-source /usr/share/zsh/site-functions/zsh-autosuggestions.zsh
+source $ZDOTDIR/plugin/zsh-autosuggestions.zsh
 
 # vterm scroll back
 if [[ "$INSIDE_EMACS" = 'vterm' ]]; then

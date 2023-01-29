@@ -20,9 +20,6 @@ XF86AudioLowerVolume
 XF86AudioMute
     pactl set-sink-mute 0 toggle
 
-alt + q
-    tdrop --monitor=DisplayPort-0 -am -w 1300 -h 550 -x 600 -y 520 kitty
-
 # screenshot keybindings
 ctrl + alt + a
     flameshot gui

@@ -60,11 +60,12 @@ def go_to_group(name: str) -> Callable:
         if len(qtile.screens) == 1:
             qtile.groups_map[name].cmd_toscreen()
             return
-
-        if name in '1234':
+        if name in '1234' or name == 'scratchpad':
+            qtile.cmd_to_screen(0)
             qtile.focus_screen(0)
             qtile.groups_map[name].cmd_toscreen()
         else:
+            qtile.cmd_to_screen(1)
             qtile.focus_screen(1)
             qtile.groups_map[name].cmd_toscreen()
 
@@ -89,6 +90,22 @@ for i in groups:
             #     desc="move focused window to group {}".format(i.name)),
         ]
     )
+
+from libqtile.config import Group, ScratchPad, DropDown, Key
+from libqtile.lazy import lazy
+groups.append(
+    ScratchPad("scratchpad", [
+        # define a drop down terminal.
+        # it is placed in the upper third of screen by default.
+        # define another terminal exclusively for ``qtile shell` at different position
+        DropDown("term", "kitty",
+                 x=0.38, y=0.4, width=0.6, height=0.6, opacity=1.0,
+                 on_focus_lost_hide=True) 
+               ]))
+keys.append(
+    Key(['mod1'], 'Q', lazy.group['scratchpad'].dropdown_toggle('term')),
+)
+
 
 layouts = [
     layout.Columns(margin=4, border_focus_stack=["#1F1D2E", "#8f3d3d"], border_width=4),
@@ -144,16 +161,17 @@ screens = [
                     status_format='{play_status} {artist} - {title}',
                     idle_format='{play_status} {idle_message}',
                     idle_message='wait for playing....    ',
-                    width=300,
+                    width=400,
                     padding=10,
                     scroll=True,
+                    scroll_fixed_width=True
                     # font= 'JetBrains Mono Bold',
                 ),
                 widget.Image(
                     filename='~/.config/qtile/assets/4.png',                
                 ),
                 widget.Spacer(
-                    length=880,
+                    length=780,
                     background='#ff0000.0',
                     opacity=1,
                 ),
@@ -248,7 +266,6 @@ floating_layout = layout.Floating(
         Match(wm_class="makebranch"),  # gitk
         Match(wm_class="maketag"),  # gitk
         Match(wm_class="ssh-askpass"),  # ssh-askpass
-        Match(wm_class="kitty"),  # ssh-askpass
         Match(title="branchdialog"),  # gitk
         Match(title="pinentry"),  # GPG key password entry
         Match(title="Microbench"),  # GPG key password entry
