@@ -2,10 +2,44 @@ from libqtile import bar, layout, widget
 from libqtile.config import Click, Drag, Group, Key, Match, Screen
 from libqtile.lazy import lazy
 from libqtile.utils import guess_terminal
+import os
+
+class PrevFocus(object):
+    """Store last focus per group and go back when called"""
+
+    def __init__(self):
+        self.focus = None
+        self.old_focus = None
+        self.groups_focus = {}
+        hook.subscribe.client_focus(self.on_focus)
+
+    def on_focus(self, window):
+        group = window.group
+        # only store focus if the group is set
+        if not group:
+            return
+        group_focus = self.groups_focus.setdefault(group.name, {
+            "current": None, "prev": None
+        })
+        # don't change prev if the current focus is the same as before
+        if group_focus["current"] == window:
+            return
+        group_focus["prev"] = group_focus["current"]
+        group_focus["current"] = window
+
+    def __call__(self, qtile):
+        group = qtile.current_group
+        group_focus = self.groups_focus.get(group.name, {"prev": None})
+        prev = group_focus["prev"]
+        if prev and group.name == prev.group.name:
+            group.focus(prev, False)
 
 
 mod = "mod4"
 terminal = guess_terminal()
+
+def latest_group(qtile):
+    qtile.current_screen.set_group(qtile.current_screen.previous_group)
 
 keys = [
     # A list of available commands that can be bound to keys can be found
@@ -30,16 +64,11 @@ keys = [
     Key([mod], "n", lazy.layout.normalize(), desc="Reset all window sizes"),
     Key([mod], "f", lazy.window.toggle_fullscreen()),
     Key([mod], "space", lazy.window.toggle_floating()),
-    Key([mod], "tab", lazy.next_layout(), desc="Toggle between layouts"),
     Key([mod], "m", lazy.next_layout(), desc="Toggle between layouts"),
     Key([mod, "shift"], "q", lazy.window.kill(), desc="Kill focused window"),
     Key([mod, "control"], "r", lazy.reload_config(), desc="Reload the config"),
-    # Key([mod], "Return", lazy.spawn(terminal), desc="Launch terminal"),
-    # Key([mod, "control"], "q", lazy.shutdown(), desc="Shutdown Qtile"),
-    # Key([mod], "r", lazy.spawncmd(), desc="Spawn a command using a prompt widget"),
+    Key([mod], "tab", lazy.prev_screen()),
 ]
-
-# groups = [Group(f"{i+1}", label="") for i in range(8)]
 
 groups = [
     Group(name="1", label=""),
@@ -47,10 +76,6 @@ groups = [
     Group(name="3", label=""),
     Group(name="4", label=""),
     Group(name="5", label=""),
-    # Group(name="6", label=""),
-    # Group(name="7", label=""),
-    # Group(name="8", label=""),
-    # Group(name="9", label=""),
 ]
 
 from typing import Callable
@@ -60,12 +85,11 @@ def go_to_group(name: str) -> Callable:
         if len(qtile.screens) == 1:
             qtile.groups_map[name].cmd_toscreen()
             return
-        if name in '1234' or name == 'scratchpad':
-            qtile.cmd_to_screen(0)
+
+        if name in '1234':
             qtile.focus_screen(0)
             qtile.groups_map[name].cmd_toscreen()
         else:
-            qtile.cmd_to_screen(1)
             qtile.focus_screen(1)
             qtile.groups_map[name].cmd_toscreen()
 
@@ -84,10 +108,6 @@ for i in groups:
                 lazy.window.togroup(i.name),
                 desc="Switch to & move focused window to group {}".format(i.name),
             ),
-            # Or, use below if you prefer not to switch to that group.
-            # # mod1 + shift + letter of group = move focused window to group
-            # Key([mod, "shift"], i.name, lazy.window.togroup(i.name),
-            #     desc="move focused window to group {}".format(i.name)),
         ]
     )
 
@@ -106,15 +126,17 @@ keys.append(
     Key(['mod1'], 'Q', lazy.group['scratchpad'].dropdown_toggle('term')),
 )
 
-
 layouts = [
-    layout.Columns(margin=4, border_focus_stack=["#1F1D2E", "#8f3d3d"], border_width=4),
+    layout.Columns(margin=[10, 20, 20, 20],
+                   border_focus='#f74843',
+                   border_focus_stack=["#1F1D2E", "#8f3d3d"],
+                   border_width=4),
     layout.Max(),
 ]
 
 widget_defaults = dict(
     font="JetBrainsMono",
-    fontsize=18,
+    fontsize=30,
     padding=8,
 )
 extension_defaults = widget_defaults.copy()
@@ -123,20 +145,21 @@ screens = [
     Screen(
         top=bar.Bar(
             [
-                widget.Spacer(length=20,
+                widget.Spacer(length=40,
                     background='#1F1F1F',
                 ),
                 widget.CurrentLayoutIcon(
+                    # foreground='#f97874',
                     background='#1f1f1f',
                     padding = 0,
-                    scale = 0.5,
+                    scale = 0.6,
                 ),
                 widget.Image(
                     filename='~/.config/qtile/assets/6.png',
                 ),
                 widget.GroupBox(
-                    fontsize=16,
-                    borderwidth=3,
+                    fontsize=26,
+                    borderwidth=4,
                     highlight_method='block',
                     active='#f2f3f3',
                     block_highlight_text_color="#f2f3f3",
@@ -148,7 +171,7 @@ screens = [
                     this_screen_border='#897974',
                     other_current_screen_border='#897974',
                     other_screen_border='#695954',
-                    urgent_border='#ff0000',
+                    urgent_border='#f97874',
                     rounded=True,
                     disable_drag=True,
                  ),
@@ -156,7 +179,7 @@ screens = [
                     filename='~/.config/qtile/assets/5.png',
                 ),
                 widget.Mpd2(
-                    foreground='#ffffff',
+                    # foreground='#f97874',
                     background='#1f1f1f',
                     status_format='{play_status} {artist} - {title}',
                     idle_format='{play_status} {idle_message}',
@@ -171,7 +194,7 @@ screens = [
                     filename='~/.config/qtile/assets/4.png',                
                 ),
                 widget.Spacer(
-                    length=780,
+                    length=2340,
                     background='#ff0000.0',
                     opacity=1,
                 ),
@@ -181,34 +204,21 @@ screens = [
                 widget.TextBox(
                     text="﬙",
                     font="Font Awesome 5 Free Solid",
-                    fontsize=26,
-                    padding=0,
+                    fontsize=46,
+                    padding=5,
                     background='#1f1f1f',
                 ),
                 widget.Memory(format='{MemUsed:.0f}{mm}',
                     font="JetBrains Mono Bold",
-                    # fontsize=12,
                     background='#1f1f1f',
                 ),
-                # widget.Systray(
-                #     background='#1f1f1f',
-                #     fontsize=2,
-                # ),
-                # widget.TextBox(
-                #     text=' ',
-                #     background='#1f1f1f',
-                # ),
                 widget.Image(
                     filename='~/.config/qtile/assets/2.png',                
                 ),                       
-                # widget.TextBox(
-                #     text='| ',
-                #     background='#534947',
-                # ),
                 widget.TextBox(
                     text="",
                     font="Font Awesome 5 Free Solid",
-                    fontsize=16,
+                    fontsize=30,
                     padding=3,
                     background='#534947',
                 ),
@@ -222,7 +232,7 @@ screens = [
                 widget.TextBox(
                     text="",
                     font="Font Awesome 6 Free Solid",
-                    fontsize=28,
+                    fontsize=45,
                     padding=0,
                     background='#1F1D2E',
                 ),
@@ -232,12 +242,12 @@ screens = [
                     font="JetBrains Mono Bold",
                 ),
                 widget.Spacer(
-                    length=20,
+                    length=40,
                     background='#1F1D2E',
                 ),
             ],
-            30,
-            margin = [6,6,6,6],
+            45,
+            margin = [6,12,6,12],
             background="#ff0000.0",
             opacity=1,
         ),
@@ -247,14 +257,14 @@ screens = [
 # Drag floating layouts.
 mouse = [
     Drag([mod], "Button1", lazy.window.set_position_floating(), start=lazy.window.get_position()),
-    Drag([mod], "Button3", lazy.window.set_size_floating(), start=lazy.window.get_size()),
     Click([mod], "Button2", lazy.window.bring_to_front()),
+    Drag([mod], "Button3", lazy.window.set_size_floating(), start=lazy.window.get_size()),
 ]
 
 dgroups_key_binder = None
 dgroups_app_rules = []  # type: list
 follow_mouse_focus = False
-bring_front_click = False
+bring_front_click = True
 cursor_warp = False
 floating_layout = layout.Floating(
     border_focus='#191919',
@@ -266,16 +276,19 @@ floating_layout = layout.Floating(
         Match(wm_class="makebranch"),  # gitk
         Match(wm_class="maketag"),  # gitk
         Match(wm_class="ssh-askpass"),  # ssh-askpass
+        Match(wm_class="Microbench"),  # GPG key password entry
+        Match(wm_class="ShaderBench"),  # GPG key password entry
         Match(title="branchdialog"),  # gitk
         Match(title="pinentry"),  # GPG key password entry
         Match(title="Microbench"),  # GPG key password entry
+        Match(title="Shaderbench"),  # GPG key password entry
         Match(title="Steam - News"),  # GPG key password entry
         Match(title="Friends List"),  # GPG key password entry
     ]
 )
+
 from libqtile import hook
 # some other imports
-import os
 import subprocess
 # stuff
 @hook.subscribe.startup_once
@@ -283,13 +296,13 @@ def autostart():
     home = os.path.expanduser('~/.myprofile/bin/autostart.sh') 
     subprocess.call([home])
 
-auto_fullscreen = True
+auto_fullscreen = False
 focus_on_window_activation = "smart"
 reconfigure_screens = True
 
 # If things like steam games want to auto-minimize themselves when losing
 # focus, should we respect this or not?
-auto_minimize = True
+auto_minimize = False
 
 # When using the Wayland backend, this can be used to configure input devices.
 wl_input_rules = None
