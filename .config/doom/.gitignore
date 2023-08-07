@@ -1,0 +1,13 @@
+.cache/
+.lsp-session-v1
+*~
+projectile-bookmarks.eld
+elpa/
+recentf
+history
+\#backups\#
+amx-items
+custom.el
+smex-items
+bookmarks
+transient
